@@ -4,11 +4,10 @@
 (tool-bar-mode -1)          ; Disable the toolbar
 (tooltip-mode -1)           ; Disable tooltips
 (set-fringe-mode 10)        ; Give some breathing room
-
 (menu-bar-mode -1)            ; Disable the menu bar
 
-;; Set up the visible bell
-(setq visible-bell t)
+;; visible bell setup
+(setq ring-bell-function 'ignore)
 
 (set-face-attribute 'default nil :font "Iosevka Fixed" :height 160)
 
@@ -29,29 +28,16 @@
 ;; for emacs versions >= 27
 (setq package-enable-at-startup nil)
 
-;; automatically install missing packages
+;; always use straight.el when invoking use-package
 (setq straight-use-package-by-default t)
-
-; use-package setup
-;; Initialize package sources
-;(require 'package)
-;(add-to-list 'package-archives
-;             '("melpa" . "https://melpa.org/packages/") t)
-;(package-initialize)
-;
-;(require 'use-package-ensure)
-;(setq use-package-always-ensure t)
-;
-;;; bootstrap use-package
-;(unless (package-installed-p 'use-package)
-;  (package-refresh-contents)
-;  (package-install 'use-package))
-;(require 'use-package)
 
 ;; install use-package with straight.el
 (straight-use-package 'use-package)
+;; always ensure packages
+(setq use-package-always-ensure t)
 
-;; load evil
+;; EVIL
+;; evil
 (use-package evil
   :init ;; tweak evil's configuration before loading it
   (setq evil-search-module 'evil-search)
@@ -60,12 +46,28 @@
   (setq evil-split-window-below t)
   (setq evil-shift-round nil)
   (setq evil-want-C-u-scroll t)
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
   :config ;; tweak evil after loading it
   (evil-mode)
 
   ;; example how to map a command in normal mode (called 'normal state' in evil)
   (define-key evil-normal-state-map (kbd ", w") 'evil-window-vsplit))
 
+;; evil collection
+(use-package evil-collection
+  :after evil
+  :ensure t
+  :config
+  (evil-collection-init))
+
+;; evil surround
+(use-package evil-surround
+  :config
+  (global-evil-surround-mode 1))
+;;----
+
+;; vertico - completion engine
 (use-package vertico
   :init
   (vertico-mode)
@@ -119,20 +121,23 @@
   ;; Enable recursive minibuffers
   (setq enable-recursive-minibuffers t))
 
+; marginalia
+(use-package marginalia
+  :init
+  ;; Must be in the :init section of use-package such that the mode gets
+  ;; enabled right away. Note that this forces loading the package.
+  (marginalia-mode))
+;;----
+
 ;; themes
 (use-package doom-themes
-  :ensure t
   :config
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
   (load-theme 'doom-dracula t)
 
-  ;; Enable flashing mode-line on errors
-  (doom-themes-visual-bell-config)
-  ;; Enable custom neotree theme (all-the-icons must be installed!)
-  (doom-themes-neotree-config)
-  ;; or for treemacs users
+  ;; Enable custom treemacs theme (all-the-icons must be installed!)
   (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
   (doom-themes-treemacs-config)
   ;; Corrects (and improves) org-mode's native fontification.
@@ -140,7 +145,6 @@
 
 ;; modeline
 (use-package doom-modeline
-  :ensure t
   :init (doom-modeline-mode 1))
 
 ;; projectile
@@ -153,6 +157,29 @@
 
 ;; magit
 (use-package magit)
+
+;; deft
+(use-package deft)
+
+;; org-roam 2
+(use-package org-roam
+  :custom
+  (org-roam-directory (file-truename "~/Documents/Google/org/roam"))
+  :bind (("C-c n l" . org-roam-buffer-toggle) ; TODO hotkeys
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n g" . org-roam-graph)
+         ("C-c n i" . org-roam-node-insert)
+         ("C-c n c" . org-roam-capture)
+         ;; Dailies
+         ("C-c n j" . org-roam-dailies-capture-today))
+  :config
+  (org-roam-db-autosync-mode)
+  ;; If using org-roam-protocol
+  (require 'org-roam-protocol))
+
+; TODO org agenda install needed?
+(setq org-directory "~/Documents/Google/org")
+(setq org-agenda-files '("~/Documents/Google/org/roam/agenda")) ; https://stackoverflow.com/a/11384907
 
 ;; TODO
 ;; projectile default
