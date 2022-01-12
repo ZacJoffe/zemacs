@@ -12,6 +12,26 @@
 ;; font setup
 (set-face-attribute 'default nil :font "Iosevka Fixed" :height 160)
 
+;; backwards-kill-word without copying to kill-ring
+;; https://www.emacswiki.org/emacs/BackwardDeleteWord
+(defun delete-word (arg)
+  "Delete characters forward until encountering the end of a word.
+With argument, do this that many times."
+  (interactive "p")
+  (if (use-region-p)
+      (delete-region (region-beginning) (region-end))
+    (delete-region (point) (progn (forward-word arg) (point)))))
+
+(defun backward-delete-word (arg)
+  "Delete characters backward until encountering the end of a word.
+With argument, do this that many times."
+  (interactive "p")
+  (delete-word (- arg)))
+
+;; C-w should always delete the last word unless normal mode in evil
+;; this allows me to use C-w to delete words in vertico
+(global-set-key "\C-w" 'backward-delete-word)
+
 ;; straight.el bootstrap
 (defvar bootstrap-version)
 (let ((bootstrap-file
