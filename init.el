@@ -4,7 +4,7 @@
 (tool-bar-mode -1)          ; Disable the toolbar
 (tooltip-mode -1)           ; Disable tooltips
 (set-fringe-mode 10)        ; Give some breathing room
-(menu-bar-mode -1)            ; Disable the menu bar
+(menu-bar-mode -1)          ; Disable the menu bar
 
 ;; disable bells (distracting)
 (setq ring-bell-function 'ignore)
@@ -75,10 +75,17 @@ With argument, do this that many times."
   ;; example how to map a command in normal mode (called 'normal state' in evil)
   (define-key evil-normal-state-map (kbd ", w") 'evil-window-vsplit))
 
+;; undo-tree with evil mode https://www.reddit.com/r/emacs/comments/n1pibp/installed_evil_on_emacs_for_windows_redo_not/gwei7fw/
+(use-package undo-tree
+  :after evil
+  :diminish
+  :config
+  (evil-set-undo-system 'undo-tree)
+  (global-undo-tree-mode 1))
+
 ;; evil collection
 (use-package evil-collection
   :after evil
-  :ensure t
   :config
   (evil-collection-init))
 
@@ -87,6 +94,9 @@ With argument, do this that many times."
   :config
   (global-evil-surround-mode 1))
 ;;----
+
+;;; UNDO TREE
+;
 
 ;;; VERTICO
 ;; vertico - completion engine
@@ -197,6 +207,7 @@ With argument, do this that many times."
   :config
   (setq projectile-project-search-path '("~/Documents/Code")))
 
+
 ;; treemacs
 (use-package treemacs
   :defer t
@@ -281,24 +292,19 @@ With argument, do this that many times."
         ("C-x t M-t" . treemacs-find-tag)))
 
 (use-package treemacs-evil
-  :after (treemacs evil)
-  :ensure t)
+  :after (treemacs evil))
 
 (use-package treemacs-projectile
-  :after (treemacs projectile)
-  :ensure t)
+  :after (treemacs projectile))
 
 (use-package treemacs-icons-dired
-  :hook (dired-mode . treemacs-icons-dired-enable-once)
-  :ensure t)
+  :hook (dired-mode . treemacs-icons-dired-enable-once))
 
 (use-package treemacs-magit
-  :after (treemacs magit)
-  :ensure t)
+  :after (treemacs magit))
 
 (use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
   :after (treemacs persp-mode) ;;or perspective vs. persp-mode
-  :ensure t
   :config (treemacs-set-scope-type 'Perspectives))
 ;;----
 
@@ -318,6 +324,7 @@ With argument, do this that many times."
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
 
+
 ;; modeline
 (use-package doom-modeline
   :init (doom-modeline-mode 1))
@@ -326,8 +333,6 @@ With argument, do this that many times."
 ;; magit
 (use-package magit)
 
-;; deft
-(use-package deft)
 
 ;; org-roam 2
 (use-package org-roam
@@ -350,6 +355,13 @@ With argument, do this that many times."
 (setq org-agenda-files '("~/Documents/Google/org/roam/agenda")) ; https://stackoverflow.com/a/11384907
 
 
+;; deft
+(use-package deft)
+(setq deft-recursive t)
+;(setq deft-directory org-roam-directory)
+(setq deft-directory "~/Documents/Google/org/roam")
+
+
 ;; which-key
 (use-package which-key
     :config
@@ -369,7 +381,20 @@ With argument, do this that many times."
 (use-package lsp-ui :commands lsp-ui-mode)
 (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
 (use-package consult-lsp)
-;; (use-package dap-LANGUAGE) to load the dap adapter for your language
+
+
+;; flycheck
+(use-package flycheck
+  :init (global-flycheck-mode))
+
+
+;; tree sitter
+(use-package tree-sitter)
+(use-package tree-sitter-langs)
+
+; enable tree sitter syntax highlighting whenever possible https://emacs-tree-sitter.github.io/syntax-highlighting/
+(global-tree-sitter-mode)
+(add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
 
 
 ;; rust
