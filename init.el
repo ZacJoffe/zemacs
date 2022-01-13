@@ -104,16 +104,17 @@ With argument, do this that many times."
 (use-package vertico
   :init
   (vertico-mode)
+  ; https://systemcrafters.cc/emacs-tips/streamline-completions-with-vertico/
+  :bind (:map vertico-map
+         ("C-j" . vertico-next)
+         ("C-k" . vertico-previous))
   :config
   (setq vertico-resize nil
         vertico-count 17
-        vertico-cycle t)
+        vertico-cycle t) ; enable cycling for `vertico-next' and `vertico-previous'.
 
   ;; Grow and shrink the Vertico minibuffer
   ;; (setq vertico-resize t)
-
-  ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
-  ;; (setq vertico-cycle t)
   )
 
 ; vertico directory extension
