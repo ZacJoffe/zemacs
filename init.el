@@ -1,4 +1,12 @@
+;;; EDITOR GENERAL
 (setq inhibit-startup-message t)
+
+;; save buffers on close (sessioning)
+(setq desktop-path '("~/"))
+(desktop-save-mode 1)
+
+;; remember window configuration changes
+(winner-mode 1)
 
 (scroll-bar-mode -1)        ; Disable visible scrollbar
 (tool-bar-mode -1)          ; Disable the toolbar
@@ -6,11 +14,62 @@
 (set-fringe-mode 10)        ; Give some breathing room
 (menu-bar-mode -1)          ; Disable the menu bar
 
+;; show trailing whitespace
+(setq-default show-trailing-whitespace t)
+
+;; prompt y/n instead of yes/no
+(defalias 'yes-or-no-p 'y-or-n-p)
+
+;; font setup
+(set-face-attribute 'default nil :font "Iosevka Fixed" :height 170 :weight 'light)
+
+;; always show line numbers
+(global-display-line-numbers-mode)
+;; relative line numbers
+(setq display-line-numbers-type 'relative)
+
+;; line-by-line scrolling
+(setq scroll-step            1
+      scroll-conservatively  10000)
+
 ;; disable bells (distracting)
 (setq ring-bell-function 'ignore)
 
-;; font setup
-(set-face-attribute 'default nil :font "Iosevka Fixed" :height 160)
+;; delimeter pairing
+(electric-pair-mode 1)
+(setq electric-pair-delete-adjacent-pairs t)
+;; TODO
+(setq electric-pair-pairs '((?\" . ?\")
+                            (?\{ . ?\})
+                            ))
+
+;; use aspell backend
+(setq ispell-program-name "/opt/homebrew/bin/aspell" ; mac specific
+      ispell-dictionary "english")
+
+
+;; my hacky approach to formatting in insert mode
+(defun my-backward-kill-word ()
+  "Kill words backward my way."
+  (interactive)
+  (if (bolp)
+      (backward-delete-char 1)
+    (if (string-match "^\\s-+$" (buffer-substring (point-at-bol) (point)))
+        (kill-region (point-at-bol) (point))
+      (backward-kill-word 1))))
+
+(defun my-backward-kill-line ()
+  "Easy formatting!"
+  (interactive)
+  (my-backward-kill-word)
+  (backward-delete-char 1)
+  ;; (c-electric-backspace 1)
+  (insert " "))
+
+(global-set-key [C-backspace] 'my-backward-kill-word)
+(global-set-key (kbd "<M-backspace>") 'my-backward-kill-line)
+
+
 
 ;; backwards-kill-word without copying to kill-ring
 ;; https://www.emacswiki.org/emacs/BackwardDeleteWord
@@ -28,9 +87,6 @@ With argument, do this that many times."
   (interactive "p")
   (delete-word (- arg)))
 
-;; C-w should always delete the last word unless normal mode in evil
-;; this allows me to use C-w to delete words in vertico
-(global-set-key "\C-w" 'backward-delete-word)
 
 ;; straight.el bootstrap
 (defvar bootstrap-version)
@@ -40,7 +96,6 @@ With argument, do this that many times."
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
         (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
          'silent 'inhibit-cookies)
       (goto-char (point-max))
       (eval-print-last-sexp)))
@@ -57,6 +112,7 @@ With argument, do this that many times."
 ;; always ensure packages
 (setq use-package-always-ensure t)
 
+;;;; EDITOR PACKAGES
 ;;; EVIL
 ;; evil
 (use-package evil
@@ -70,11 +126,9 @@ With argument, do this that many times."
   (setq evil-want-integration t)
   (setq evil-want-keybinding nil)
   :config ;; tweak evil after loading it
-  (evil-mode)
+  (evil-mode))
 
-  ;; example how to map a command in normal mode (called 'normal state' in evil)
-  (define-key evil-normal-state-map (kbd ", w") 'evil-window-vsplit))
-
+;;; UNDO TREE
 ;; undo-tree with evil mode https://www.reddit.com/r/emacs/comments/n1pibp/installed_evil_on_emacs_for_windows_redo_not/gwei7fw/
 (use-package undo-tree
   :after evil
@@ -93,10 +147,50 @@ With argument, do this that many times."
 (use-package evil-surround
   :config
   (global-evil-surround-mode 1))
+
+;; evil org
+(use-package evil-org
+  :after org
+  :hook (org-mode . (lambda () evil-org-mode))
+  :config
+  (require 'evil-org-agenda)
+  (evil-org-agenda-set-keys))
+
+
+;; vim-like handling of empty lines
+(use-package vi-tilde-fringe)
+(add-hook 'prog-mode-hook #'vi-tilde-fringe-mode)
 ;;----
 
-;;; UNDO TREE
-;
+;; highlight todos
+(use-package hl-todo
+  :hook ((prog-mode . hl-todo-mode)
+	 (markdown-mode . hl-todo-mode)
+	 (org-mode . hl-todo-mode))
+  :config
+  ; https://github.com/hlissner/doom-emacs/blob/develop/modules/ui/hl-todo/config.el
+  (setq hl-todo-highlight-punctuation ":"
+        hl-todo-keyword-faces
+        `(;; For things that need to be done, just not today.
+          ("TODO" warning bold)
+          ;; For problems that will become bigger problems later if not
+          ;; fixed ASAP.
+          ("FIXME" error bold)
+          ;; For tidbits that are unconventional and not intended uses of the
+          ;; constituent parts, and may break in a future update.
+          ("HACK" font-lock-constant-face bold)
+          ;; For things that were done hastily and/or hasn't been thoroughly
+          ;; tested. It may not even be necessary!
+          ("REVIEW" font-lock-keyword-face bold)
+          ;; For especially important gotchas with a given implementation,
+          ;; directed at another user other than the author.
+          ("NOTE" success bold)
+          ;; For things that just gotta go and will soon be gone.
+          ("DEPRECATED" font-lock-doc-face bold)
+          ;; For a known bug that needs a workaround
+          ("BUG" error bold)
+          ;; For warning about a problematic or misguiding code
+          ("XXX" font-lock-constant-face bold))))
 
 ;;; VERTICO
 ;; vertico - completion engine
@@ -196,6 +290,12 @@ With argument, do this that many times."
 (use-package embark-consult)
 
 ;;----
+
+
+;; spelling
+(use-package flyspell-correct
+  :after flyspell
+  :bind (:map flyspell-mode-map ("C-;" . flyspell-correct-wrapper)))
 
 
 ;; PROJECT
@@ -309,6 +409,9 @@ With argument, do this that many times."
   :config (treemacs-set-scope-type 'Perspectives))
 ;;----
 
+;; workspaces
+(use-package persp-mode)
+
 ;; themes
 (use-package doom-themes
   :config
@@ -329,6 +432,11 @@ With argument, do this that many times."
 ;; modeline
 (use-package doom-modeline
   :init (doom-modeline-mode 1))
+
+
+;; solaire mode - distinguish minibuffers from "real" buffers
+(use-package solaire-mode
+  :init (solaire-global-mode 1))
 
 
 ;; magit
@@ -392,16 +500,76 @@ With argument, do this that many times."
 ;; tree sitter
 (use-package tree-sitter)
 (use-package tree-sitter-langs)
-
 ; enable tree sitter syntax highlighting whenever possible https://emacs-tree-sitter.github.io/syntax-highlighting/
 (global-tree-sitter-mode)
 (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
+
+
+;; smartparens
+; TODO not working?
+;(use-package smartparens
+;  :diminish smartparens-mode ;; Do not show in modeline
+;  :hook (prog-mode text-mode markdown-mode)
+;  :init
+;  (require 'smartparens-config)
 
 
 ;; rust
 (use-package rustic)
 
 ;;----
+
+
+;; PDF
+(use-package pdf-tools)
+(add-hook 'pdf-tools-enabled-hook 'pdf-view-midnight-minor-mode) ; dark mode
+
+;;----
+
+;; KEYBINDINGS
+; more traditional zoom keys
+(global-set-key (kbd "C-=") 'text-scale-increase)
+(global-set-key (kbd "C--") 'text-scale-decrease)
+
+;; remap '?' key to be for enhanced search
+;(with-eval-after-load 'evil-maps
+;  (define-key evil-normal-state-map (kbd "?") 'consult-line))
+(evil-define-key 'normal 'global (kbd "?") 'consult-line)
+
+;; unbind C-z from evil
+(evil-define-key '(normal insert visual) 'global (kbd "C-z") 'consult-buffer)
+(global-set-key (kbd "C-z") 'consult-buffer) ; TODO not sure if this is needed
+
+;; C-w should always delete the last word unless normal mode in evil
+;; this allows me to use C-w to delete words in vertico
+(global-set-key (kbd "C-w") 'backward-delete-word)
+
+;; buffer management
+(global-set-key (kbd "C-a") 'bury-buffer)
+(global-set-key (kbd "C-S-a") 'unbury-buffer)
+
+;; window management - undo last window action
+;; taken from https://github.com/hlissner/doom-emacs/blob/develop/modules/editor/evil/config.el
+(evil-define-key 'normal 'global (kbd "C-w C-u") 'winner-undo)
+(evil-define-key 'normal 'global (kbd "C-w u") 'winner-undo)
+
+;; flyspell correction hotkey in normal mode
+(evil-define-key 'normal 'global (kbd "z =") 'flyspell-correct-wrapper)
+
+;(map! (:after company
+;        (:map company-active-map
+;          "TAB" #'company-complete-selection
+;          [tab] #'company-complete-selection))
+;      :m
+;      "C-a" #'bury-buffer
+;      "C-S-a" #'unbury-buffer)
+;(map! :m "C-z" #'buffer-menu)
+
+;----
+
+;; MACOS SPECIFIC CONFIGS
+(setq mac-option-modifier 'super)
+(setq mac-command-modifier 'meta)
 
 
 
@@ -411,6 +579,11 @@ With argument, do this that many times."
 ;; evil hotkeys
 ;; lang support
 ;; org roam 2
+;; flycheck things
+;; workspaces https://github.com/hlissner/doom-emacs/tree/master/modules/ui/workspaces
+;; git gutter
+
+
 
 ;; https://stackoverflow.com/a/5058752/11312409
 (setq custom-file "~/.emacs.d/custom.el")
