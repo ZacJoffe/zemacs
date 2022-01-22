@@ -11,20 +11,31 @@
 (scroll-bar-mode -1)        ; Disable visible scrollbar
 (tool-bar-mode -1)          ; Disable the toolbar
 (tooltip-mode -1)           ; Disable tooltips
-(set-fringe-mode 10)        ; Give some breathing room
+(setq set-fringe-mode 4)         ; I hate fringes lol
 (menu-bar-mode -1)          ; Disable the menu bar
 
 ;; show trailing whitespace
-(setq-default show-trailing-whitespace t)
+(setq-default show-trailing-whitespace nil)
+(defun show-trailing-whitespace-hook ()
+  (setq show-trailing-whitespace t))
+
+(add-hook 'prog-mode-hook 'show-trailing-whitespace-hook)
+(add-hook 'text-mode-hook 'show-trailing-whitespace-hook)
+(add-hook 'org-mode-hook 'show-trailing-whitespace-hook)
+(add-hook 'markdown-mode-hook 'show-trailing-whitespace-hook)
 
 ;; prompt y/n instead of yes/no
 (defalias 'yes-or-no-p 'y-or-n-p)
 
 ;; font setup
-(set-face-attribute 'default nil :font "Iosevka Fixed" :height 170 :weight 'light)
+(set-face-attribute 'default nil :font "Iosevka Fixed" :height 180 :weight 'light)
 
-;; always show line numbers
-(global-display-line-numbers-mode)
+;; setup line numbers
+;(global-display-line-numbers-mode)
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+(add-hook 'text-mode-hook 'display-line-numbers-mode)
+(add-hook 'conf-mode-hook 'display-line-numbers-mode)
+
 ;; relative line numbers
 (setq display-line-numbers-type 'relative)
 
@@ -44,6 +55,7 @@
                             ))
 
 ;; use aspell backend
+; TODO fix for linux
 (setq ispell-program-name "/opt/homebrew/bin/aspell" ; mac specific
       ispell-dictionary "english")
 
@@ -68,8 +80,6 @@
 
 (global-set-key [C-backspace] 'my-backward-kill-word)
 (global-set-key (kbd "<M-backspace>") 'my-backward-kill-line)
-
-
 
 ;; backwards-kill-word without copying to kill-ring
 ;; https://www.emacswiki.org/emacs/BackwardDeleteWord
@@ -156,41 +166,17 @@ With argument, do this that many times."
   (require 'evil-org-agenda)
   (evil-org-agenda-set-keys))
 
+;; evil-commentary
+(use-package evil-commentary
+  :hook
+  (evil-mode . evil-commentary-mode))
 
 ;; vim-like handling of empty lines
-(use-package vi-tilde-fringe)
-(add-hook 'prog-mode-hook #'vi-tilde-fringe-mode)
+(use-package vi-tilde-fringe
+  :hook (prog-mode . vi-tilde-fringe-mode))
+;(add-hook 'prog-mode-hook #'vi-tilde-fringe-mode)
 ;;----
 
-;; highlight todos
-(use-package hl-todo
-  :hook ((prog-mode . hl-todo-mode)
-	 (markdown-mode . hl-todo-mode)
-	 (org-mode . hl-todo-mode))
-  :config
-  ; https://github.com/hlissner/doom-emacs/blob/develop/modules/ui/hl-todo/config.el
-  (setq hl-todo-highlight-punctuation ":"
-        hl-todo-keyword-faces
-        `(;; For things that need to be done, just not today.
-          ("TODO" warning bold)
-          ;; For problems that will become bigger problems later if not
-          ;; fixed ASAP.
-          ("FIXME" error bold)
-          ;; For tidbits that are unconventional and not intended uses of the
-          ;; constituent parts, and may break in a future update.
-          ("HACK" font-lock-constant-face bold)
-          ;; For things that were done hastily and/or hasn't been thoroughly
-          ;; tested. It may not even be necessary!
-          ("REVIEW" font-lock-keyword-face bold)
-          ;; For especially important gotchas with a given implementation,
-          ;; directed at another user other than the author.
-          ("NOTE" success bold)
-          ;; For things that just gotta go and will soon be gone.
-          ("DEPRECATED" font-lock-doc-face bold)
-          ;; For a known bug that needs a workaround
-          ("BUG" error bold)
-          ;; For warning about a problematic or misguiding code
-          ("XXX" font-lock-constant-face bold))))
 
 ;;; VERTICO
 ;; vertico - completion engine
@@ -211,8 +197,8 @@ With argument, do this that many times."
   ;; (setq vertico-resize t)
   )
 
-; vertico directory extension
-; TODO doesn't work
+                                        ; vertico directory extension
+                                        ; TODO doesn't work
 ;; (use-package vertico-directory
 ;;   :after vertico
 ;;   :ensure nil
@@ -431,7 +417,96 @@ With argument, do this that many times."
 
 ;; modeline
 (use-package doom-modeline
-  :init (doom-modeline-mode 1))
+  ;:init (doom-modeline-mode 1) TODO delete me
+  :hook (after-init . doom-modeline-mode)
+  :hook (doom-modeline-mode . size-indication-mode) ; filesize in modeline
+  :hook (doom-modeline-mode . column-number-mode)   ; cursor column in modeline
+  ; https://github.com/hlissner/doom-emacs/blob/master/modules/ui/modeline/config.el
+  :init
+  (unless after-init-time
+    ;; prevent flash of unstyled modeline at startup
+    (setq-default mode-line-format nil))
+  ;; We display project info in the modeline ourselves
+  (setq projectile-dynamic-mode-line nil)
+  ;; Set these early so they don't trigger variable watchers
+  (setq doom-modeline-bar-width 3
+        doom-modeline-github nil
+        doom-modeline-mu4e nil
+        doom-modeline-persp-name nil
+        doom-modeline-minor-modes nil
+        doom-modeline-major-mode-icon nil
+        doom-modeline-buffer-file-name-style 'relative-from-project
+        ;; Only show file encoding if it's non-UTF-8 and different line endings
+        ;; than the current OSes preference
+        doom-modeline-buffer-encoding 'nondefault
+        doom-modeline-default-eol-type
+        nil ; wtf? must have even number of args https://emacs.stackexchange.com/a/28288
+    ))
+
+
+;; highlight todos
+(use-package hl-todo
+  :hook ((prog-mode . hl-todo-mode)
+         (markdown-mode . hl-todo-mode)
+         (org-mode . hl-todo-mode))
+  :config
+  ; https://github.com/hlissner/doom-emacs/blob/develop/modules/ui/hl-todo/config.el
+  (setq hl-todo-highlight-punctuation ":"
+        hl-todo-keyword-faces
+        `(;; For things that need to be done, just not today.
+          ("TODO" warning bold)
+          ;; For problems that will become bigger problems later if not
+          ;; fixed ASAP.
+          ("FIXME" error bold)
+          ;; For tidbits that are unconventional and not intended uses of the
+          ;; constituent parts, and may break in a future update.
+          ("HACK" font-lock-constant-face bold)
+          ;; For things that were done hastily and/or hasn't been thoroughly
+          ;; tested. It may not even be necessary!
+          ("REVIEW" font-lock-keyword-face bold)
+          ;; For especially important gotchas with a given implementation,
+          ;; directed at another user other than the author.
+          ("NOTE" success bold)
+          ;; For things that just gotta go and will soon be gone.
+          ("DEPRECATED" font-lock-doc-face bold)
+          ;; For a known bug that needs a workaround
+          ("BUG" error bold)
+          ;; For warning about a problematic or misguiding code
+          ("XXX" font-lock-constant-face bold))))
+
+
+;; rainbow delimiters
+(use-package rainbow-delimiters
+  :hook ((prog-mode . rainbow-delimiters-mode)
+         (markdown-mode . rainbow-delimiters-mode)
+         (org-mode . rainbow-delimiters-mode)))
+
+;; highlight numbers
+(use-package highlight-numbers
+  :hook ((prog-mode . highlight-numbers-mode)
+         (markdown-mode . highlight-numbers-mode)
+         (org-mode . highlight-numbers-mode)))
+
+
+;; highlight quoted
+; TODO not working, I don't think it's in melpa?
+(use-package highlight-quoted
+  :hook (emacs-lisp-mode-hook 'highlight-quoted-mode))
+
+;; undo-tree - undo history represented as a tree, with evil integration
+(use-package undo-tree
+  :diminish
+  :config
+  (evil-set-undo-system 'undo-tree)
+  (global-undo-tree-mode 1))
+
+
+;; anzu - show number of matches with a search
+(use-package evil-anzu
+  ;:after-call evil-ex-start-search evil-ex-start-word-search evil-ex-search-activate-highlight
+  :after evil
+  :config
+  (global-anzu-mode +1))
 
 
 ;; solaire mode - distinguish minibuffers from "real" buffers
@@ -441,7 +516,11 @@ With argument, do this that many times."
 
 ;; magit
 (use-package magit)
+(use-package magit-todos)
+(use-package evil-magit)
 
+; TODO
+(use-package git-gutter-fringe)
 
 ;; org-roam 2
 (use-package org-roam
@@ -477,6 +556,49 @@ With argument, do this that many times."
     (which-key-mode))
 
 
+;; helpful
+(use-package helpful
+  :config
+  ;; redefine help keys to use helpful functions instead of vanilla
+  ;; https://github.com/Wilfred/helpful#usage
+  (global-set-key (kbd "C-h f") #'helpful-callable)
+  (global-set-key (kbd "C-h v") #'helpful-variable)
+  (global-set-key (kbd "C-h k") #'helpful-key))
+
+
+;; general
+;; doomesque hotkeys using spacebar as prefix
+(use-package general
+  :config
+  (general-evil-setup t)
+  (defconst my-leader "SPC")
+  (general-create-definer my-leader-def
+    :prefix my-leader)
+  (my-leader-def
+    :states '(normal visual)
+    ; TODO add the doom hotkeys that i use
+    ;; map universal argument to SPC-u
+    "u" '(universal-argument :which-key "Universal argument")
+    ";" '(eval-region :which-key "eval-region")
+    ;"SPC" '(find-file :which-key "Find file") ; TODO change to find file in project
+    "." '(find-file :which-key "Find file")
+
+    ;; editor
+    "e" '(:ignore t :which-key "Editor")
+    "eu" '(undo-tree-visualize :which-key "undo-tree-visualize")
+
+    ;; help
+    "h" '(:ignore t :which-key "Help")
+    "hf" '(helpful-callable :which-key "describe-function")
+    "hk" '(helpful-key :which-key "describe-key")
+    "hv" '(helpful-variable :which-key "describe-variable")
+    "hm" '(describe-mode :which-key "describe-mode")
+
+    ;; git
+    "g" '(:ignore t :which-key "Git") ; prefix
+    "gg" '(magit-status :which-key "Git status")))
+
+
 ;;; LANGUAGES
 ;; lsp
 (use-package lsp-mode
@@ -494,7 +616,14 @@ With argument, do this that many times."
 
 ;; flycheck
 (use-package flycheck
-  :init (global-flycheck-mode))
+  :init
+  (global-flycheck-mode) ; TODO should this be :init or :config?
+  :config
+  (setq flycheck-indication-mode 'right-fringe)) ; TODO change the direction of the arrow and look into margins instead of fringes
+
+;; flycheck-popup-tip
+(use-package flycheck-popup-tip
+  :hook (flycheck-mode . flycheck-popup-tip-mode))
 
 
 ;; tree sitter
@@ -544,12 +673,21 @@ With argument, do this that many times."
 ;; this allows me to use C-w to delete words in vertico
 (global-set-key (kbd "C-w") 'backward-delete-word)
 
+;; C-v to paste (or "yank" in emacs jargon) from clipboard, useful for minibuffers (such as query-replace and M-x)
+(global-set-key (kbd "C-v") 'yank)
+
 ;; buffer management
 (global-set-key (kbd "C-a") 'bury-buffer)
 (global-set-key (kbd "C-S-a") 'unbury-buffer)
 
+
+;; map the escape key to quit mini buffers instantly
+;; https://www.reddit.com/r/emacs/comments/4a0421/any_reason_not_to_just_rebind_keyboardquit_from/d0wo66r/
+(define-key key-translation-map (kbd "ESC") (kbd "C-g"))
+
 ;; window management - undo last window action
 ;; taken from https://github.com/hlissner/doom-emacs/blob/develop/modules/editor/evil/config.el
+; TODO another way to do this? https://github.com/angrybacon/dotemacs/blob/master/dotemacs.org#evil
 (evil-define-key 'normal 'global (kbd "C-w C-u") 'winner-undo)
 (evil-define-key 'normal 'global (kbd "C-w u") 'winner-undo)
 
@@ -572,21 +710,20 @@ With argument, do this that many times."
 (setq mac-command-modifier 'meta)
 
 
-
-
 ;; TODO
 ;; projectile default
 ;; evil hotkeys
-;; lang support
-;; org roam 2
+;; lang support (look into differences with elisp syntax for doom)
+;; org look like doom
+;; org link follow
 ;; flycheck things
 ;; workspaces https://github.com/hlissner/doom-emacs/tree/master/modules/ui/workspaces
 ;; git gutter
+;; left fringe prettify (I think doom disables it and renders errors in the line using a popup, get that working)
+;; solve errors
 
 
 
 ;; https://stackoverflow.com/a/5058752/11312409
 (setq custom-file "~/.emacs.d/custom.el")
 (load custom-file)
-
-
