@@ -55,9 +55,14 @@
                             ))
 
 ;; use aspell backend
-; TODO fix for linux
-(setq ispell-program-name "/opt/homebrew/bin/aspell" ; mac specific
-      ispell-dictionary "english")
+(if (eq system-type 'darwin)
+  (setq ispell-program-name "/opt/homebrew/bin/aspell" ; mac specific
+        ispell-dictionary "english"))
+
+(if (eq system-type 'gnu/linux)
+  (setq ispell-program-name "/usr/bin/aspell"
+        ispell-dictionary "english"))
+
 
 
 ;; my hacky approach to formatting in insert mode
@@ -171,6 +176,8 @@ With argument, do this that many times."
   :hook
   (evil-mode . evil-commentary-mode))
 
+(use-package evil-numbers)
+
 ;; vim-like handling of empty lines
 (use-package vi-tilde-fringe
   :hook (prog-mode . vi-tilde-fringe-mode))
@@ -282,7 +289,9 @@ With argument, do this that many times."
 (use-package flyspell-correct
   :after flyspell
   :bind (:map flyspell-mode-map ("C-;" . flyspell-correct-wrapper)))
-
+;(use-package flyspell-correct-popup
+;  :after flyspell-correct)
+(use-package spell-fu) ; TODO figure out how replacement for ispell-word
 
 ;; PROJECT
 ;; projectile
@@ -596,7 +605,13 @@ With argument, do this that many times."
 
     ;; git
     "g" '(:ignore t :which-key "Git") ; prefix
-    "gg" '(magit-status :which-key "Git status")))
+    "gg" '(magit-status :which-key "Git status"))
+
+  ;; normal/visual mode hotkeys
+  (general-define-key
+    :states '(normal visual)
+    "g=" 'evil-numbers/inc-at-pt
+    "g-" 'evil-numbers/dec-at-pt))
 
 
 ;;; LANGUAGES
@@ -646,12 +661,45 @@ With argument, do this that many times."
 ;; rust
 (use-package rustic)
 
+
+;; latex
+(use-package auctex
+  :hook (LaTeX-mode . visual-line-mode)
+  :hook (LaTeX-mode . rainbow-delimiters-mode))
+(use-package latex-preview-pane)
+(use-package evil-tex
+  :hook (LaTeX-mode . evil-tex-mode))
 ;;----
 
 
+;; adaptive text wrap
+;; taken from https://github.com/hlissner/doom-emacs/blob/master/modules/lang/latex/config.el
+(use-package adaptive-wrap
+  :hook (LaTeX-mode . adaptive-wrap-prefix-mode) ; work well with visual-line-mode
+  :init (setq-default adaptive-wrap-extra-indent 0))
+
 ;; PDF
-(use-package pdf-tools)
-(add-hook 'pdf-tools-enabled-hook 'pdf-view-midnight-minor-mode) ; dark mode
+(use-package pdf-tools
+  :config
+  (pdf-tools-install)
+  ; HiDPI support
+  (setq pdf-view-use-scaling t
+        pdf-view-use-imagemagick nil)
+  (setq TeX-view-program-selection '((output-pdf "PDF Tools"))
+	TeX-view-program-list '(("PDF Tools" TeX-pdf-tools-sync-view))
+	TeX-source-correlate-start-server t)
+  ; TODO refactor with :hook
+  (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
+  ;(add-hook 'pdf-tools-enabled-hook 'pdf-view-midnight-minor-mode) ; dark mode ; TODO I think this is broken?
+  (add-hook 'pdf-view-mode-hook 'pdf-view-midnight-minor-mode) ; dark mode
+
+  ;; https://www.reddit.com/r/emacs/comments/dgywoo/issue_with_pdfview_midnight_mode/f3hdhf2/
+  ;; disable cursor in pdf-view, otherwise there is a distracting border on the pdf
+  (add-hook 'pdf-view-mode-hook
+    (lambda ()
+      (set (make-local-variable 'evil-normal-state-cursor) (list nil)))))
+(use-package saveplace-pdf-view
+  :after pdf-view)
 
 ;;----
 
@@ -710,6 +758,8 @@ With argument, do this that many times."
 (setq mac-command-modifier 'meta)
 
 
+
+
 ;; TODO
 ;; projectile default
 ;; evil hotkeys
@@ -718,7 +768,7 @@ With argument, do this that many times."
 ;; org link follow
 ;; flycheck things
 ;; workspaces https://github.com/hlissner/doom-emacs/tree/master/modules/ui/workspaces
-;; git gutter
+
 ;; left fringe prettify (I think doom disables it and renders errors in the line using a popup, get that working)
 ;; solve errors
 
@@ -727,3 +777,5 @@ With argument, do this that many times."
 ;; https://stackoverflow.com/a/5058752/11312409
 (setq custom-file "~/.emacs.d/custom.el")
 (load custom-file)
+
+
