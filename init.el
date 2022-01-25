@@ -589,12 +589,31 @@ With argument, do this that many times."
     ;; map universal argument to SPC-u
     "u" '(universal-argument :which-key "Universal argument")
     ";" '(eval-region :which-key "eval-region")
-    ;"SPC" '(find-file :which-key "Find file") ; TODO change to find file in project
+    "SPC" '(projectile-find-file :which-key "Projectile find file")
     "." '(find-file :which-key "Find file")
 
     ;; editor
     "e" '(:ignore t :which-key "Editor")
     "eu" '(undo-tree-visualize :which-key "undo-tree-visualize")
+
+    ;; buffer
+    "b" '(:ignore t :which-key "Buffer")
+    ;"bb" ; TODO switch workspace buffer
+    "bB" '(consult-buffer :which-key "consult-buffer") ; TODO map to SPC-<
+    "b[" '(previous-buffer :which-key "Previous buffer")
+    "b]" '(next-buffer :which-key "Next buffer")
+    "bd" '(kill-current-buffer :which-key "Kill buffer")
+    "bk" '(kill-current-buffer :which-key "Kill buffer")
+    "bl" '(evil-switch-to-windows-last-buffer :which-key "Switch to last buffer")
+
+    ;; open
+    "o" '(:ignore t :which-key "Open")
+    "op" '(treemacs :which-key "Treemacs")
+    "oP" '(treemacs-find-file :which-key "Treemacs find file")
+
+    ;; project
+    "p" '(:ignore t :which-key "Project")
+    "pp" '(projectile-switch-project :which-key "Switch Project")
 
     ;; help
     "h" '(:ignore t :which-key "Help")
