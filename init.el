@@ -13,6 +13,7 @@
 (tooltip-mode -1)           ; Disable tooltips
 (setq set-fringe-mode 4)         ; I hate fringes lol
 (menu-bar-mode -1)          ; Disable the menu bar
+(setq sentence-end-double-space nil) ; sentences should end with 1 space
 
 ;; show trailing whitespace
 (setq-default show-trailing-whitespace nil)
@@ -35,6 +36,28 @@
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 (add-hook 'text-mode-hook 'display-line-numbers-mode)
 (add-hook 'conf-mode-hook 'display-line-numbers-mode)
+
+
+;; automatically refresh dired on changes
+;; https://www.reddit.com/r/emacs/comments/1acg6q/comment/c8w2itz/?utm_source=share&utm_medium=web2x&context=3
+(add-hook 'dired-mode-hook 'auto-revert-mode)
+
+
+;; revert buffer without confirmation
+;; http://www.emacswiki.org/emacs-en/download/misc-cmds.el
+(defun revert-buffer-no-confirm ()
+    "Revert buffer without confirmation."
+    (interactive)
+    (revert-buffer :ignore-auto :noconfirm))
+
+
+;; kill all other buffers
+;; https://www.emacswiki.org/emacs/KillingBuffers#h5o-2
+(defun kill-other-buffers ()
+     "Kill all other buffers."
+     (interactive)
+     (mapc 'kill-buffer (delq (current-buffer) (buffer-list))))
+
 
 ;; relative line numbers
 (setq display-line-numbers-type 'relative)
@@ -127,6 +150,16 @@ With argument, do this that many times."
 ;; always ensure packages
 (setq use-package-always-ensure t)
 
+
+;; put backup files and auto-save files in their own directory
+(use-package no-littering
+  :config
+  ;; auto-saves go in another directory
+  ;; https://github.com/emacscollective/no-littering#auto-save-settings
+  (setq auto-save-file-name-transforms
+      `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
+
+
 ;;;; EDITOR PACKAGES
 ;;; EVIL
 ;; evil
@@ -204,8 +237,8 @@ With argument, do this that many times."
   ;; (setq vertico-resize t)
   )
 
-                                        ; vertico directory extension
-                                        ; TODO doesn't work
+; vertico directory extension
+; TODO doesn't work
 ;; (use-package vertico-directory
 ;;   :after vertico
 ;;   :ensure nil
@@ -279,7 +312,11 @@ With argument, do this that many times."
 
 ;; embark
 ;TODO config
-(use-package embark)
+(use-package embark
+  :config
+  ;; let "C-h" after a prefix command bring up a completion search using vertico
+  ;; https://www.reddit.com/r/emacs/comments/otjn19/comment/h6vyx9q/?utm_source=share&utm_medium=web2x&context=3
+  (setq prefix-help-command #'embark-prefix-help-command))
 (use-package embark-consult)
 
 ;;----
@@ -404,8 +441,28 @@ With argument, do this that many times."
   :config (treemacs-set-scope-type 'Perspectives))
 ;;----
 
+
+;; tabs
+;(use-package centaur-tabs
+;  :demand
+;  :config
+;  (setq centaur-tabs-set-bar 'under)
+;  ;; Note: If you're not using Spacmeacs, in order for the underline to display
+;  ;; correctly you must add the following line:
+;  (setq x-underline-at-descent-line t)
+;  (centaur-tabs-mode t))
+
+;(setq tab-bar-show nil)
+
 ;; workspaces
-(use-package persp-mode)
+;; TODO
+;(use-package persp-mode)
+;(use-package bufler
+;  :config
+;  (bufler-mode 1))
+;(use-package burly)
+
+
 
 ;; themes
 (use-package doom-themes
@@ -526,7 +583,7 @@ With argument, do this that many times."
 ;; magit
 (use-package magit)
 (use-package magit-todos)
-(use-package evil-magit)
+;(use-package evil-magit)
 
 ; TODO
 (use-package git-gutter-fringe)
@@ -583,8 +640,10 @@ With argument, do this that many times."
   (defconst my-leader "SPC")
   (general-create-definer my-leader-def
     :prefix my-leader)
+  (general-override-mode) ;; https://github.com/noctuid/general.el/issues/99#issuecomment-360914335
   (my-leader-def
     :states '(normal visual)
+    :keymaps 'override ;; https://github.com/noctuid/general.el/issues/99#issuecomment-360914335
     ; TODO add the doom hotkeys that i use
     ;; map universal argument to SPC-u
     "u" '(universal-argument :which-key "Universal argument")
@@ -605,6 +664,8 @@ With argument, do this that many times."
     "bd" '(kill-current-buffer :which-key "Kill buffer")
     "bk" '(kill-current-buffer :which-key "Kill buffer")
     "bl" '(evil-switch-to-windows-last-buffer :which-key "Switch to last buffer")
+    "br" '(revert-buffer-no-confirm :which-key "Revert buffer")
+    "bK" '(kill-other-buffers :which-key "Kill other buffers")
 
     ;; open
     "o" '(:ignore t :which-key "Open")
@@ -630,7 +691,12 @@ With argument, do this that many times."
   (general-define-key
     :states '(normal visual)
     "g=" 'evil-numbers/inc-at-pt
-    "g-" 'evil-numbers/dec-at-pt))
+    "g-" 'evil-numbers/dec-at-pt)
+
+  ;; insert mode hotkeys
+  (general-define-key
+   :states 'insert
+   "C-SPC" 'company-complete))
 
 
 ;;; LANGUAGES
@@ -688,7 +754,25 @@ With argument, do this that many times."
 (use-package latex-preview-pane)
 (use-package evil-tex
   :hook (LaTeX-mode . evil-tex-mode))
+
+
+;; thrift
+(use-package thrift)
+
 ;;----
+
+;; AUTOCOMPLETE
+;; TODO tab completion
+;; TODO C-w work during popup
+;; TODO cycle completion options
+(use-package company)
+;;----
+
+
+
+;; change font size in all buffers (frame)
+(use-package zoom-frm)
+
 
 
 ;; adaptive text wrap
@@ -696,6 +780,7 @@ With argument, do this that many times."
 (use-package adaptive-wrap
   :hook (LaTeX-mode . adaptive-wrap-prefix-mode) ; work well with visual-line-mode
   :init (setq-default adaptive-wrap-extra-indent 0))
+
 
 ;; PDF
 (use-package pdf-tools
@@ -719,13 +804,21 @@ With argument, do this that many times."
       (set (make-local-variable 'evil-normal-state-cursor) (list nil)))))
 (use-package saveplace-pdf-view
   :after pdf-view)
-
 ;;----
+
+
+;; ranger
+(use-package ranger)
+
+
 
 ;; KEYBINDINGS
 ; more traditional zoom keys
 (global-set-key (kbd "C-=") 'text-scale-increase)
 (global-set-key (kbd "C--") 'text-scale-decrease)
+(global-set-key (kbd "C-M-=") 'zoom-in)
+(global-set-key (kbd "C-M--") 'zoom-out)
+(setq text-scale-mode-step 1.1) ; more granular zoom
 
 ;; remap '?' key to be for enhanced search
 ;(with-eval-after-load 'evil-maps
@@ -777,8 +870,6 @@ With argument, do this that many times."
 (setq mac-command-modifier 'meta)
 
 
-
-
 ;; TODO
 ;; projectile default
 ;; evil hotkeys
@@ -794,7 +885,6 @@ With argument, do this that many times."
 
 
 ;; https://stackoverflow.com/a/5058752/11312409
-(setq custom-file "~/.emacs.d/custom.el")
-(load custom-file)
-
+;(setq custom-file "~/.emacs.d/custom.el")
+;(load custom-file)
 
