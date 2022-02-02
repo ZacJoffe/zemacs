@@ -1,6 +1,9 @@
 ;;; EDITOR GENERAL
 (setq inhibit-startup-message t)
 
+;; indent with spaces
+(setq-default indent-tabs-mode nil)
+
 ;; save buffers on close (sessioning)
 (setq desktop-path '("~/"))
 (desktop-save-mode 1)
@@ -16,6 +19,15 @@
 
 ;; fringe setup (left . right)
 (set-fringe-mode '(4 . 4))
+
+;; setup variable to determine computer specific actions
+;; inpsired by https://github.com/jakebox/jake-emacs#custom-variables-registers
+(defvar computer "Which computer I am on")
+(let ((sys (system-name)))
+  (if (string= sys "arch")
+      (setq computer 'linux-desktop)
+    (setq computer 'mac-laptop)))
+
 
 ;; mac specific titlebar stuff
 ;; https://emacs.stackexchange.com/a/40777
@@ -158,6 +170,54 @@ With argument, do this that many times."
   (setq indent-tabs-mode (not indent-tabs-mode))
   (message "Indent style changed to %s" (if indent-tabs-mode "tabs" "spaces")))
 
+;; toggle horizontal/vertical split
+;; https://www.emacswiki.org/emacs/ToggleWindowSplit
+(defun toggle-window-split ()
+  (interactive)
+  (if (= (count-windows) 2)
+      (let* ((this-win-buffer (window-buffer))
+	     (next-win-buffer (window-buffer (next-window)))
+	     (this-win-edges (window-edges (selected-window)))
+	     (next-win-edges (window-edges (next-window)))
+	     (this-win-2nd (not (and (<= (car this-win-edges)
+					 (car next-win-edges))
+				     (<= (cadr this-win-edges)
+					 (cadr next-win-edges)))))
+	     (splitter
+	      (if (= (car this-win-edges)
+		     (car (window-edges (next-window))))
+		  'split-window-horizontally
+		'split-window-vertically)))
+	(delete-other-windows)
+	(let ((first-win (selected-window)))
+	  (funcall splitter)
+	  (if this-win-2nd (other-window 1))
+	  (set-window-buffer (selected-window) this-win-buffer)
+	  (set-window-buffer (next-window) next-win-buffer)
+	  (select-window first-win)
+	  (if this-win-2nd (other-window 1))))))
+
+
+
+;; TODO
+(defun tab-jump-pair (&optional ARG)
+  (interactive "P")
+  (let ((delims-close '(")" "]" "}"))
+	(delims-open '("(" "[" "{")))
+    (if (or (memq char-after delims-open) (memq char-after delims-close))
+	(forward-char)
+      (indent-for-tab-command ARG)
+      )
+      ;; https://stackoverflow.com/questions/16651180/jump-to-the-first-occurrence-of-symbol-in-emacs
+      ;; (eval
+      ;;  `(progn
+      ;; 	  (search-forward-regexp
+      ;; 	   (rx symbol-start ,(thing-at-point 'symbol) symbol-end))
+      ;; 	  (beginning-of-thing 'symbol))
+      ;;   ) ;; TODO find previous occurence of close delim, find matching closed delim, jump out of it
+      ))
+
+
 
 ;; straight.el bootstrap
 (defvar bootstrap-version)
@@ -186,7 +246,7 @@ With argument, do this that many times."
 
 ;; put backup files and auto-save files in their own directory
 (use-package no-littering
-  :config
+  :init ;; TODO is this working?
   ;; auto-saves go in another directory
   ;; https://github.com/emacscollective/no-littering#auto-save-settings
   (setq auto-save-file-name-transforms
@@ -515,19 +575,20 @@ With argument, do this that many times."
 
 
 
-;; themes and icons
+;; icons
 (use-package all-the-icons
   :config
   ;; needed for getting the right side of doom-modeline to render on the screen properly
   ;; https://github.com/hlissner/doom-emacs/blob/develop/modules/ui/modeline/README.org#the-right-side-of-the-modeline-is-cut-off
   (setq all-the-icons-scale-factor 1.1))
 
+;; themes
 (use-package doom-themes
   :config
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-dracula t)
+  (load-theme 'doom-spacegrey t)
 
   ;; Enable custom treemacs theme (all-the-icons must be installed!)
   (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
@@ -829,11 +890,11 @@ _j_ zoom-out
   ("1" (my-load-theme 'doom-one) "doom-one")
   ("2" (my-load-theme 'doom-dracula) "doom-dracula")
   ("3" (my-load-theme 'doom-nord) "doom-nord")
-  ("4" (my-load-theme 'doom-fairy-floss) "doom-fairy-floss")
+  ("4" (my-load-theme 'doom-moonlight) "doom-moonlight")
   ("5" (my-load-theme 'doom-gruvbox) "doom-gruvbox")
   ("6" (my-load-theme 'doom-material) "doom-material")
   ("7" (my-load-theme 'doom-palenight) "doom-palenight")
-  ("8" (my-load-theme 'doom-dark+) "doom-dark+")
+  ("8" (my-load-theme 'doom-spacegrey) "doom-spacegrey")
   ("9" (my-load-theme 'doom-molokai) "doom-molokai"))
 
 (defun my-load-theme (theme)
@@ -853,7 +914,7 @@ _j_ zoom-out
     :prefix my-leader)
   (general-override-mode) ;; https://github.com/noctuid/general.el/issues/99#issuecomment-360914335
   (my-leader-def
-    :states '(normal visual)
+    :states '(motion normal visual treemacs) ;; note the treemacs state
     :keymaps 'override ;; https://github.com/noctuid/general.el/issues/99#issuecomment-360914335
     ; TODO add the doom hotkeys that i use
     ; TODO ordering in which-key (is it even possible?)
@@ -863,6 +924,7 @@ _j_ zoom-out
     ";" '(eval-region :which-key "eval-region")
     "SPC" '(projectile-find-file :which-key "Projectile find file")
     "." '(find-file :which-key "Find file")
+    ":" '(execute-extended-command :which-key "M-x")
 
     ;; editor
     "e" '(:ignore t :which-key "Editor")
@@ -910,13 +972,14 @@ _j_ zoom-out
     "zz" '(hydra-zoom/body :which-key "hydra-zoom")
 
     ;; window
-    "w" '(:ignore t :which-key "window")
+    "w" '(:ignore t :which-key "Window")
     "ww" '(hydra-window/body :which-key "hydra-window")
     "wg" '(golden-ratio :which-key "golden-ratio")
+    "wt" '(toggle-window-split :which-key "toggle-window-split")
     ; TODO more window stuff
 
     ;; toggles
-    "t" '(:ignore t :which-key "toggles")
+    "t" '(:ignore t :which-key "Toggles")
     "ts" '(flyspell-mode :which-key "flyspell-mode")
     "tc" '(flycheck-mode :which-key "flycheck-mode")
     "tC" '(company-mode :which-key "company-mode") ; not sure how good of a hotkey this is lol
@@ -926,10 +989,11 @@ _j_ zoom-out
     "tI" '(toggle-indent-style :which-key "Indent style")
 
     ;; notes
-    "n" '(:ignore t :which-key "notes")
-    "nr" '(:ignore t :which-key "org-roam")
-    "nrf" '(org-roam-node-find :which-key "find-node")
-    "nri" '(org-roam-node-insert :which-key "insert-node")
+    "n" '(:ignore t :which-key "Notes")
+    ;"nr" '(:ignore t :which-key "org-roam")
+    "nf" '(org-roam-node-find :which-key "find-node")
+    "ni" '(org-roam-node-insert :which-key "insert-node")
+    "nt" '(org-roam-dailies-goto-today :which-key "org-roam-dailies-goto-today")
 
     ;; git
     "g" '(:ignore t :which-key "Git") ; prefix
@@ -1003,8 +1067,14 @@ _j_ zoom-out
   :init
   ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
   (setq lsp-keymap-prefix "C-c l")
-  :hook (;; if you want which-key integration
-         (lsp-mode . lsp-enable-which-key-integration))
+  :hook ((lsp-mode . lsp-enable-which-key-integration)
+	 (rustic-mode . lsp)
+         ;; for some reason headerline is enabled by default, add a hook to disable it
+         ;; TODO look into fixing this in lsp-mode
+         ;; https://emacs.stackexchange.com/a/64988
+         )
+         ;(lsp-mode . lsp-headerline-breadcrumb-mode))
+
   :commands lsp)
 
 (use-package lsp-ui :commands lsp-ui-mode)
@@ -1048,8 +1118,7 @@ _j_ zoom-out
 
 ;; latex
 (use-package auctex
-  :hook (LaTeX-mode . visual-line-mode)
-  :hook (LaTeX-mode . rainbow-delimiters-mode))
+  :hook (LaTeX-mode . visual-line-mode))
 (use-package latex-preview-pane)
 (use-package evil-tex
   :hook (LaTeX-mode . evil-tex-mode))
@@ -1201,16 +1270,3 @@ _j_ zoom-out
 ;(setq custom-file "~/.emacs.d/custom.el")
 ;(load custom-file)
 
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   '("0466adb5554ea3055d0353d363832446cd8be7b799c39839f387abb631ea0995" "1d5e33500bc9548f800f9e248b57d1b2a9ecde79cb40c0b1398dec51ee820daf" "a6e620c9decbea9cac46ea47541b31b3e20804a4646ca6da4cce105ee03e8d0e" "47db50ff66e35d3a440485357fb6acb767c100e135ccdf459060407f8baea7b2" "1704976a1797342a1b4ea7a75bdbb3be1569f4619134341bd5a4c1cfb16abad4" "234dbb732ef054b109a9e5ee5b499632c63cc24f7c2383a849815dacc1727cb6" "a9a67b318b7417adbedaab02f05fa679973e9718d9d26075c6235b1f0db703c8" default)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
