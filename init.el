@@ -11,9 +11,21 @@
 (scroll-bar-mode -1)        ; Disable visible scrollbar
 (tool-bar-mode -1)          ; Disable the toolbar
 (tooltip-mode -1)           ; Disable tooltips
-(setq set-fringe-mode 4)         ; I hate fringes lol
 (menu-bar-mode -1)          ; Disable the menu bar
 (setq sentence-end-double-space nil) ; sentences should end with 1 space
+
+;; fringe setup (left . right)
+(set-fringe-mode '(4 . 4))
+
+;; mac specific titlebar stuff
+;; https://emacs.stackexchange.com/a/40777
+(if (eq system-type 'darwin)
+    (progn
+      (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+      (add-to-list 'default-frame-alist '(ns-appearance . dark))
+      (setq ns-use-proxy-icon nil)
+      (setq frame-title-format nil)))
+
 
 ;; show trailing whitespace
 (setq-default show-trailing-whitespace nil)
@@ -29,10 +41,15 @@
 (defalias 'yes-or-no-p 'y-or-n-p)
 
 ;; font setup
-(set-face-attribute 'default nil :font "Iosevka Fixed" :height 180 :weight 'light)
+(set-face-attribute 'default nil :font "Iosevka Fixed" :height 220 :weight 'regular)
+;; float height value (1.0) makes fixed-pitch take height 1.0 * height of default
+(set-face-attribute 'fixed-pitch nil :font "Iosevka Fixed" :height 1.0 :weight 'regular)
+(set-face-attribute 'variable-pitch nil :font "Iosevka Aile" :height 1.0 :weight 'regular)
 
 ;; setup line numbers
-;(global-display-line-numbers-mode)
+;; do not dynamically resize line number column when a digit needs to be added
+(setq display-line-numbers-width-start t)
+;; I don't want line numbers in help files, dired, etc.
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 (add-hook 'text-mode-hook 'display-line-numbers-mode)
 (add-hook 'conf-mode-hook 'display-line-numbers-mode)
@@ -43,6 +60,7 @@
 (add-hook 'dired-mode-hook 'auto-revert-mode)
 
 
+;; TODO group defuns together
 ;; revert buffer without confirmation
 ;; http://www.emacswiki.org/emacs-en/download/misc-cmds.el
 (defun revert-buffer-no-confirm ()
@@ -57,6 +75,13 @@
      "Kill all other buffers."
      (interactive)
      (mapc 'kill-buffer (delq (current-buffer) (buffer-list))))
+
+
+;; open init.el
+(defun open-init-file ()
+  "Open the init file."
+  (interactive)
+  (find-file user-init-file))
 
 
 ;; relative line numbers
@@ -90,7 +115,7 @@
 
 ;; my hacky approach to formatting in insert mode
 (defun my-backward-kill-word ()
-  "Kill words backward my way."
+  "Kill words backward my way"
   (interactive)
   (if (bolp)
       (backward-delete-char 1)
@@ -209,6 +234,7 @@ With argument, do this that many times."
   :hook
   (evil-mode . evil-commentary-mode))
 
+;; change numbers with evil
 (use-package evil-numbers)
 
 ;; vim-like handling of empty lines
@@ -329,6 +355,7 @@ With argument, do this that many times."
 ;(use-package flyspell-correct-popup
 ;  :after flyspell-correct)
 (use-package spell-fu) ; TODO figure out how replacement for ispell-word
+
 
 ;; PROJECT
 ;; projectile
@@ -464,7 +491,8 @@ With argument, do this that many times."
 
 
 
-;; themes
+;; themes and icons
+(use-package all-the-icons)
 (use-package doom-themes
   :config
   ;; Global settings (defaults)
@@ -505,9 +533,7 @@ With argument, do this that many times."
         ;; Only show file encoding if it's non-UTF-8 and different line endings
         ;; than the current OSes preference
         doom-modeline-buffer-encoding 'nondefault
-        doom-modeline-default-eol-type
-        nil ; wtf? must have even number of args https://emacs.stackexchange.com/a/28288
-    ))
+        doom-modeline-default-eol-type (if (eq system-type 'gnu/linux) 2 0))) ;; TODO breaks on windows
 
 
 ;; highlight todos
@@ -585,9 +611,18 @@ With argument, do this that many times."
 (use-package magit-todos)
 ;(use-package evil-magit)
 
+
+;; minimap
+(use-package minimap
+  :config
+  (setq minimap-window-location 'right))
+
+
 ; TODO
 (use-package git-gutter-fringe)
 
+
+;; ORG
 ;; org-roam 2
 (use-package org-roam
   :custom
@@ -608,12 +643,26 @@ With argument, do this that many times."
 (setq org-directory "~/Documents/Google/org")
 (setq org-agenda-files '("~/Documents/Google/org/roam/agenda")) ; https://stackoverflow.com/a/11384907
 
+;; prettier headings
+(use-package org-superstar)
+
+;; better rendering of things like italics
+(use-package org-appear
+  :commands (org-appear-mode)
+  :hook (org-mode . org-appear-mode)
+  :init
+  (setq org-hide-emphasis-markers t) ;; A default setting that needs to be t for org-appear
+  (setq org-appear-autoemphasis t)  ;; Enable org-appear on emphasis (bold, italics, etc)
+  (setq org-appear-autolinks t) ;; Enable on links
+  (setq org-appear-autosubmarkers t)) ;; Enable on subscript and superscript
+
 
 ;; deft
 (use-package deft)
 (setq deft-recursive t)
 ;(setq deft-directory org-roam-directory)
 (setq deft-directory "~/Documents/Google/org/roam")
+;;----
 
 
 ;; which-key
@@ -632,7 +681,128 @@ With argument, do this that many times."
   (global-set-key (kbd "C-h k") #'helpful-key))
 
 
-;; general
+;; HYDRA
+(use-package hydra)
+
+;;https://github.com/jmercouris/configuration/blob/master/.emacs.d/hydra.el#L89
+; window movement / management
+(defhydra hydra-window (:hint nil)
+   "
+Movement      ^Split^            ^Switch^        ^Resize^
+----------------------------------------------------------
+_h_ ←           _v_ertical         _b_uffer        _M-h_ ←
+_j_ ↓           _h_orizontal       _f_ind files    _M-j_ ↓
+_k_ ↑           _1_only this       _P_rojectile    _M-k_ ↑
+_l_ →           _d_elete           _s_wap          _M-l_ →
+_F_ollow        _e_qualize         _[_backward
+_q_uit          ^        ^         _]_forward
+"
+   ;; movement
+   ("h" windmove-left)
+   ("j" windmove-down)
+   ("k" windmove-up)
+   ("l" windmove-right)
+   ("[" previous-buffer)
+   ("]" next-buffer)
+
+   ;; resize
+   ("M-h" hydra-move-splitter-left)
+   ("M-j" hydra-move-splitter-down)
+   ("M-k" hydra-move-splitter-up)
+   ("M-l" hydra-move-splitter-right)
+
+   ("b" consult-buffer)
+   ("f" find-file)
+   ("P" projectile-find-file)
+
+   ("F" follow-mode)
+   ("s" switch-window-then-swap-buffer)
+   ("v" split-window-right)
+   ("s" split-window-below)
+   ("3" split-window-right)
+   ("2" split-window-below)
+   ("d" delete-window)
+   ("1" delete-other-windows)
+   ("e" balance-windows)
+
+
+   ("q" nil))
+
+(defun hydra-move-splitter-left (arg)
+  "Move window splitter left."
+  (interactive "p")
+  (if (let ((windmove-wrap-around))
+        (windmove-find-other-window 'right))
+      (shrink-window-horizontally arg)
+    (enlarge-window-horizontally arg)))
+
+(defun hydra-move-splitter-right (arg)
+  "Move window splitter right."
+  (interactive "p")
+  (if (let ((windmove-wrap-around))
+        (windmove-find-other-window 'right))
+      (enlarge-window-horizontally arg)
+    (shrink-window-horizontally arg)))
+
+(defun hydra-move-splitter-up (arg)
+  "Move window splitter up."
+  (interactive "p")
+  (if (let ((windmove-wrap-around))
+        (windmove-find-other-window 'up))
+      (enlarge-window arg)
+    (shrink-window arg)))
+
+(defun hydra-move-splitter-down (arg)
+  "Move window splitter down."
+  (interactive "p")
+  (if (let ((windmove-wrap-around))
+        (windmove-find-other-window 'up))
+      (shrink-window arg)
+    (enlarge-window arg)))
+
+;; buffer/frame zoom hydra
+(defhydra hydra-zoom (:hint nil)
+  "
+Zoom
+-----------------------
+_=_   text-scale-increase
+_-_   text-scale-decrease
+_M-=_ zoom-in
+_M--_ zoom-out
+_k_ zoom-in
+_j_ zoom-out
+"
+  ("=" text-scale-increase)
+  ("-" text-scale-decrease)
+  ("M-=" zoom-in)
+  ("M--" zoom-out)
+  ("k" zoom-in)
+  ("j" zoom-out))
+
+
+;; use hydra to quickly load themes
+;; the themes here are (mostly)
+;; https://github.com/jakebox/jake-emacs/blob/main/jake-emacs/init.org#hydra
+(defhydra hydra-theme (:hint nil)
+  "Switch theme"
+  ("1" (my-load-theme 'doom-one) "doom-one")
+  ("2" (my-load-theme 'doom-dracula) "doom-dracula")
+  ("3" (my-load-theme 'doom-nord) "doom-nord")
+  ("4" (my-load-theme 'doom-fairy-floss) "doom-fairy-floss")
+  ("5" (my-load-theme 'doom-gruvbox) "doom-gruvbox")
+  ("6" (my-load-theme 'doom-material) "doom-material")
+  ("7" (my-load-theme 'doom-palenight) "doom-palenight")
+  ("8" (my-load-theme 'doom-dark+) "doom-dark+")
+  ("9" (my-load-theme 'doom-molokai) "doom-molokai"))
+
+(defun my-load-theme (theme)
+  "Enhance `load-theme' by first disabling enabled themes."
+  (mapc #'disable-theme custom-enabled-themes)
+  (load-theme theme t))
+;;----
+
+
+;; general keybindings
 ;; doomesque hotkeys using spacebar as prefix
 (use-package general
   :config
@@ -645,6 +815,8 @@ With argument, do this that many times."
     :states '(normal visual)
     :keymaps 'override ;; https://github.com/noctuid/general.el/issues/99#issuecomment-360914335
     ; TODO add the doom hotkeys that i use
+    ; TODO ordering in which-key (is it even possible?)
+
     ;; map universal argument to SPC-u
     "u" '(universal-argument :which-key "Universal argument")
     ";" '(eval-region :which-key "eval-region")
@@ -654,8 +826,10 @@ With argument, do this that many times."
     ;; editor
     "e" '(:ignore t :which-key "Editor")
     "eu" '(undo-tree-visualize :which-key "undo-tree-visualize")
+    "et" '(hydra-theme/body :which-key "hydra-theme") ; not sure if this is the best place for this, perhaps toggles would be more appropriate?
 
     ;; buffer
+    ;"TAB" '(switch-to-prev-buffer :which-key "Prev buffer")
     "b" '(:ignore t :which-key "Buffer")
     ;"bb" ; TODO switch workspace buffer
     "bB" '(consult-buffer :which-key "consult-buffer") ; TODO map to SPC-<
@@ -671,6 +845,7 @@ With argument, do this that many times."
     "o" '(:ignore t :which-key "Open")
     "op" '(treemacs :which-key "Treemacs")
     "oP" '(treemacs-find-file :which-key "Treemacs find file")
+    "oc" '(open-init-file :which-key "Open init.el")
 
     ;; project
     "p" '(:ignore t :which-key "Project")
@@ -683,6 +858,30 @@ With argument, do this that many times."
     "hv" '(helpful-variable :which-key "describe-variable")
     "hm" '(describe-mode :which-key "describe-mode")
 
+    ;; zoom
+    ;; the hydra is nice but the rest is kind of jank, need to pla around with this more
+    "=" '(text-scale-increase :which-key "text-scale-increase")
+    "-" '(text-scale-decrease :which-key "text-scale-decrease")
+    "z" '(:ignore t :which-key "zoom")
+    "z=" '(zoom-in :which-key "zoom-in")
+    "z-" '(zoom-out :which-key "zoom-out")
+    "zz" '(hydra-zoom/body :which-key "hydra-zoom")
+
+    ;; window
+    "w" '(:ignore t :which-key "window")
+    "ww" '(hydra-window/body :which-key "hydra-window")
+    "wg" '(golden-ratio :which-key "golden-ratio")
+    ; TODO more window stuff
+
+    ;; toggles
+    "t" '(:ignore t :which-key "toggles")
+    "ts" '(flyspell-mode :which-key "flyspell-mode")
+    "tc" '(flycheck-mode :which-key "flycheck-mode")
+    "tC" '(company-mode :which-key "company-mode") ; not sure how good of a hotkey this is lol
+    "tm" '(minimap-mode :which-key "minimap-mode")
+    "tg" '(golden-ratio-mode :which-key "golden-ratio-mode")
+    ;; TODO check doom for this, some useful stuff there
+
     ;; git
     "g" '(:ignore t :which-key "Git") ; prefix
     "gg" '(magit-status :which-key "Git status"))
@@ -690,13 +889,63 @@ With argument, do this that many times."
   ;; normal/visual mode hotkeys
   (general-define-key
     :states '(normal visual)
+    ;; evil numbers
     "g=" 'evil-numbers/inc-at-pt
-    "g-" 'evil-numbers/dec-at-pt)
+    "g-" 'evil-numbers/dec-at-pt
+
+    ;; flyspell correct
+    "z=" 'flyspell-correct-wrapper)
 
   ;; insert mode hotkeys
   (general-define-key
-   :states 'insert
-   "C-SPC" 'company-complete))
+    :states 'insert
+    "C-SPC" 'company-complete)
+
+  ;; motion mode hotkeys, inherited by normal/visual
+  (general-define-key
+    :states 'motion
+    "?" 'consult-line
+
+    ;; window management
+    "C-w C-u" 'winner-undo
+    "C-w u" 'winner-undo)
+
+  ;; company
+  (general-define-key
+    :keymaps '(company-active-map)
+    "C-w" nil ; allow C-w to act normally during completion
+    "C-h" nil
+    "C-n" #'company-select-next
+    "C-p" #'company-select-previous
+    ;TODO
+    )
+
+  ;; some emacs hotkeys inside insert mode
+  (general-def
+    :states '(insert)
+    "C-a" 'evil-beginning-of-visual-line
+    "C-e" 'evil-end-of-visual-line
+    "C-n" 'evil-next-visual-line
+    "C-p" 'evil-previous-visual-line)
+
+  ;; global
+  (general-define-key
+    ;; more traditional zoom keys
+    "C-=" 'text-scale-increase
+    "C--" 'text-scale-decrease
+    "C-M-=" 'zoom-in
+    "C-M--" 'zoom-out
+
+    ;; C-w should always delete the last word unless normal mode in evil
+    ;; this allows me to use C-w to delete words in vertico
+    "C-w" 'backward-delete-word
+
+     ;; C-v to paste (or "yank" in emacs jargon) from clipboard, useful for minibuffers (such as query-replace and M-x)
+    "C-v" 'yank
+
+    ;; buffer management
+    "C-a" 'bury-buffer
+    "C-S-a" 'unbury-buffer))
 
 
 ;;; LANGUAGES
@@ -771,7 +1020,10 @@ With argument, do this that many times."
 
 
 ;; change font size in all buffers (frame)
-(use-package zoom-frm)
+(use-package zoom-frm
+  :config
+  ;; more granular zooming
+  (setq text-scale-mode-step 1.1))
 
 
 
@@ -807,23 +1059,30 @@ With argument, do this that many times."
 ;;----
 
 
-;; ranger
+;; ranger enhancement for dired
 (use-package ranger)
+
+
+;; golden ratio windows
+;; TODO this does not work with evil window switching
+(use-package golden-ratio
+  :config
+  (setq golden-ratio-auto-scale t))
 
 
 
 ;; KEYBINDINGS
-; more traditional zoom keys
-(global-set-key (kbd "C-=") 'text-scale-increase)
-(global-set-key (kbd "C--") 'text-scale-decrease)
-(global-set-key (kbd "C-M-=") 'zoom-in)
-(global-set-key (kbd "C-M--") 'zoom-out)
-(setq text-scale-mode-step 1.1) ; more granular zoom
+;; more traditional zoom keys
+;(global-set-key (kbd "C-=") 'text-scale-increase)
+;(global-set-key (kbd "C--") 'text-scale-decrease)
+;(global-set-key (kbd "C-M-=") 'zoom-in)
+;(global-set-key (kbd "C-M--") 'zoom-out)
 
 ;; remap '?' key to be for enhanced search
 ;(with-eval-after-load 'evil-maps
 ;  (define-key evil-normal-state-map (kbd "?") 'consult-line))
-(evil-define-key 'normal 'global (kbd "?") 'consult-line)
+;; TODO I don't think this should affect dired?
+;(evil-define-key 'normal 'global (kbd "?") 'consult-line)
 
 ;; unbind C-z from evil
 (evil-define-key '(normal insert visual) 'global (kbd "C-z") 'consult-buffer)
@@ -831,14 +1090,14 @@ With argument, do this that many times."
 
 ;; C-w should always delete the last word unless normal mode in evil
 ;; this allows me to use C-w to delete words in vertico
-(global-set-key (kbd "C-w") 'backward-delete-word)
+;(global-set-key (kbd "C-w") 'backward-delete-word)
 
 ;; C-v to paste (or "yank" in emacs jargon) from clipboard, useful for minibuffers (such as query-replace and M-x)
-(global-set-key (kbd "C-v") 'yank)
+;(global-set-key (kbd "C-v") 'yank)
 
 ;; buffer management
-(global-set-key (kbd "C-a") 'bury-buffer)
-(global-set-key (kbd "C-S-a") 'unbury-buffer)
+;(global-set-key (kbd "C-a") 'bury-buffer)
+;(global-set-key (kbd "C-S-a") 'unbury-buffer)
 
 
 ;; map the escape key to quit mini buffers instantly
@@ -848,11 +1107,11 @@ With argument, do this that many times."
 ;; window management - undo last window action
 ;; taken from https://github.com/hlissner/doom-emacs/blob/develop/modules/editor/evil/config.el
 ; TODO another way to do this? https://github.com/angrybacon/dotemacs/blob/master/dotemacs.org#evil
-(evil-define-key 'normal 'global (kbd "C-w C-u") 'winner-undo)
-(evil-define-key 'normal 'global (kbd "C-w u") 'winner-undo)
+;(evil-define-key 'normal 'global (kbd "C-w C-u") 'winner-undo)
+;(evil-define-key 'normal 'global (kbd "C-w u") 'winner-undo)
 
 ;; flyspell correction hotkey in normal mode
-(evil-define-key 'normal 'global (kbd "z =") 'flyspell-correct-wrapper)
+;(evil-define-key 'normal 'global (kbd "z =") 'flyspell-correct-wrapper)
 
 ;(map! (:after company
 ;        (:map company-active-map
@@ -869,6 +1128,12 @@ With argument, do this that many times."
 (setq mac-option-modifier 'super)
 (setq mac-command-modifier 'meta)
 
+;; fix path related issues to allow emacs to easily access tools like rg
+(when (memq window-system '(mac ns x))
+  (use-package exec-path-from-shell
+    :config
+    (exec-path-from-shell-initialize)))
+
 
 ;; TODO
 ;; projectile default
@@ -878,7 +1143,6 @@ With argument, do this that many times."
 ;; org link follow
 ;; flycheck things
 ;; workspaces https://github.com/hlissner/doom-emacs/tree/master/modules/ui/workspaces
-
 ;; left fringe prettify (I think doom disables it and renders errors in the line using a popup, get that working)
 ;; solve errors
 
@@ -888,3 +1152,16 @@ With argument, do this that many times."
 ;(setq custom-file "~/.emacs.d/custom.el")
 ;(load custom-file)
 
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   '("0466adb5554ea3055d0353d363832446cd8be7b799c39839f387abb631ea0995" "1d5e33500bc9548f800f9e248b57d1b2a9ecde79cb40c0b1398dec51ee820daf" "a6e620c9decbea9cac46ea47541b31b3e20804a4646ca6da4cce105ee03e8d0e" "47db50ff66e35d3a440485357fb6acb767c100e135ccdf459060407f8baea7b2" "1704976a1797342a1b4ea7a75bdbb3be1569f4619134341bd5a4c1cfb16abad4" "234dbb732ef054b109a9e5ee5b499632c63cc24f7c2383a849815dacc1727cb6" "a9a67b318b7417adbedaab02f05fa679973e9718d9d26075c6235b1f0db703c8" default)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
