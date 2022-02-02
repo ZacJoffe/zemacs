@@ -925,6 +925,12 @@ _j_ zoom-out
     "tg" '(evil-goggles-mode :which-key "evil-goggles")
     "tI" '(toggle-indent-style :which-key "Indent style")
 
+    ;; notes
+    "n" '(:ignore t :which-key "notes")
+    "nr" '(:ignore t :which-key "org-roam")
+    "nrf" '(org-roam-node-find :which-key "find-node")
+    "nri" '(org-roam-node-insert :which-key "insert-node")
+
     ;; git
     "g" '(:ignore t :which-key "Git") ; prefix
     "gg" '(magit-status :which-key "Git status"))
@@ -1021,7 +1027,8 @@ _j_ zoom-out
 ;; tree sitter
 (use-package tree-sitter)
 (use-package tree-sitter-langs)
-; enable tree sitter syntax highlighting whenever possible https://emacs-tree-sitter.github.io/syntax-highlighting/
+;; enable tree sitter syntax highlighting whenever possible https://emacs-tree-sitter.github.io/syntax-highlighting/
+; TODO use-package refactor
 (global-tree-sitter-mode)
 (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
 
@@ -1182,7 +1189,6 @@ _j_ zoom-out
 ;; projectile default
 ;; evil hotkeys
 ;; lang support (look into differences with elisp syntax for doom)
-;; org look like doom
 ;; org link follow
 ;; flycheck things
 ;; workspaces https://github.com/hlissner/doom-emacs/tree/master/modules/ui/workspaces
