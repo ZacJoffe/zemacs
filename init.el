@@ -41,10 +41,10 @@
 (defalias 'yes-or-no-p 'y-or-n-p)
 
 ;; font setup
-(set-face-attribute 'default nil :font "Iosevka Fixed" :height 220 :weight 'regular)
+(set-face-attribute 'default nil :font "Iosevka Fixed" :height 170 :weight 'light)
 ;; float height value (1.0) makes fixed-pitch take height 1.0 * height of default
-(set-face-attribute 'fixed-pitch nil :font "Iosevka Fixed" :height 1.0 :weight 'regular)
-(set-face-attribute 'variable-pitch nil :font "Iosevka Aile" :height 1.0 :weight 'regular)
+(set-face-attribute 'fixed-pitch nil :font "Iosevka Fixed" :height 1.0 :weight 'light)
+(set-face-attribute 'variable-pitch nil :font "Iosevka Aile" :height 1.0 :weight 'light)
 
 ;; setup line numbers
 ;; do not dynamically resize line number column when a digit needs to be added
@@ -151,6 +151,14 @@ With argument, do this that many times."
   (delete-word (- arg)))
 
 
+;; toggle whether a file uses tabs or spaces
+;; https://github.com/hlissner/doom-emacs/blob/master/core/autoload/text.el#L293
+(defun toggle-indent-style ()
+  (interactive)
+  (setq indent-tabs-mode (not indent-tabs-mode))
+  (message "Indent style changed to %s" (if indent-tabs-mode "tabs" "spaces")))
+
+
 ;; straight.el bootstrap
 (defvar bootstrap-version)
 (let ((bootstrap-file
@@ -199,7 +207,9 @@ With argument, do this that many times."
   (setq evil-want-integration t)
   (setq evil-want-keybinding nil)
   :config ;; tweak evil after loading it
-  (evil-mode))
+  (evil-mode)
+  ;; highlight the current line (not explicitly evil but whatever)
+  (hl-line-mode 1))
 
 ;;; UNDO TREE
 ;; undo-tree with evil mode https://www.reddit.com/r/emacs/comments/n1pibp/installed_evil_on_emacs_for_windows_redo_not/gwei7fw/
@@ -237,10 +247,24 @@ With argument, do this that many times."
 ;; change numbers with evil
 (use-package evil-numbers)
 
+;; show evil actions
+(use-package evil-goggles
+  :config
+  (evil-goggles-mode)
+  (setq evil-goggles-duration 0.1)
+  ;; disable slow actions
+  (setq evil-goggles-enable-change nil)
+  (setq evil-goggles-enable-delete nil))
+
 ;; vim-like handling of empty lines
 (use-package vi-tilde-fringe
   :hook (prog-mode . vi-tilde-fringe-mode))
-;(add-hook 'prog-mode-hook #'vi-tilde-fringe-mode)
+
+
+;; editor config
+(use-package editorconfig
+  :config
+  (editorconfig-mode 1))
 ;;----
 
 
@@ -492,7 +516,12 @@ With argument, do this that many times."
 
 
 ;; themes and icons
-(use-package all-the-icons)
+(use-package all-the-icons
+  :config
+  ;; needed for getting the right side of doom-modeline to render on the screen properly
+  ;; https://github.com/hlissner/doom-emacs/blob/develop/modules/ui/modeline/README.org#the-right-side-of-the-modeline-is-cut-off
+  (setq all-the-icons-scale-factor 1.1))
+
 (use-package doom-themes
   :config
   ;; Global settings (defaults)
@@ -530,10 +559,18 @@ With argument, do this that many times."
         doom-modeline-minor-modes nil
         doom-modeline-major-mode-icon nil
         doom-modeline-buffer-file-name-style 'relative-from-project
+        doom-modeline-indent-info t
         ;; Only show file encoding if it's non-UTF-8 and different line endings
         ;; than the current OSes preference
         doom-modeline-buffer-encoding 'nondefault
-        doom-modeline-default-eol-type (if (eq system-type 'gnu/linux) 2 0))) ;; TODO breaks on windows
+        doom-modeline-default-eol-type (if (eq system-type 'gnu/linux) 2 0)) ;; TODO breaks on Windows
+
+  :config
+  ;; add padding to the right side of the modeline to prevent it from getting cutoff
+  ;; https://github.com/hlissner/doom-emacs/blob/develop/modules/ui/modeline/README.org#the-right-side-of-the-modeline-is-cut-off
+  (doom-modeline-def-modeline 'main
+    '(bar matches buffer-info remote-host buffer-position parrot selection-info)
+    '(misc-info minor-modes checker input-method buffer-encoding major-mode process vcs "  "))) ; <-- added padding here
 
 
 ;; highlight todos
@@ -569,9 +606,8 @@ With argument, do this that many times."
 
 ;; rainbow delimiters
 (use-package rainbow-delimiters
-  :hook ((prog-mode . rainbow-delimiters-mode)
-         (markdown-mode . rainbow-delimiters-mode)
-         (org-mode . rainbow-delimiters-mode)))
+  :hook (LaTeX-mode . rainbow-delimiters-mode)
+  :hook (prog-mode . rainbow-delimiters-mode))
 
 ;; highlight numbers
 (use-package highlight-numbers
@@ -623,6 +659,11 @@ With argument, do this that many times."
 
 
 ;; ORG
+(use-package org
+  :straight nil
+  ;; indent hook
+  :hook (org-mode . org-indent-mode))
+
 ;; org-roam 2
 (use-package org-roam
   :custom
@@ -857,6 +898,7 @@ _j_ zoom-out
     "hk" '(helpful-key :which-key "describe-key")
     "hv" '(helpful-variable :which-key "describe-variable")
     "hm" '(describe-mode :which-key "describe-mode")
+    "hF" '(describe-face :which-key "describe-face")
 
     ;; zoom
     ;; the hydra is nice but the rest is kind of jank, need to pla around with this more
@@ -880,7 +922,8 @@ _j_ zoom-out
     "tC" '(company-mode :which-key "company-mode") ; not sure how good of a hotkey this is lol
     "tm" '(minimap-mode :which-key "minimap-mode")
     "tg" '(golden-ratio-mode :which-key "golden-ratio-mode")
-    ;; TODO check doom for this, some useful stuff there
+    "tg" '(evil-goggles-mode :which-key "evil-goggles")
+    "tI" '(toggle-indent-style :which-key "Indent style")
 
     ;; git
     "g" '(:ignore t :which-key "Git") ; prefix
