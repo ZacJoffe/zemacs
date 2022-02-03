@@ -214,9 +214,9 @@ With argument, do this that many times."
   (interactive "P")
   (let ((delims-close '(")" "]" "}"))
 	(delims-open '("(" "[" "{")))
-    (if (or (memq char-after delims-open) (memq char-after delims-close))
+    (if (or (memq (string (following-char)) delims-open) (memq (string (following-char)) delims-close))
 	(forward-char)
-      (indent-for-tab-command ARG)
+      (forward-whitespace 1)
       )
       ;; https://stackoverflow.com/questions/16651180/jump-to-the-first-occurrence-of-symbol-in-emacs
       ;; (eval
@@ -1022,7 +1022,9 @@ _j_ zoom-out
   ;; insert mode hotkeys
   (general-define-key
     :states 'insert
-    "C-SPC" 'company-complete)
+    "C-SPC" 'company-complete
+    "TAB" 'tab-jump-pair)
+
 
   ;; motion mode hotkeys, inherited by normal/visual
   (general-define-key
