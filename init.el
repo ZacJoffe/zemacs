@@ -49,6 +49,11 @@
 (add-hook 'org-mode-hook 'show-trailing-whitespace-hook)
 (add-hook 'markdown-mode-hook 'show-trailing-whitespace-hook)
 
+
+;; show tabs in the editor
+(setq-default whitespace-style '(face tabs tab-mark))
+(global-whitespace-mode 1)
+
 ;; prompt y/n instead of yes/no
 (defalias 'yes-or-no-p 'y-or-n-p)
 
@@ -89,6 +94,10 @@
      (mapc 'kill-buffer (delq (current-buffer) (buffer-list))))
 
 
+;; I use chemacs on my desktop, slightly ugly hack to open the correct file in open-init-file
+(when (eq computer 'linux-desktop)
+  (setq user-init-file "~/.zemacs/init.el"))
+
 ;; open init.el
 (defun open-init-file ()
   "Open the init file."
@@ -98,6 +107,7 @@
 
 ;; relative line numbers
 (setq display-line-numbers-type 'relative)
+
 
 ;; line-by-line scrolling
 (setq scroll-step            1
@@ -211,7 +221,7 @@ With argument, do this that many times."
       ;; https://stackoverflow.com/questions/16651180/jump-to-the-first-occurrence-of-symbol-in-emacs
       ;; (eval
       ;;  `(progn
-      ;; 	  (search-forward-regexp
+      ;;    (search-forward-regexp
       ;; 	   (rx symbol-start ,(thing-at-point 'symbol) symbol-end))
       ;; 	  (beginning-of-thing 'symbol))
       ;;   ) ;; TODO find previous occurence of close delim, find matching closed delim, jump out of it
