@@ -6,7 +6,7 @@
 
 ;; save buffers on close (sessioning)
 (setq desktop-path '("~/"))
-(desktop-save-mode 1)
+;(desktop-save-mode 1) ; TODO doesn't work with perspective-el? https://github.com/nex3/perspective-el
 
 ;; remember window configuration changes
 (winner-mode 1)
@@ -22,7 +22,7 @@
 
 ;; setup variable to determine computer specific actions
 ;; inpsired by https://github.com/jakebox/jake-emacs#custom-variables-registers
-(defvar computer "Which computer I am on")
+(defvar computer nil "Which computer I am on.")
 (let ((sys (system-name)))
   (if (string= sys "arch")
       (setq computer 'linux-desktop)
@@ -94,7 +94,7 @@
      (mapc 'kill-buffer (delq (current-buffer) (buffer-list))))
 
 
-;; I use chemacs on my desktop, slightly ugly hack to open the correct file in open-init-file
+;; I use chemacs2 on my desktop, slightly ugly hack to open the correct file in open-init-file
 (when (eq computer 'linux-desktop)
   (setq user-init-file "~/.zemacs/init.el"))
 
@@ -320,7 +320,7 @@ With argument, do this that many times."
 ;; show evil actions
 (use-package evil-goggles
   :config
-  (evil-goggles-mode)
+  ;(evil-goggles-mode) ;; TODO actions are not being disabled properly
   (setq evil-goggles-duration 0.1)
   ;; disable slow actions
   (setq evil-goggles-enable-change nil)
@@ -340,11 +340,11 @@ With argument, do this that many times."
 
 ;;; VERTICO
 ;; vertico - completion engine
-; TODO figure out how to get C-w working in vertico minibuffer
 (use-package vertico
   :init
   (vertico-mode)
   ; https://systemcrafters.cc/emacs-tips/streamline-completions-with-vertico/
+  ;; TODO refactor with general
   :bind (:map vertico-map
          ("C-j" . vertico-next)
          ("C-k" . vertico-previous))
@@ -352,9 +352,6 @@ With argument, do this that many times."
   (setq vertico-resize nil
         vertico-count 17
         vertico-cycle t) ; enable cycling for `vertico-next' and `vertico-previous'.
-
-  ;; Grow and shrink the Vertico minibuffer
-  ;; (setq vertico-resize t)
   )
 
 ; vertico directory extension
@@ -557,9 +554,10 @@ With argument, do this that many times."
 (use-package treemacs-magit
   :after (treemacs magit))
 
-(use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
-  :after (treemacs persp-mode) ;;or perspective vs. persp-mode
-  :config (treemacs-set-scope-type 'Perspectives))
+;; TODO with persp-mode
+;(use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
+;  :after (treemacs persp-mode) ;;or perspective vs. persp-mode
+;  :config (treemacs-set-scope-type 'Perspectives))
 ;;----
 
 
@@ -583,9 +581,38 @@ With argument, do this that many times."
 ;  (bufler-mode 1))
 ;(use-package burly)
 
+;(use-package perspective
+;  :hook (kill-emacs . persp-state-save)
+;  :config
+;  (persp-mode))
+(use-package persp-mode
+  :config
+  (setq persp-nil-name "#1")
+  ;(setq persp-interactive-completion-function )
+
+  ;; start persp-mode
+  (persp-mode 1))
+
+;; TODO
+(defvar persp-stack (car persp-names-cache))
 
 
-;; icons
+(defun persp-add-new-anonymous ()
+  "Add a new perspective with no name."
+  (interactive)
+  ;; hacky approach - perspective names are numbers, add 1 to latest persective
+  ;; and create new one with that number as the name
+  (let ((last-persp (substring (car (last persp-names-cache)) 1) ))
+    (persp-add-new (concat "#" (number-to-string (+ (string-to-number last-persp) 1))) )))
+;; TODO hack together consult preview for persp-switch-to-buffer
+;; TODO M-1 to first buffer, etc
+
+
+;; ace window
+(use-package ace-window)
+
+
+;; Icons
 (use-package all-the-icons
   :config
   ;; needed for getting the right side of doom-modeline to render on the screen properly
@@ -986,6 +1013,7 @@ _j_ zoom-out
     "ww" '(hydra-window/body :which-key "hydra-window")
     "wg" '(golden-ratio :which-key "golden-ratio")
     "wt" '(toggle-window-split :which-key "toggle-window-split")
+    "wa" '(ace-window :which-key "ace-window")
     ; TODO more window stuff
 
     ;; toggles
@@ -1019,10 +1047,17 @@ _j_ zoom-out
     ;; flyspell correct
     "z=" 'flyspell-correct-wrapper)
 
+  ;; visual mode hotkeys
+  (general-define-key
+    :states 'visual
+    ;; also bound to "S", "s" and "c" are the same in visual mode anyways
+    "s" 'evil-surround-region)
+
   ;; insert mode hotkeys
   (general-define-key
     :states 'insert
     "C-SPC" 'company-complete
+    "C-v" 'yank ;; C-v should paste clipboard contents
     "TAB" 'tab-jump-pair)
 
 
@@ -1033,7 +1068,8 @@ _j_ zoom-out
 
     ;; window management
     "C-w C-u" 'winner-undo
-    "C-w u" 'winner-undo)
+    "C-w u" 'winner-undo
+    "C-w a" 'ace-window)
 
   ;; company
   (general-define-key
@@ -1042,6 +1078,7 @@ _j_ zoom-out
     "C-h" nil
     "C-n" #'company-select-next
     "C-p" #'company-select-previous
+    "<tab>" #'company-complete-selection
     ;TODO
     )
 
@@ -1052,6 +1089,14 @@ _j_ zoom-out
     "C-e" 'evil-end-of-visual-line
     "C-n" 'evil-next-visual-line
     "C-p" 'evil-previous-visual-line)
+
+  ;; key bindings for evil search ('/')
+  ;; there could be a better way to do this, but this works so whatever
+  (general-define-key
+    ;; note that evil-ex-map is different from evil-ex-search-keymap
+    :keymaps 'evil-ex-search-keymap
+    ;; C-v should paste clipboard contents
+    "C-v" 'yank)
 
   ;; global
   (general-define-key
@@ -1075,23 +1120,23 @@ _j_ zoom-out
 
 ;;; LANGUAGES
 ;; lsp
-(use-package lsp-mode
-  :init
-  ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
-  (setq lsp-keymap-prefix "C-c l")
-  :hook ((lsp-mode . lsp-enable-which-key-integration)
-	 (rustic-mode . lsp)
-         ;; for some reason headerline is enabled by default, add a hook to disable it
-         ;; TODO look into fixing this in lsp-mode
-         ;; https://emacs.stackexchange.com/a/64988
-         )
-         ;(lsp-mode . lsp-headerline-breadcrumb-mode))
+;; (use-package lsp-mode
+;;   :init
+;;   ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
+;;   (setq lsp-keymap-prefix "C-c l")
+;;   :hook ((lsp-mode . lsp-enable-which-key-integration)
+;; 	 ;(rustic-mode . lsp)
+;;          ;; for some reason headerline is enabled by default, add a hook to disable it
+;;          ;; TODO look into fixing this in lsp-mode
+;;          ;; https://emacs.stackexchange.com/a/64988
+;;          (lsp-mode . lsp-headerline-breadcrumb-mode))
+;;   :commands lsp
+;;   :config
+;;   (setq lsp-headerline-breadcrumb-enable nil))
 
-  :commands lsp)
-
-(use-package lsp-ui :commands lsp-ui-mode)
-(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
-(use-package consult-lsp)
+;; (use-package lsp-ui :commands lsp-ui-mode)
+;; (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+;; (use-package consult-lsp)
 
 
 ;; flycheck
@@ -1125,7 +1170,10 @@ _j_ zoom-out
 
 
 ;; rust
-(use-package rustic)
+(use-package rustic
+  :config
+  ;; disable lsp support for now
+  (setq rustic-lsp-client nil))
 
 
 ;; latex
@@ -1142,10 +1190,24 @@ _j_ zoom-out
 ;;----
 
 ;; AUTOCOMPLETE
-;; TODO tab completion
-;; TODO C-w work during popup
 ;; TODO cycle completion options
-(use-package company)
+;; company
+(use-package company
+  ;; trying out tab and go mode
+  :hook (company-mode . company-tng-mode)
+  :config
+  ;; https://github.com/company-mode/company-mode/blob/master/company-tng.el#L65
+  (setq company-require-match nil))
+
+;; fuzzy autocomplete
+(use-package company-fuzzy
+  :hook (company-mode . company-fuzzy-mode)
+  :init
+  (setq company-fuzzy-sorting-backend 'flx
+        company-fuzzy-prefix-on-top nil
+        company-fuzzy-history-backends '(company-yasnippet)
+        company-fuzzy-trigger-symbols '("." "->" "<" "\"" "'" "@")))
+
 ;;----
 
 
