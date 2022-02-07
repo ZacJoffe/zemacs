@@ -137,7 +137,7 @@
 
 ;; my hacky approach to formatting in insert mode
 (defun my-backward-kill-word ()
-  "Kill words backward my way"
+  "Kill words backward my way."
   (interactive)
   (if (bolp)
       (backward-delete-char 1)
@@ -150,8 +150,8 @@
   (interactive)
   (my-backward-kill-word)
   (backward-delete-char 1)
-  ;; (c-electric-backspace 1)
-  (insert " "))
+  ;(insert " ")
+  )
 
 (global-set-key [C-backspace] 'my-backward-kill-word)
 (global-set-key (kbd "<M-backspace>") 'my-backward-kill-line)
@@ -227,6 +227,15 @@ With argument, do this that many times."
       ;;   ) ;; TODO find previous occurence of close delim, find matching closed delim, jump out of it
       ))
 
+;; https://gist.github.com/mads-hartmann/3402786?permalink_comment_id=693878#gistcomment-693878
+(defun toggle-maximize-buffer ()
+  "Maximize window."
+  (interactive)
+  (if (= 1 (length (window-list)))
+      (jump-to-register '_)
+    (progn
+      (window-configuration-to-register '_)
+      (delete-other-windows))))
 
 
 ;; straight.el bootstrap
@@ -279,7 +288,7 @@ With argument, do this that many times."
   :config ;; tweak evil after loading it
   (evil-mode)
   ;; highlight the current line (not explicitly evil but whatever)
-  (hl-line-mode 1))
+  (global-hl-line-mode 1))
 
 ;;; UNDO TREE
 ;; undo-tree with evil mode https://www.reddit.com/r/emacs/comments/n1pibp/installed_evil_on_emacs_for_windows_redo_not/gwei7fw/
@@ -307,7 +316,15 @@ With argument, do this that many times."
   :hook (org-mode . (lambda () evil-org-mode))
   :config
   (require 'evil-org-agenda)
-  (evil-org-agenda-set-keys))
+  (evil-org-agenda-set-keys)
+
+  ;; TODO delete me
+  ;; unbind the return (enter) key so it becomes org-return
+  ;; the return key is not that useful here any
+  ;; (general-define-key
+  ;;   :states 'motion
+  ;;   "RET" nil)
+  )
 
 ;; evil-commentary
 (use-package evil-commentary
@@ -575,16 +592,11 @@ With argument, do this that many times."
 
 ;; workspaces
 ;; TODO
-;(use-package persp-mode)
-;(use-package bufler
-;  :config
-;  (bufler-mode 1))
-;(use-package burly)
-
 ;(use-package perspective
 ;  :hook (kill-emacs . persp-state-save)
 ;  :config
 ;  (persp-mode))
+
 (use-package persp-mode
   :config
   (setq persp-nil-name "#1")
@@ -594,7 +606,9 @@ With argument, do this that many times."
   (persp-mode 1))
 
 ;; TODO
+;; not sure if this is needed, I think persp-names-cache may be sufficient
 (defvar persp-stack (car persp-names-cache))
+(setq persp-stack (cons (car persp-names-cache) '()))
 
 
 (defun persp-add-new-anonymous ()
@@ -602,10 +616,41 @@ With argument, do this that many times."
   (interactive)
   ;; hacky approach - perspective names are numbers, add 1 to latest persective
   ;; and create new one with that number as the name
-  (let ((last-persp (substring (car (last persp-names-cache)) 1) ))
-    (persp-add-new (concat "#" (number-to-string (+ (string-to-number last-persp) 1))) )))
+  (let* ((last-persp (substring (car (last persp-names-cache)) 1))
+         (new-persp (concat "#" (number-to-string (+ (string-to-number last-persp) 1)))))
+    (persp-add-new new-persp)
+    (add-to-list 'persp-stack new-persp t)))
+
+
+(defun persp-kill-top ()
+  "Kill the perspective at the top of the stack."
+  (interactive)
+  (if (eq (length persp-names-cache) 1)
+      (message "Cannot kill last perspective")
+    (let ((last-persp (cons (car (last persp-names-cache)) '()) ))
+      (persp-kill last-persp))))
+
+(defun my-persp-switch (NAME)
+  "Switch to the perspective with name NAME, if it exists."
+  (if (member NAME persp-names-cache)
+      (progn
+        (persp-switch NAME)
+        (message (concat "Persp: " NAME)))
+    (message (concat "Invalid persp: " NAME))))
+
+(defun persp-kill-all-except-default ()
+  "Switch to persp #1 and kill all other persps."
+  (interactive)
+  (progn
+    (persp-switch persp-nil-name)
+    (message (concat "Persp: " persp-nil-name))
+    (persp-kill (cdr persp-names-cache))))
+
+
+;; TODO document functions
+;; TODO M-RET open file in new persp in find-file
+
 ;; TODO hack together consult preview for persp-switch-to-buffer
-;; TODO M-1 to first buffer, etc
 
 
 ;; ace window
@@ -760,7 +805,9 @@ With argument, do this that many times."
 (use-package org
   :straight nil
   ;; indent hook
-  :hook (org-mode . org-indent-mode))
+  :hook (org-mode . org-indent-mode)
+  :config
+  (setq org-return-follows-link t))
 
 ;; org-roam 2
 (use-package org-roam
@@ -792,7 +839,7 @@ With argument, do this that many times."
   :init
   (setq org-hide-emphasis-markers t) ;; A default setting that needs to be t for org-appear
   (setq org-appear-autoemphasis t)  ;; Enable org-appear on emphasis (bold, italics, etc)
-  (setq org-appear-autolinks t) ;; Enable on links
+  (setq org-appear-autolinks nil)
   (setq org-appear-autosubmarkers t)) ;; Enable on subscript and superscript
 
 
@@ -1014,6 +1061,7 @@ _j_ zoom-out
     "wg" '(golden-ratio :which-key "golden-ratio")
     "wt" '(toggle-window-split :which-key "toggle-window-split")
     "wa" '(ace-window :which-key "ace-window")
+    "wf" '(toggle-maximize-buffer :which-key "toggle-maximize-buffer")
     ; TODO more window stuff
 
     ;; toggles
@@ -1115,7 +1163,39 @@ _j_ zoom-out
 
     ;; buffer management
     "C-a" 'bury-buffer
-    "C-S-a" 'unbury-buffer))
+    "C-S-a" 'unbury-buffer
+
+    ;; quick perspective switching
+    "M-1" (lambda () (interactive) (my-persp-switch "#1"))
+    "M-2" (lambda () (interactive) (my-persp-switch "#2"))
+    "M-3" (lambda () (interactive) (my-persp-switch "#3"))
+    "M-4" (lambda () (interactive) (my-persp-switch "#4"))
+    "M-5" (lambda () (interactive) (my-persp-switch "#5"))
+    "M-6" (lambda () (interactive) (my-persp-switch "#6"))
+    "M-7" (lambda () (interactive) (my-persp-switch "#7"))
+    "M-8" (lambda () (interactive) (my-persp-switch "#8"))
+    "M-9" (lambda () (interactive) (my-persp-switch "#9")))
+
+  ;; magit
+  (general-define-key
+    ;; https://github.com/emacs-evil/evil-magit/issues/14#issuecomment-626583736
+    :keymaps 'transient-base-map
+    "<escape>" 'transient-quit-one)
+  ;(general-define-key
+  ;  :keymaps 'magit-mode-map
+  ;  ;; escape key should quit buffer
+  ;  "ESC" nil)
+
+
+  ;; org mode specific evil
+  ;; unbind the return (enter) key so it becomes org-return
+  ;; the return key is not that useful here any
+  ;; TODO this doesn't work
+  (general-define-key
+    :major-modes 'org-mode
+    :states 'motion
+    :keymaps 'local ;; only in the buffer
+    "RET" nil))
 
 
 ;;; LANGUAGES
@@ -1178,7 +1258,10 @@ _j_ zoom-out
 
 ;; latex
 (use-package auctex
-  :hook (LaTeX-mode . visual-line-mode))
+  :hook (LaTeX-mode . visual-line-mode)
+  ;; electric pair mode for $ https://tex.stackexchange.com/a/75884
+  :hook (LaTeX-mode . (lambda ()
+                       (define-key LaTeX-mode-map (kbd "$") 'self-insert-command))))
 (use-package latex-preview-pane)
 (use-package evil-tex
   :hook (LaTeX-mode . evil-tex-mode))
@@ -1200,13 +1283,13 @@ _j_ zoom-out
   (setq company-require-match nil))
 
 ;; fuzzy autocomplete
-(use-package company-fuzzy
-  :hook (company-mode . company-fuzzy-mode)
-  :init
-  (setq company-fuzzy-sorting-backend 'flx
-        company-fuzzy-prefix-on-top nil
-        company-fuzzy-history-backends '(company-yasnippet)
-        company-fuzzy-trigger-symbols '("." "->" "<" "\"" "'" "@")))
+;(use-package company-fuzzy
+;  :hook (company-mode . company-fuzzy-mode)
+;  :init
+;  (setq company-fuzzy-sorting-backend 'flx
+;        company-fuzzy-prefix-on-top nil
+;        company-fuzzy-history-backends '(company-yasnippet)
+;        company-fuzzy-trigger-symbols '("." "->" "<" "\"" "'" "@")))
 
 ;;----
 
