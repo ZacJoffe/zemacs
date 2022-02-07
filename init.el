@@ -597,6 +597,8 @@ With argument, do this that many times."
 ;  :config
 ;  (persp-mode))
 
+;; WORKSPACES
+;; my workflow is hacked on top of persp-mode.el (apparently it works better with emacsclient than perspective-el)
 (use-package persp-mode
   :config
   (setq persp-nil-name "#1")
@@ -606,11 +608,6 @@ With argument, do this that many times."
   (persp-mode 1))
 
 ;; TODO
-;; not sure if this is needed, I think persp-names-cache may be sufficient
-(defvar persp-stack (car persp-names-cache))
-(setq persp-stack (cons (car persp-names-cache) '()))
-
-
 (defun persp-add-new-anonymous ()
   "Add a new perspective with no name."
   (interactive)
@@ -618,8 +615,7 @@ With argument, do this that many times."
   ;; and create new one with that number as the name
   (let* ((last-persp (substring (car (last persp-names-cache)) 1))
          (new-persp (concat "#" (number-to-string (+ (string-to-number last-persp) 1)))))
-    (persp-add-new new-persp)
-    (add-to-list 'persp-stack new-persp t)))
+    (persp-add-new new-persp)))
 
 
 (defun persp-kill-top ()
@@ -652,6 +648,7 @@ With argument, do this that many times."
 
 ;; TODO hack together consult preview for persp-switch-to-buffer
 
+;;----
 
 ;; ace window
 (use-package ace-window)
