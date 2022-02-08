@@ -238,6 +238,12 @@ With argument, do this that many times."
       (delete-other-windows))))
 
 
+(defun open-scratch-buffer ()
+  "Open *scractch* buffer."
+  (interactive)
+  (switch-to-buffer "*scratch*"))
+
+
 ;; straight.el bootstrap
 (defvar bootstrap-version)
 (let ((bootstrap-file
@@ -620,9 +626,9 @@ With argument, do this that many times."
   (safe-persp-name (get-current-persp)))
 
 
-;; TODO
+;; TODO docs
 (defun persp-add-new-anonymous ()
-  "Add a new perspective with no name."
+  "Switch to new perspective, open *scratch* buffer."
   (interactive)
   ;; hacky approach - perspective names are numbers, add 1 to latest persective
   ;; and create new one with that number as the name
@@ -630,6 +636,8 @@ With argument, do this that many times."
          (new-persp (concat "#" (number-to-string (+ (string-to-number last-persp) 1)))))
     (progn
       (persp-switch new-persp)
+      (clear-window-persp)
+      (open-scratch-buffer)
       (message (concat "Created and switched to persp " new-persp)))))
 
 (defun persp-kill-top ()
@@ -653,10 +661,13 @@ With argument, do this that many times."
 (defun persp-kill-all-except-default ()
   "Switch to persp #1 and kill all other persps."
   (interactive)
-  (persp-switch persp-nil-name)
-  (message (concat "Persp: " persp-nil-name))
-  (persp-kill (cdr persp-names-cache)))
-;; TODO I should also make kill all except current once I figure out how to get the current one
+  (if (eq (length persp-names-cache) 1)
+      (message "No other perspectives to kill!")
+    (progn
+      (persp-switch persp-nil-name)
+      (message (concat "Killed all non-default perspectives! Switched to persp: " persp-nil-name))
+      (persp-kill (cdr persp-names-cache)))))
+    ;; TODO I should also make kill all except current once I figure out how to get the current one
 
 ;; TODO
 (defun persp-kill-current ()
@@ -674,6 +685,19 @@ With argument, do this that many times."
   ""
   (interactive)
   )
+
+;; hydra to quickly switch perspectives
+(defhydra hydra-switch-persp (:hint nil)
+  "Switch perspective"
+  ("1" (my-persp-switch "#1") "Persp #1")
+  ("2" (my-persp-switch "#2") "Persp #2")
+  ("3" (my-persp-switch "#3") "Persp #3")
+  ("4" (my-persp-switch "#4") "Persp #4")
+  ("5" (my-persp-switch "#5") "Persp #5")
+  ("6" (my-persp-switch "#6") "Persp #6")
+  ("7" (my-persp-switch "#7") "Persp #7")
+  ("8" (my-persp-switch "#8") "Persp #8")
+  ("9" (my-persp-switch "#9") "Persp #9"))
 
 
 ;; TODO document functions
@@ -937,7 +961,6 @@ _q_uit          ^        ^         _]_forward
    ("b" consult-buffer)
    ("f" find-file)
    ("P" projectile-find-file)
-
    ("F" follow-mode)
    ("s" switch-window-then-swap-buffer)
    ("v" split-window-right)
@@ -1046,6 +1069,7 @@ _j_ zoom-out
     "SPC" '(projectile-find-file :which-key "Projectile find file")
     "." '(find-file :which-key "Find file")
     ":" '(execute-extended-command :which-key "M-x")
+    "x" '(open-scratch-buffer :which-key "Open scratch buffer")
 
     ;; editor
     "e" '(:ignore t :which-key "Editor")
@@ -1125,6 +1149,7 @@ _j_ zoom-out
     "TAB n" '(persp-add-new-anonymous :which-key "persp-add-new-anonymous")
     ;; "TAB k" ;; TODO kill current perspective
     "TAB K" '(persp-kill-all-except-default :which-key "persp-kill-all-except-default")
+    "TAB h" '(hydra-switch-persp/body :which-key "hydra-switch-persp")
 
 
     ;; git
@@ -1172,7 +1197,7 @@ _j_ zoom-out
     "C-h" nil
     "C-n" #'company-select-next
     "C-p" #'company-select-previous
-    "<tab>" #'company-complete-selection
+    "TAB" #'company-complete-selection
     ;TODO
     )
 
@@ -1323,19 +1348,34 @@ _j_ zoom-out
 ;; company
 (use-package company
   ;; trying out tab and go mode
-  :hook (company-mode . company-tng-mode)
-  :config
+  ;:hook (company-mode . company-tng-mode)
+  :init
   ;; https://github.com/company-mode/company-mode/blob/master/company-tng.el#L65
-  (setq company-require-match nil))
+  (setq company-require-match nil
+        company-minimum-prefix-length 2
+        company-tooltip-limit 14
+        company-tooltip-align-annotations t
+        company-frontends
+        '(company-pseudo-tooltip-frontend  ; always show candidates in overlay tooltip
+          company-echo-metadata-frontend)  ; show selected candidate docs in echo area
 
-;; fuzzy autocomplete
-;(use-package company-fuzzy
-;  :hook (company-mode . company-fuzzy-mode)
-;  :init
-;  (setq company-fuzzy-sorting-backend 'flx
-;        company-fuzzy-prefix-on-top nil
-;        company-fuzzy-history-backends '(company-yasnippet)
-;        company-fuzzy-trigger-symbols '("." "->" "<" "\"" "'" "@")))
+        company-backends '(company-capf)
+
+        ;; Only search the current buffer for `company-dabbrev' (a backend that
+        ;; suggests text your open buffers). This prevents Company from causing
+        ;; lag once you have a lot of buffers open.
+        company-dabbrev-other-buffers nil
+        ;; Make `company-dabbrev' fully case-sensitive, to improve UX with
+        ;; domain-specific words with particular casing.
+        company-dabbrev-ignore-case nil
+        company-dabbrev-downcase nil))
+;; TODO common highlighting (probably with company-tooltip-common face) not working
+
+;; fuzzy autocomplete for company
+(use-package company-flx
+  :after company
+  :config
+  (company-flx-mode +1))
 
 ;;----
 
