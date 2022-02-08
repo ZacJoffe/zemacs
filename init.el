@@ -867,7 +867,15 @@ With argument, do this that many times."
 
 
 ;; magit
-(use-package magit)
+(use-package magit
+  ;; refresh status when you save file being tracked in repo
+  :hook (after-save . magit-after-save-refresh-status)
+  :config
+  (setq magit-display-buffer-function 'switch-to-buffer
+        magit-auto-revert-mode t))
+
+
+
 (use-package magit-todos)
 ;(use-package evil-magit)
 
