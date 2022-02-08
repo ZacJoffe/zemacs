@@ -607,6 +607,19 @@ With argument, do this that many times."
   ;; start persp-mode
   (persp-mode 1))
 
+;; a bunch of functions to hack my workflow for perspectives
+(defun persp-exists (NAME)
+  "Returns true if NAME is name of existing persp."
+  (member NAME persp-names-cache))
+
+;; thanks again doom lol
+;; https://github.com/hlissner/doom-emacs/blob/master/modules/ui/workspaces/autoload/workspaces.el#L62
+(defun persp-get-current-name ()
+  "Wrapper to get current perspective name."
+  (interactive)
+  (safe-persp-name (get-current-persp)))
+
+
 ;; TODO
 (defun persp-add-new-anonymous ()
   "Add a new perspective with no name."
@@ -615,8 +628,9 @@ With argument, do this that many times."
   ;; and create new one with that number as the name
   (let* ((last-persp (substring (car (last persp-names-cache)) 1))
          (new-persp (concat "#" (number-to-string (+ (string-to-number last-persp) 1)))))
-    (persp-add-new new-persp)))
-
+    (progn
+      (persp-switch new-persp)
+      (message (concat "Created and switched to persp " new-persp)))))
 
 (defun persp-kill-top ()
   "Kill the perspective at the top of the stack."
@@ -628,19 +642,38 @@ With argument, do this that many times."
 
 (defun my-persp-switch (NAME)
   "Switch to the perspective with name NAME, if it exists."
-  (if (member NAME persp-names-cache)
-      (progn
-        (persp-switch NAME)
-        (message (concat "Persp: " NAME)))
+  (if (persp-exists NAME)
+      (if (string= (persp-get-current-name) NAME)
+          (message (concat "Persp " NAME " already exists!"))
+        (progn
+          (persp-switch NAME)
+          (message (concat "Persp: " NAME))))
     (message (concat "Invalid persp: " NAME))))
 
 (defun persp-kill-all-except-default ()
   "Switch to persp #1 and kill all other persps."
   (interactive)
-  (progn
-    (persp-switch persp-nil-name)
-    (message (concat "Persp: " persp-nil-name))
-    (persp-kill (cdr persp-names-cache))))
+  (persp-switch persp-nil-name)
+  (message (concat "Persp: " persp-nil-name))
+  (persp-kill (cdr persp-names-cache)))
+;; TODO I should also make kill all except current once I figure out how to get the current one
+
+;; TODO
+(defun persp-kill-current ()
+  "Kill the current perspective, unless it's the protected perspective."
+  (interactive)
+  (let ((curr (persp-get-current-name)))
+    (if (string= curr persp-nil-name)
+        (message (concat "Cannot kill protected perspective " curr))
+      (progn
+        (persp-kill curr)
+        (message (concat "Killed persp " curr))))))
+
+;; TODO https://github.com/hlissner/doom-emacs/blob/master/modules/ui/workspaces/autoload/workspaces.el#L366
+(defun persp-cycle ()
+  ""
+  (interactive)
+  )
 
 
 ;; TODO document functions
@@ -703,9 +736,16 @@ With argument, do this that many times."
         ;; Only show file encoding if it's non-UTF-8 and different line endings
         ;; than the current OSes preference
         doom-modeline-buffer-encoding 'nondefault
-        doom-modeline-default-eol-type (if (eq system-type 'gnu/linux) 2 0)) ;; TODO breaks on Windows
+                doom-modeline-default-eol-type (if (eq system-type 'gnu/linux) 2 0)) ;; TODO breaks on Windows
 
   :config
+  ;; display symlink file paths https://github.com/seagle0128/doom-modeline#faq
+  (setq find-file-visit-truename t)
+
+  ;; persp-mode integration
+  (setq doom-modeline-persp-name t)
+  (setq doom-modeline-display-defualt-persp-name t)
+
   ;; add padding to the right side of the modeline to prevent it from getting cutoff
   ;; https://github.com/hlissner/doom-emacs/blob/develop/modules/ui/modeline/README.org#the-right-side-of-the-modeline-is-cut-off
   (doom-modeline-def-modeline 'main
@@ -1077,6 +1117,15 @@ _j_ zoom-out
     "nf" '(org-roam-node-find :which-key "find-node")
     "ni" '(org-roam-node-insert :which-key "insert-node")
     "nt" '(org-roam-dailies-goto-today :which-key "org-roam-dailies-goto-today")
+
+
+    ;; workspaces/perspectives
+    "TAB" '(:ignore t :which-key "Perspective")
+    "TAB TAB" '(persp-switch :which-key "persp-switch")
+    "TAB n" '(persp-add-new-anonymous :which-key "persp-add-new-anonymous")
+    ;; "TAB k" ;; TODO kill current perspective
+    "TAB K" '(persp-kill-all-except-default :which-key "persp-kill-all-except-default")
+
 
     ;; git
     "g" '(:ignore t :which-key "Git") ; prefix
