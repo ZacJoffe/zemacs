@@ -145,6 +145,7 @@
         (kill-region (point-at-bol) (point))
       (backward-kill-word 1))))
 
+;; TODO fix this
 (defun my-backward-kill-line ()
   "Easy formatting!"
   (interactive)
@@ -153,6 +154,7 @@
   ;(insert " ")
   )
 
+;; TODO refactor with general
 (global-set-key [C-backspace] 'my-backward-kill-word)
 (global-set-key (kbd "<M-backspace>") 'my-backward-kill-line)
 
@@ -237,7 +239,7 @@ With argument, do this that many times."
       (window-configuration-to-register '_)
       (delete-other-windows))))
 
-
+;; useful to have on an easily accessible key, also used a bunch with persp mode hacks
 (defun open-scratch-buffer ()
   "Open *scractch* buffer."
   (interactive)
@@ -296,15 +298,6 @@ With argument, do this that many times."
   ;; highlight the current line (not explicitly evil but whatever)
   (global-hl-line-mode 1))
 
-;;; UNDO TREE
-;; undo-tree with evil mode https://www.reddit.com/r/emacs/comments/n1pibp/installed_evil_on_emacs_for_windows_redo_not/gwei7fw/
-(use-package undo-tree
-  :after evil
-  :diminish
-  :config
-  (evil-set-undo-system 'undo-tree)
-  (global-undo-tree-mode 1))
-
 ;; evil collection
 (use-package evil-collection
   :after evil
@@ -348,6 +341,17 @@ With argument, do this that many times."
   ;; disable slow actions
   (setq evil-goggles-enable-change nil)
   (setq evil-goggles-enable-delete nil))
+
+
+;;; UNDO TREE
+;; undo-tree with evil mode https://www.reddit.com/r/emacs/comments/n1pibp/installed_evil_on_emacs_for_windows_redo_not/gwei7fw/
+(use-package undo-tree
+  :after evil
+  :diminish
+  :config
+  (evil-set-undo-system 'undo-tree)
+  (global-undo-tree-mode 1))
+
 
 ;; vim-like handling of empty lines
 (use-package vi-tilde-fringe
@@ -444,6 +448,8 @@ With argument, do this that many times."
 ;; consult
 ;TODO config
 (use-package consult)
+
+;; TODO broken
 (use-package consult-dir
   :bind (("C-x C-d" . consult-dir)
          :map vertico-map
@@ -463,6 +469,7 @@ With argument, do this that many times."
 
 
 ;; spelling
+(use-package flyspell)
 (use-package flyspell-correct
   :after flyspell
   :bind (:map flyspell-mode-map ("C-;" . flyspell-correct-wrapper)))
@@ -483,6 +490,7 @@ With argument, do this that many times."
 
 
 ;; treemacs
+;; TODO lots of stuff here can be deleted
 (use-package treemacs
   :defer t
   :init
@@ -584,38 +592,17 @@ With argument, do this that many times."
 ;;----
 
 
-;; tabs
-;(use-package centaur-tabs
-;  :demand
-;  :config
-;  (setq centaur-tabs-set-bar 'under)
-;  ;; Note: If you're not using Spacmeacs, in order for the underline to display
-;  ;; correctly you must add the following line:
-;  (setq x-underline-at-descent-line t)
-;  (centaur-tabs-mode t))
-
-;(setq tab-bar-show nil)
-
-;; workspaces
-;; TODO
-;(use-package perspective
-;  :hook (kill-emacs . persp-state-save)
-;  :config
-;  (persp-mode))
-
 ;; WORKSPACES
 ;; my workflow is hacked on top of persp-mode.el (apparently it works better with emacsclient than perspective-el)
 (use-package persp-mode
   :config
   (setq persp-nil-name "#1")
-  ;(setq persp-interactive-completion-function )
-
   ;; start persp-mode
   (persp-mode 1))
 
 ;; a bunch of functions to hack my workflow for perspectives
 (defun persp-exists (NAME)
-  "Returns true if NAME is name of existing persp."
+  "Return non-nil if NAME is name of existing persp."
   (member NAME persp-names-cache))
 
 ;; thanks again doom lol
@@ -626,10 +613,11 @@ With argument, do this that many times."
   (safe-persp-name (get-current-persp)))
 
 
-;; TODO docs
 ;; TODO refactor using index of persp-names-cache
+;; create new "anonymous" perspective and switch to it
+;; essentially this allows me to quickly create a new perspective without having to name it, which I find cumbersome
 (defun persp-add-new-anonymous ()
-  "Switch to new perspective, open *scratch* buffer."
+  "Switch to new perspective and open *scratch* buffer."
   (interactive)
   ;; hacky approach - perspective names are numbers, add 1 to latest persective
   ;; and create new one with that number as the name
@@ -641,6 +629,7 @@ With argument, do this that many times."
       (open-scratch-buffer)
       (message (concat "Created and switched to persp " new-persp)))))
 
+;; kill the perspective most recently created
 (defun persp-kill-top ()
   "Kill the perspective at the top of the stack."
   (interactive)
@@ -649,6 +638,8 @@ With argument, do this that many times."
     (let ((last-persp (cons (car (last persp-names-cache)) '()) ))
       (persp-kill last-persp))))
 
+;; wrapper for switching perspectives, only allow switch if NAME is a valid persp
+;; TODO refactor using index into persp-names-cache as parameter (or create another function)
 (defun my-persp-switch (NAME)
   "Switch to the perspective with name NAME, if it exists."
   (if (persp-exists NAME)
@@ -659,6 +650,7 @@ With argument, do this that many times."
           (message (concat "Persp: " NAME))))
     (message (concat "Invalid persp: " NAME))))
 
+;; kill all perspectives and their associated buffers other
 (defun persp-kill-all-except-default ()
   "Switch to persp #1 and kill all other persps."
   (interactive)
@@ -668,7 +660,8 @@ With argument, do this that many times."
       (persp-switch persp-nil-name)
       (message (concat "Killed all non-default perspectives! Switched to persp: " persp-nil-name))
       (persp-kill (cdr persp-names-cache)))))
-    ;; TODO I should also make kill all except current once I figure out how to get the current one
+
+;; TODO I should also make kill all except current once I figure out how to get the current one
 
 ;; TODO
 (defun persp-kill-current ()
@@ -678,6 +671,7 @@ With argument, do this that many times."
     (if (string= curr persp-nil-name)
         (message (concat "Cannot kill protected perspective " curr))
       (progn
+        ;; TODO refactor to switch to previous perspective
         (persp-kill curr)
         (message (concat "Killed persp " curr))))))
 
@@ -869,21 +863,16 @@ With argument, do this that many times."
 ;; magit
 (use-package magit
   ;; refresh status when you save file being tracked in repo
-  :hook (after-save . magit-after-save-refresh-status)
-  :config
-  (setq magit-display-buffer-function 'switch-to-buffer
-        magit-auto-revert-mode t))
+  :hook (after-save . magit-after-save-refresh-status))
+;  :config
+;  ;; TODO this doesn't work
+;  (setq magit-display-buffer-function 'switch-to-buffer
+;        magit-auto-revert-mode t))
 
 
 
 (use-package magit-todos)
 ;(use-package evil-magit)
-
-
-;; minimap
-(use-package minimap
-  :config
-  (setq minimap-window-location 'right))
 
 
 ; TODO
@@ -943,6 +932,7 @@ With argument, do this that many times."
 ;; which-key
 (use-package which-key
     :config
+    (setq which-key-sort-order 'which-key-key-order-alpha)
     (which-key-mode))
 
 
@@ -959,8 +949,8 @@ With argument, do this that many times."
 ;; HYDRA
 (use-package hydra)
 
-;;https://github.com/jmercouris/configuration/blob/master/.emacs.d/hydra.el#L89
-; window movement / management
+;; https://github.com/jmercouris/configuration/blob/master/.emacs.d/hydra.el#L89
+;; window movement / management
 (defhydra hydra-window (:hint nil)
    "
 Movement      ^Split^            ^Switch^        ^Resize^
@@ -999,9 +989,9 @@ _q_uit          ^        ^         _]_forward
    ("1" delete-other-windows)
    ("e" balance-windows)
 
-
    ("q" nil))
 
+;; TODO move up
 (defun hydra-move-splitter-left (arg)
   "Move window splitter left."
   (interactive "p")
@@ -1069,6 +1059,7 @@ _j_ zoom-out
   ("8" (my-load-theme 'doom-spacegrey) "doom-spacegrey")
   ("9" (my-load-theme 'doom-molokai) "doom-molokai"))
 
+;; TODO move up
 (defun my-load-theme (theme)
   "Enhance `load-theme' by first disabling enabled themes."
   (mapc #'disable-theme custom-enabled-themes)
@@ -1177,6 +1168,7 @@ _j_ zoom-out
     "TAB ]" '(persp-switch-next :which-key "persp-switch-next")
     "TAB n" '(persp-add-new-anonymous :which-key "persp-add-new-anonymous")
     ;; "TAB k" ;; TODO kill current perspective
+    "TAB k" '(persp-kill-current :which-key "persp-kill-current")
     "TAB K" '(persp-kill-all-except-default :which-key "persp-kill-all-except-default")
     "TAB h" '(hydra-switch-persp/body :which-key "hydra-switch-persp")
 
@@ -1470,12 +1462,6 @@ _j_ zoom-out
 
 
 ;; KEYBINDINGS
-;; more traditional zoom keys
-;(global-set-key (kbd "C-=") 'text-scale-increase)
-;(global-set-key (kbd "C--") 'text-scale-decrease)
-;(global-set-key (kbd "C-M-=") 'zoom-in)
-;(global-set-key (kbd "C-M--") 'zoom-out)
-
 ;; remap '?' key to be for enhanced search
 ;(with-eval-after-load 'evil-maps
 ;  (define-key evil-normal-state-map (kbd "?") 'consult-line))
@@ -1485,18 +1471,6 @@ _j_ zoom-out
 ;; unbind C-z from evil
 (evil-define-key '(normal insert visual) 'global (kbd "C-z") 'consult-buffer)
 (global-set-key (kbd "C-z") 'consult-buffer) ; TODO not sure if this is needed
-
-;; C-w should always delete the last word unless normal mode in evil
-;; this allows me to use C-w to delete words in vertico
-;(global-set-key (kbd "C-w") 'backward-delete-word)
-
-;; C-v to paste (or "yank" in emacs jargon) from clipboard, useful for minibuffers (such as query-replace and M-x)
-;(global-set-key (kbd "C-v") 'yank)
-
-;; buffer management
-;(global-set-key (kbd "C-a") 'bury-buffer)
-;(global-set-key (kbd "C-S-a") 'unbury-buffer)
-
 
 ;; map the escape key to quit mini buffers instantly
 ;; https://www.reddit.com/r/emacs/comments/4a0421/any_reason_not_to_just_rebind_keyboardquit_from/d0wo66r/
