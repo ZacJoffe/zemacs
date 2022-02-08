@@ -627,6 +627,7 @@ With argument, do this that many times."
 
 
 ;; TODO docs
+;; TODO refactor using index of persp-names-cache
 (defun persp-add-new-anonymous ()
   "Switch to new perspective, open *scratch* buffer."
   (interactive)
@@ -680,11 +681,30 @@ With argument, do this that many times."
         (persp-kill curr)
         (message (concat "Killed persp " curr))))))
 
-;; TODO https://github.com/hlissner/doom-emacs/blob/master/modules/ui/workspaces/autoload/workspaces.el#L366
-(defun persp-cycle ()
-  ""
+;; cycle through persps
+;; https://github.com/hlissner/doom-emacs/blob/master/modules/ui/workspaces/autoload/workspaces.el#L366
+(defun persp-cycle (n)
+  "Cycle n workspaces to the right (default) or left."
+  (interactive (list 1))
+  (let* ((curr (persp-get-current-name))
+         (num-persps (length persp-names-cache))
+         (index (cl-position curr persp-names-cache)))
+    (if (eq num-persps 1)
+        (message "No other workspaces")
+      (let* ((new-index (% (+ index n num-persps) num-persps)) ;; adding num-persps is for handling when n < 0
+             (new-persp-name (nth new-index persp-names-cache)))
+        (my-persp-switch new-persp-name)))))
+
+(defun persp-switch-next ()
+  "Switch to next persp."
   (interactive)
-  )
+  (persp-cycle 1))
+
+(defun persp-switch-prev ()
+  "Switch to prev persp."
+  (interactive)
+  (persp-cycle -1))
+
 
 ;; hydra to quickly switch perspectives
 (defhydra hydra-switch-persp (:hint nil)
@@ -1142,10 +1162,11 @@ _j_ zoom-out
     "ni" '(org-roam-node-insert :which-key "insert-node")
     "nt" '(org-roam-dailies-goto-today :which-key "org-roam-dailies-goto-today")
 
-
     ;; workspaces/perspectives
     "TAB" '(:ignore t :which-key "Perspective")
     "TAB TAB" '(persp-switch :which-key "persp-switch")
+    "TAB [" '(persp-switch-prev :which-key "persp-switch-prev")
+    "TAB ]" '(persp-switch-next :which-key "persp-switch-next")
     "TAB n" '(persp-add-new-anonymous :which-key "persp-add-new-anonymous")
     ;; "TAB k" ;; TODO kill current perspective
     "TAB K" '(persp-kill-all-except-default :which-key "persp-kill-all-except-default")
@@ -1198,6 +1219,7 @@ _j_ zoom-out
     "C-n" #'company-select-next
     "C-p" #'company-select-previous
     "TAB" #'company-complete-selection
+    "<tab>" #'company-complete-selection
     ;TODO
     )
 
@@ -1236,7 +1258,13 @@ _j_ zoom-out
     "C-a" 'bury-buffer
     "C-S-a" 'unbury-buffer
 
+    ;; perspective management
+    ;; persp cycling
+    "C-<tab>" 'persp-switch-next
+    "C-<iso-lefttab>" 'persp-switch-prev
+
     ;; quick perspective switching
+    ;; TODO refactor using index of persp-names-cache
     "M-1" (lambda () (interactive) (my-persp-switch "#1"))
     "M-2" (lambda () (interactive) (my-persp-switch "#2"))
     "M-3" (lambda () (interactive) (my-persp-switch "#3"))
