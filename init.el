@@ -148,16 +148,16 @@
 
 ;; TODO fix this
 (defun my-backward-kill-line ()
-  "Easy formatting!"
+  "Easy formatting!" ; TODO change this
   (interactive)
   (my-backward-kill-word)
   (backward-delete-char 1)
   ;(insert " ")
-  )
+  ) ; TODO deletes last character on previous line when position is at start of line
 
 ;; TODO refactor with general
 (global-set-key [C-backspace] 'my-backward-kill-word)
-(global-set-key (kbd "<M-backspace>") 'my-backward-kill-line)
+;(global-set-key (kbd "<M-backspace>") 'my-backward-kill-line)
 
 ;; backwards-kill-word without copying to kill-ring
 ;; https://www.emacswiki.org/emacs/BackwardDeleteWord
@@ -689,6 +689,7 @@ With argument, do this that many times."
 
 ;; TODO this may require some groundwork in the package itself since persp-rename only works on the current
 ;; iterate through persp names, rename them all to their current index inside persp-names-cache
+;; HACK can only rename current persp, so switch to each one before renaming
 (defun persp-rename-all-to-index ()
   "Rename all perspectives to match their respective index in persp-names-cache."
   (interactive)
@@ -701,8 +702,7 @@ With argument, do this that many times."
                     (persp-switch persp)
                     (let ((new-persp (concat "#" (number-to-string (+ index 2)))))
                       (unless (string= new-persp (persp-get-current-name))
-                        (persp-rename new-persp)))
-                    )))
+                        (persp-rename new-persp))))))
       (persp-switch (nth curr-index persp-names-cache))))
 
 
@@ -734,7 +734,7 @@ With argument, do this that many times."
 ;; hydra to quickly switch perspectives
 (defhydra hydra-switch-persp (:hint nil)
   "Switch perspective"
-  ;; TODO refactor for index switch
+  ;; TODO refactor for index switch, may be non-trivial with a bunch of dynamic work to do before hand (use :pre with variables??)
   ("1" (my-persp-switch "#1") "Persp #1")
   ("2" (my-persp-switch "#2") "Persp #2")
   ("3" (my-persp-switch "#3") "Persp #3")
@@ -745,9 +745,7 @@ With argument, do this that many times."
   ("8" (my-persp-switch "#8") "Persp #8")
   ("9" (my-persp-switch "#9") "Persp #9"))
 
-;; TODO document functions
 ;; TODO M-RET open file in new persp in find-file
-
 ;; TODO hack together consult preview for persp-switch-to-buffer
 
 ;;----
@@ -865,11 +863,6 @@ With argument, do this that many times."
          (org-mode . highlight-numbers-mode)))
 
 
-;; highlight quoted
-; TODO not working, I don't think it's in melpa?
-(use-package highlight-quoted
-  :hook (emacs-lisp-mode-hook 'highlight-quoted-mode))
-
 ;; undo-tree - undo history represented as a tree, with evil integration
 (use-package undo-tree
   :diminish
@@ -897,8 +890,9 @@ With argument, do this that many times."
   :hook (after-save . magit-after-save-refresh-status)
   :config
   ;; display magit status in current buffer (no popup) https://stackoverflow.com/a/58554387/11312409
-  (setq magit-display-buffer-function 'magit-display-buffer-same-window-except-diff-v1)
-  (setq magit-auto-revert-mode t))
+  (setq magit-display-buffer-function 'magit-display-buffer-same-window-except-diff-v1
+        magit-auto-revert-mode t
+        git-commit-summary-max-length 50))
 
 
 (use-package magit-todos)
@@ -945,8 +939,8 @@ With argument, do this that many times."
   :commands (org-appear-mode)
   :hook (org-mode . org-appear-mode)
   :init
-  (setq org-hide-emphasis-markers t) ;; A default setting that needs to be t for org-appear
-  (setq org-appear-autoemphasis t)  ;; Enable org-appear on emphasis (bold, italics, etc)
+  (setq org-hide-emphasis-markers t)  ;; A default setting that needs to be t for org-appear
+  (setq org-appear-autoemphasis t)    ;; Enable org-appear on emphasis (bold, italics, etc)
   (setq org-appear-autolinks nil)
   (setq org-appear-autosubmarkers t)) ;; Enable on subscript and superscript
 
@@ -1068,8 +1062,8 @@ _=_   text-scale-increase
 _-_   text-scale-decrease
 _M-=_ zoom-in
 _M--_ zoom-out
-_k_ zoom-in
-_j_ zoom-out
+_k_   zoom-in
+_j_   zoom-out
 "
   ("=" text-scale-increase)
   ("-" text-scale-decrease)
@@ -1114,7 +1108,7 @@ _j_ zoom-out
   (my-leader-def
     :states '(motion normal visual treemacs) ;; note the treemacs state
     :keymaps 'override ;; https://github.com/noctuid/general.el/issues/99#issuecomment-360914335
-    ; TODO add the doom hotkeys that i use
+    ; TODO add the doom hotkeys that I use
     ; TODO ordering in which-key (is it even possible?)
 
     ;; map universal argument to SPC-u
@@ -1232,7 +1226,8 @@ _j_ zoom-out
     :states 'insert
     "C-SPC" 'company-complete
     "C-v" 'yank ;; C-v should paste clipboard contents
-    "TAB" 'tab-jump-pair)
+    "TAB" 'tab-jump-pair
+    "M-<backspace>" 'my-backward-kill-line)
 
 
   ;; motion mode hotkeys, inherited by normal/visual
@@ -1257,13 +1252,16 @@ _j_ zoom-out
     ;TODO
     )
 
-  ;; some emacs hotkeys inside insert mode
+  ;; some emacs editing hotkeys inside insert mode
   (general-def
     :states '(insert)
     "C-a" 'evil-beginning-of-visual-line
     "C-e" 'evil-end-of-visual-line
     "C-n" 'evil-next-visual-line
     "C-p" 'evil-previous-visual-line)
+
+  ;; unbind C-z from evil
+  (general-unbind '(motion insert treemacs) "C-z")
 
   ;; key bindings for evil search ('/')
   ;; there could be a better way to do this, but this works so whatever
@@ -1291,6 +1289,7 @@ _j_ zoom-out
     ;; buffer management
     "C-a" 'bury-buffer
     "C-S-a" 'unbury-buffer
+    "C-z" 'consult-buffer
 
     ;; perspective management
     ;; persp cycling
@@ -1333,13 +1332,14 @@ _j_ zoom-out
 
   ;; org mode specific evil
   ;; unbind the return (enter) key so it becomes org-return
-  ;; the return key is not that useful here any
+  ;; the return key is not that useful here anyways
   ;; TODO this doesn't work
   (general-define-key
-    :major-modes 'org-mode
     :states 'motion
     :keymaps 'local ;; only in the buffer
     "RET" nil))
+
+
 
 
 ;;; LANGUAGES
@@ -1507,29 +1507,11 @@ _j_ zoom-out
 
 
 ;; KEYBINDINGS
-;; remap '?' key to be for enhanced search
-;(with-eval-after-load 'evil-maps
-;  (define-key evil-normal-state-map (kbd "?") 'consult-line))
-;; TODO I don't think this should affect dired?
-;(evil-define-key 'normal 'global (kbd "?") 'consult-line)
-
-;; unbind C-z from evil
-(evil-define-key '(normal insert visual) 'global (kbd "C-z") 'consult-buffer)
-(global-set-key (kbd "C-z") 'consult-buffer) ; TODO not sure if this is needed
-
 ;; map the escape key to quit mini buffers instantly
 ;; https://www.reddit.com/r/emacs/comments/4a0421/any_reason_not_to_just_rebind_keyboardquit_from/d0wo66r/
 (define-key key-translation-map (kbd "ESC") (kbd "C-g"))
 
-;; window management - undo last window action
-;; taken from https://github.com/hlissner/doom-emacs/blob/develop/modules/editor/evil/config.el
-; TODO another way to do this? https://github.com/angrybacon/dotemacs/blob/master/dotemacs.org#evil
-;(evil-define-key 'normal 'global (kbd "C-w C-u") 'winner-undo)
-;(evil-define-key 'normal 'global (kbd "C-w u") 'winner-undo)
-
-;; flyspell correction hotkey in normal mode
-;(evil-define-key 'normal 'global (kbd "z =") 'flyspell-correct-wrapper)
-
+;; TODO I think I can delete this?
 ;(map! (:after company
 ;        (:map company-active-map
 ;          "TAB" #'company-complete-selection
