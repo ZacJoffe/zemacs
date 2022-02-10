@@ -373,20 +373,8 @@ With argument, do this that many times."
   :config
   (setq vertico-resize nil
         vertico-count 17
-        vertico-cycle t) ; enable cycling for `vertico-next' and `vertico-previous'.
-  )
-
-; vertico directory extension
-; TODO doesn't work
-;; (use-package vertico-directory
-;;   :after vertico
-;;   :ensure nil
-;;   :bind (:map vertico-map
-;;               ("RET" . vertico-directory-enter)
-;;               ("DEL" . vertico-directory-delete-char)
-;;               ("M-DEL" . vertico-directory-delete-word))
-;;   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
-
+        ;; enable cycling for `vertico-next' and `vertico-previous'
+        vertico-cycle t))
 
 ;; Optionally use the `orderless' completion style. See
 ;; `+orderless-dispatch' in the Consult wiki for an advanced Orderless style
@@ -615,13 +603,12 @@ With argument, do this that many times."
 (defun persp-add-new-anonymous ()
   "Switch to new perspective and open *scratch* buffer."
   (interactive)
-  ;; TODO should I call the function that renames all persps here?
-
   ;; hacky approach - perspective names are numbers, add 1 to latest persective
   ;; and create new one with that number as the name
   (let* ((last-persp (substring (car (last persp-names-cache)) 1))
          (new-persp (concat "#" (number-to-string (+ (string-to-number last-persp) 1)))))
     (progn
+      (persp-rename-all-to-index)
       (persp-switch new-persp)
       (clear-window-persp)
       (open-scratch-buffer)
@@ -667,10 +654,11 @@ With argument, do this that many times."
   (interactive)
   (if (eq (length persp-names-cache) 1)
       (message "No other perspectives to kill!")
-    (progn
-      (persp-switch persp-nil-name)
-      (message (concat "Killed all non-default perspectives! Switched to persp: " persp-nil-name))
-      (persp-kill (cdr persp-names-cache)))))
+      (let ((persps-to-kill (cdr persp-names-cache)))
+        (progn
+          (persp-switch persp-nil-name)
+          (persp-kill persps-to-kill)
+          (message (concat "Killed persps " (format "%s" persps-to-kill) ", switched to persp " persp-nil-name))))))
 
 (defun persp-kill-all-except-current-and-default ()
   "Kill all perspectives other than the current and the default."
@@ -680,9 +668,9 @@ With argument, do this that many times."
         (message "No perspectives to kill!")
       (let ((persps-to-kill (remove curr (cdr persp-names-cache))))
         (progn
+          (persp-rename-all-to-index)
           (persp-kill persps-to-kill)
-          (message (concat "Killed persps " (format "%s" persps-to-kill)))
-          )))))
+          (message (concat "Killed persps " (format "%s" persps-to-kill))))))))
 
 ;; kill current perspective and switch to previous persp
 (defun persp-kill-current ()
@@ -695,7 +683,9 @@ With argument, do this that many times."
         (persp-switch-prev)
         (persp-kill curr)
         (let ((new-curr (persp-get-current-name)))
-          (message (concat "Killed persp " curr ", switched to persp " new-curr)))))))
+          (progn
+            (persp-rename-all-to-index)
+            (message (concat "Killed persp " curr ", switched to persp " new-curr))))))))
 
 ;; TODO this may require some groundwork in the package itself since persp-rename only works on the current
 ;; iterate through persp names, rename them all to their current index inside persp-names-cache
@@ -904,12 +894,11 @@ With argument, do this that many times."
 ;; magit
 (use-package magit
   ;; refresh status when you save file being tracked in repo
-  :hook (after-save . magit-after-save-refresh-status))
-;  :config
-;  ;; TODO this doesn't work
-;  (setq magit-display-buffer-function 'switch-to-buffer
-;        magit-auto-revert-mode t))
-
+  :hook (after-save . magit-after-save-refresh-status)
+  :config
+  ;; display magit status in current buffer (no popup) https://stackoverflow.com/a/58554387/11312409
+  (setq magit-display-buffer-function 'magit-display-buffer-same-window-except-diff-v1)
+  (setq magit-auto-revert-mode t))
 
 
 (use-package magit-todos)
@@ -1561,7 +1550,6 @@ _j_ zoom-out
   (use-package exec-path-from-shell
     :config
     (exec-path-from-shell-initialize)))
-
 
 ;; TODO
 ;; projectile default
