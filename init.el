@@ -35,6 +35,7 @@
     (progn
       (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
       (add-to-list 'default-frame-alist '(ns-appearance . dark))
+      (add-to-list 'default-frame-alist '(fullscreen . maximized)) ;; start maximized
       (setq ns-use-proxy-icon nil)
       (setq frame-title-format nil)))
 
@@ -315,18 +316,11 @@ With argument, do this that many times."
   :hook (org-mode . (lambda () evil-org-mode))
   :config
   (require 'evil-org-agenda)
-  (evil-org-agenda-set-keys)
-
-  ;; TODO delete me
-  ;; unbind the return (enter) key so it becomes org-return
-  ;; the return key is not that useful here any
-  ;; (general-define-key
-  ;;   :states 'motion
-  ;;   "RET" nil)
-  )
+  (evil-org-agenda-set-keys))
 
 ;; evil-commentary
 (use-package evil-commentary
+  :after evil
   :hook
   (evil-mode . evil-commentary-mode))
 
@@ -335,6 +329,7 @@ With argument, do this that many times."
 
 ;; show evil actions
 (use-package evil-goggles
+  :after evil
   :config
   ;(evil-goggles-mode) ;; TODO actions are not being disabled properly
   (setq evil-goggles-duration 0.1)
@@ -596,7 +591,8 @@ With argument, do this that many times."
 ;; my workflow is hacked on top of persp-mode.el (apparently it works better with emacsclient than perspective-el)
 (use-package persp-mode
   :config
-  (setq persp-nil-name "#1")
+  (setq persp-nil-name "#1" ;; new default name
+        persp-add-buffer-on-after-change-major-mode t)
   ;; start persp-mode
   (persp-mode 1))
 
@@ -619,6 +615,8 @@ With argument, do this that many times."
 (defun persp-add-new-anonymous ()
   "Switch to new perspective and open *scratch* buffer."
   (interactive)
+  ;; TODO should I call the function that renames all persps here?
+
   ;; hacky approach - perspective names are numbers, add 1 to latest persective
   ;; and create new one with that number as the name
   (let* ((last-persp (substring (car (last persp-names-cache)) 1))
@@ -644,11 +642,24 @@ With argument, do this that many times."
   "Switch to the perspective with name NAME, if it exists."
   (if (persp-exists NAME)
       (if (string= (persp-get-current-name) NAME)
-          (message (concat "Persp " NAME " already exists!"))
+          (message (concat "Already on persp " NAME))
         (progn
           (persp-switch NAME)
           (message (concat "Persp: " NAME))))
     (message (concat "Invalid persp: " NAME))))
+
+;; another wrapper for switching perspectives, except parameterizing index in persp list
+(defun my-persp-switch-index (index)
+  "Switch to the perspective at index INDEX of persp-names-cache, if it exists."
+  (interactive "P")
+  (if-let ((name (nth index persp-names-cache)))
+      (if (string= name (persp-get-current-name))
+          (message (concat "Already on persp " name))
+        (progn
+          (persp-switch name)
+          (message (concat "Persp: " name))))
+    (message "Invalid persp")))
+
 
 ;; kill all perspectives and their associated buffers other
 (defun persp-kill-all-except-default ()
@@ -661,28 +672,58 @@ With argument, do this that many times."
       (message (concat "Killed all non-default perspectives! Switched to persp: " persp-nil-name))
       (persp-kill (cdr persp-names-cache)))))
 
-;; TODO I should also make kill all except current once I figure out how to get the current one
+(defun persp-kill-all-except-current-and-default ()
+  "Kill all perspectives other than the current and the default."
+  (interactive)
+  (let ((curr (persp-get-current-name)))
+    (if (or (eq (length persp-names-cache) 1) (and (eq (length persp-names-cache) 2) (not (string= curr persp-nil-name))) )
+        (message "No perspectives to kill!")
+      (let ((persps-to-kill (remove curr (cdr persp-names-cache))))
+        (progn
+          (persp-kill persps-to-kill)
+          (message (concat "Killed persps " (format "%s" persps-to-kill)))
+          )))))
 
-;; TODO
+;; kill current perspective and switch to previous persp
 (defun persp-kill-current ()
-  "Kill the current perspective, unless it's the protected perspective."
+  "Kill the current perspective (unless it's the protected perspective) and switch to previous perspective."
   (interactive)
   (let ((curr (persp-get-current-name)))
     (if (string= curr persp-nil-name)
         (message (concat "Cannot kill protected perspective " curr))
       (progn
-        ;; TODO refactor to switch to previous perspective
+        (persp-switch-prev)
         (persp-kill curr)
-        (message (concat "Killed persp " curr))))))
+        (let ((new-curr (persp-get-current-name)))
+          (message (concat "Killed persp " curr ", switched to persp " new-curr)))))))
+
+;; TODO this may require some groundwork in the package itself since persp-rename only works on the current
+;; iterate through persp names, rename them all to their current index inside persp-names-cache
+(defun persp-rename-all-to-index ()
+  "Rename all perspectives to match their respective index in persp-names-cache."
+  (interactive)
+  (let ((persps (cdr persp-names-cache))
+        (curr-index (cl-position (persp-get-current-name) persp-names-cache :test 'string=)))
+    (progn
+      (cl-loop for index from 0
+               for persp in persps
+               do (progn
+                    (persp-switch persp)
+                    (let ((new-persp (concat "#" (number-to-string (+ index 2)))))
+                      (unless (string= new-persp (persp-get-current-name))
+                        (persp-rename new-persp)))
+                    )))
+      (persp-switch (nth curr-index persp-names-cache))))
+
 
 ;; cycle through persps
 ;; https://github.com/hlissner/doom-emacs/blob/master/modules/ui/workspaces/autoload/workspaces.el#L366
 (defun persp-cycle (n)
-  "Cycle n workspaces to the right (default) or left."
+  "Cycle N workspaces to the right (default) or left."
   (interactive (list 1))
   (let* ((curr (persp-get-current-name))
          (num-persps (length persp-names-cache))
-         (index (cl-position curr persp-names-cache)))
+         (index (cl-position curr persp-names-cache :test 'string=))) ;; for whatever reason this sometimes fails, explicitly setting :test seems to fix it though
     (if (eq num-persps 1)
         (message "No other workspaces")
       (let* ((new-index (% (+ index n num-persps) num-persps)) ;; adding num-persps is for handling when n < 0
@@ -690,12 +731,12 @@ With argument, do this that many times."
         (my-persp-switch new-persp-name)))))
 
 (defun persp-switch-next ()
-  "Switch to next persp."
+  "Switch to next perspective."
   (interactive)
   (persp-cycle 1))
 
 (defun persp-switch-prev ()
-  "Switch to prev persp."
+  "Switch to prev perspective."
   (interactive)
   (persp-cycle -1))
 
@@ -703,6 +744,7 @@ With argument, do this that many times."
 ;; hydra to quickly switch perspectives
 (defhydra hydra-switch-persp (:hint nil)
   "Switch perspective"
+  ;; TODO refactor for index switch
   ("1" (my-persp-switch "#1") "Persp #1")
   ("2" (my-persp-switch "#2") "Persp #2")
   ("3" (my-persp-switch "#3") "Persp #3")
@@ -712,7 +754,6 @@ With argument, do this that many times."
   ("7" (my-persp-switch "#7") "Persp #7")
   ("8" (my-persp-switch "#8") "Persp #8")
   ("9" (my-persp-switch "#9") "Persp #9"))
-
 
 ;; TODO document functions
 ;; TODO M-RET open file in new persp in find-file
@@ -738,7 +779,7 @@ With argument, do this that many times."
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-spacegrey t)
+  (load-theme 'doom-peacock t)
 
   ;; Enable custom treemacs theme (all-the-icons must be installed!)
   (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
@@ -774,7 +815,7 @@ With argument, do this that many times."
         ;; Only show file encoding if it's non-UTF-8 and different line endings
         ;; than the current OSes preference
         doom-modeline-buffer-encoding 'nondefault
-                doom-modeline-default-eol-type (if (eq system-type 'gnu/linux) 2 0)) ;; TODO breaks on Windows
+        doom-modeline-default-eol-type (if (eq system-type 'gnu/linux) 2 0)) ;; TODO breaks on Windows
 
   :config
   ;; display symlink file paths https://github.com/seagle0128/doom-modeline#faq
@@ -938,9 +979,14 @@ With argument, do this that many times."
 
 ;; helpful
 (use-package helpful
+  :init
+  ;; HACK emacs29
+  ;; https://github.com/hlissner/doom-emacs/commit/c6d3ceef7e8f3abdfce3cd3e51f1e570603bd230
+  (defvar read-symbol-positions-list nil)
   :config
   ;; redefine help keys to use helpful functions instead of vanilla
   ;; https://github.com/Wilfred/helpful#usage
+  ;; TODO refactor with general
   (global-set-key (kbd "C-h f") #'helpful-callable)
   (global-set-key (kbd "C-h v") #'helpful-variable)
   (global-set-key (kbd "C-h k") #'helpful-key))
@@ -1052,7 +1098,7 @@ _j_ zoom-out
   ("1" (my-load-theme 'doom-one) "doom-one")
   ("2" (my-load-theme 'doom-dracula) "doom-dracula")
   ("3" (my-load-theme 'doom-nord) "doom-nord")
-  ("4" (my-load-theme 'doom-moonlight) "doom-moonlight")
+  ("4" (my-load-theme 'doom-peacock) "doom-peacock")
   ("5" (my-load-theme 'doom-gruvbox) "doom-gruvbox")
   ("6" (my-load-theme 'doom-material) "doom-material")
   ("7" (my-load-theme 'doom-palenight) "doom-palenight")
@@ -1167,7 +1213,6 @@ _j_ zoom-out
     "TAB [" '(persp-switch-prev :which-key "persp-switch-prev")
     "TAB ]" '(persp-switch-next :which-key "persp-switch-next")
     "TAB n" '(persp-add-new-anonymous :which-key "persp-add-new-anonymous")
-    ;; "TAB k" ;; TODO kill current perspective
     "TAB k" '(persp-kill-current :which-key "persp-kill-current")
     "TAB K" '(persp-kill-all-except-default :which-key "persp-kill-all-except-default")
     "TAB h" '(hydra-switch-persp/body :which-key "hydra-switch-persp")
@@ -1262,18 +1307,29 @@ _j_ zoom-out
     ;; persp cycling
     "C-<tab>" 'persp-switch-next
     "C-<iso-lefttab>" 'persp-switch-prev
+    "C-S-<tab>" 'persp-switch-prev
+
 
     ;; quick perspective switching
-    ;; TODO refactor using index of persp-names-cache
-    "M-1" (lambda () (interactive) (my-persp-switch "#1"))
-    "M-2" (lambda () (interactive) (my-persp-switch "#2"))
-    "M-3" (lambda () (interactive) (my-persp-switch "#3"))
-    "M-4" (lambda () (interactive) (my-persp-switch "#4"))
-    "M-5" (lambda () (interactive) (my-persp-switch "#5"))
-    "M-6" (lambda () (interactive) (my-persp-switch "#6"))
-    "M-7" (lambda () (interactive) (my-persp-switch "#7"))
-    "M-8" (lambda () (interactive) (my-persp-switch "#8"))
-    "M-9" (lambda () (interactive) (my-persp-switch "#9")))
+    "M-1" (lambda () (interactive) (my-persp-switch-index 0))
+    "M-2" (lambda () (interactive) (my-persp-switch-index 1))
+    "M-3" (lambda () (interactive) (my-persp-switch-index 2))
+    "M-4" (lambda () (interactive) (my-persp-switch-index 3))
+    "M-5" (lambda () (interactive) (my-persp-switch-index 4))
+    "M-6" (lambda () (interactive) (my-persp-switch-index 5))
+    "M-7" (lambda () (interactive) (my-persp-switch-index 6))
+    "M-8" (lambda () (interactive) (my-persp-switch-index 7))
+    "M-9" (lambda () (interactive) (my-persp-switch-index 8))
+    ;; "M-1" (lambda () (interactive) (my-persp-switch "#1"))
+    ;; "M-2" (lambda () (interactive) (my-persp-switch "#2"))
+    ;; "M-3" (lambda () (interactive) (my-persp-switch "#3"))
+    ;; "M-4" (lambda () (interactive) (my-persp-switch "#4"))
+    ;; "M-5" (lambda () (interactive) (my-persp-switch "#5"))
+    ;; "M-6" (lambda () (interactive) (my-persp-switch "#6"))
+    ;; "M-7" (lambda () (interactive) (my-persp-switch "#7"))
+    ;; "M-8" (lambda () (interactive) (my-persp-switch "#8"))
+    ;; "M-9" (lambda () (interactive) (my-persp-switch "#9"))
+    )
 
   ;; magit
   (general-define-key
@@ -1516,7 +1572,6 @@ _j_ zoom-out
 ;; workspaces https://github.com/hlissner/doom-emacs/tree/master/modules/ui/workspaces
 ;; left fringe prettify (I think doom disables it and renders errors in the line using a popup, get that working)
 ;; solve errors
-
 
 
 ;; https://stackoverflow.com/a/5058752/11312409
