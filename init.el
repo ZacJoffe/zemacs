@@ -1,8 +1,9 @@
 ;;; EDITOR GENERAL
 (setq inhibit-startup-message t)
 
-;; indent with spaces
-(setq-default indent-tabs-mode nil)
+;; indent with 4 spaces
+(setq-default indent-tabs-mode nil
+             tab-width 4)
 
 ;; save buffers on close (sessioning)
 (setq desktop-path '("~/"))
@@ -328,8 +329,8 @@ With argument, do this that many times."
 ;; evil-commentary
 (use-package evil-commentary
   :after evil
-  :hook
-  (evil-mode . evil-commentary-mode))
+  :config
+  (evil-commentary-mode))
 
 ;; change numbers with evil
 (use-package evil-numbers)
@@ -595,6 +596,7 @@ With argument, do this that many times."
 (use-package persp-mode
   :config
   (setq persp-nil-name "#1" ;; new default name
+        persp-autokill-buffer-on-remove t
         persp-add-buffer-on-after-change-major-mode t)
   ;; start persp-mode
   (persp-mode 1))
@@ -616,7 +618,7 @@ With argument, do this that many times."
 ;; create new "anonymous" perspective and switch to it
 ;; essentially this allows me to quickly create a new perspective without having to name it, which I find cumbersome
 (defun persp-add-new-anonymous ()
-  "Switch to new perspective and open *scratch* buffer."
+  "Switch to new perspective."
   (interactive)
   ;; hacky approach - perspective names are numbers, add 1 to latest persective
   ;; and create new one with that number as the name
@@ -626,8 +628,14 @@ With argument, do this that many times."
       (persp-rename-all-to-index)
       (persp-switch new-persp)
       (clear-window-persp)
-      (open-scratch-buffer)
       (message (concat "Created and switched to persp " new-persp)))))
+
+(defun persp-add-new-anonymous-scratch-buffer ()
+  "Switch to new perspective and open *scratch* buffer."
+  (interactive)
+  (progn
+    (persp-add-new-anonymous)
+    (open-scratch-buffer)))
 
 ;; kill the perspective most recently created
 (defun persp-kill-top ()
@@ -724,13 +732,13 @@ With argument, do this that many times."
 ;; cycle through persps
 ;; https://github.com/hlissner/doom-emacs/blob/master/modules/ui/workspaces/autoload/workspaces.el#L366
 (defun persp-cycle (n)
-  "Cycle N workspaces to the right (default) or left."
+  "Cycle N perspectives to the right (default) or left."
   (interactive (list 1))
   (let* ((curr (persp-get-current-name))
          (num-persps (length persp-names-cache))
          (index (cl-position curr persp-names-cache :test 'string=))) ;; for whatever reason this sometimes fails, explicitly setting :test seems to fix it though
     (if (eq num-persps 1)
-        (message "No other workspaces")
+        (message "No other perspectives")
       (let* ((new-index (% (+ index n num-persps) num-persps)) ;; adding num-persps is for handling when n < 0
              (new-persp-name (nth new-index persp-names-cache)))
         (my-persp-switch new-persp-name)))))
@@ -900,6 +908,7 @@ With argument, do this that many times."
 
 
 ;; magit
+;; TODO replicate magit-quit from doom (instead of magit bury buffer on q)
 (use-package magit
   ;; refresh status when you save file being tracked in repo
   :hook (after-save . magit-after-save-refresh-status)
@@ -985,9 +994,10 @@ With argument, do this that many times."
   ;; redefine help keys to use helpful functions instead of vanilla
   ;; https://github.com/Wilfred/helpful#usage
   ;; TODO refactor with general
-  (global-set-key (kbd "C-h f") #'helpful-callable)
-  (global-set-key (kbd "C-h v") #'helpful-variable)
-  (global-set-key (kbd "C-h k") #'helpful-key))
+  ;(global-set-key (kbd "C-h f") #'helpful-callable)
+  ;(global-set-key (kbd "C-h v") #'helpful-variable)
+  ;(global-set-key (kbd "C-h k") #'helpful-key)
+  )
 
 
 ;; HYDRA
@@ -1210,11 +1220,11 @@ _j_   zoom-out
     "TAB TAB" '(persp-switch :which-key "persp-switch")
     "TAB [" '(persp-switch-prev :which-key "persp-switch-prev")
     "TAB ]" '(persp-switch-next :which-key "persp-switch-next")
-    "TAB n" '(persp-add-new-anonymous :which-key "persp-add-new-anonymous")
+    "TAB n" '(persp-add-new-anonymous-scratch-buffer :which-key "persp-add-new-anonymous-scratch-buffer")
+    "TAB N" '(persp-add-new-anonymous :which-key "persp-add-new-anonymous")
     "TAB k" '(persp-kill-current :which-key "persp-kill-current")
     "TAB K" '(persp-kill-all-except-default :which-key "persp-kill-all-except-default")
     "TAB h" '(hydra-switch-persp/body :which-key "hydra-switch-persp")
-
 
     ;; git
     "g" '(:ignore t :which-key "Git") ; prefix
@@ -1351,11 +1361,10 @@ _j_   zoom-out
   ;; the return key is not that useful here anyways
   ;; TODO this doesn't work
   (general-define-key
+    :major-modes 'org-mode
     :states 'motion
     :keymaps 'local ;; only in the buffer
     "RET" nil))
-
-
 
 
 ;;; LANGUAGES
