@@ -135,29 +135,21 @@
         ispell-dictionary "english"))
 
 
-
-;; my hacky approach to formatting in insert mode
+;; I like the behaviour of evil-delete-backward-word over backward-kill-word, this is a small wrapper to make it more usable for me
 (defun my-backward-kill-word ()
-  "Kill words backward my way."
+  "Wrapper around evil-delete-backward-word."
   (interactive)
-  (if (bolp)
-      (backward-delete-char 1)
-    (if (string-match "^\\s-+$" (buffer-substring (point-at-bol) (point)))
-        (kill-region (point-at-bol) (point))
-      (backward-kill-word 1))))
+  (if (or (bolp) (eq (current-column) (current-indentation)))
+      (delete-indentation)
+    (evil-delete-backward-word)))
 
-;; TODO fix this
+;; TODO delete me?
 (defun my-backward-kill-line ()
-  "Easy formatting!" ; TODO change this
+  "Delete a line if there are no words before cursor."
   (interactive)
-  (my-backward-kill-word)
-  (backward-delete-char 1)
-  ;(insert " ")
-  ) ; TODO deletes last character on previous line when position is at start of line
-
-;; TODO refactor with general
-(global-set-key [C-backspace] 'my-backward-kill-word)
-;(global-set-key (kbd "<M-backspace>") 'my-backward-kill-line)
+  (if (or (bolp) (eq (current-column) (current-indentation)))
+      (delete-indentation)
+    (backward-kill-word 1)))
 
 ;; backwards-kill-word without copying to kill-ring
 ;; https://www.emacswiki.org/emacs/BackwardDeleteWord
@@ -169,12 +161,27 @@ With argument, do this that many times."
       (delete-region (region-beginning) (region-end))
     (delete-region (point) (progn (forward-word arg) (point)))))
 
+;; this is mainly for letting me use C-w to delete words in vertico buffers (see general.el for hotkeys)
 (defun backward-delete-word (arg)
   "Delete characters backward until encountering the end of a word.
 With argument, do this that many times."
   (interactive "p")
   (delete-word (- arg)))
 
+
+;; (defun my-tab ()
+;;   ""
+;;   (interactive)
+;;   )
+
+
+
+;; helper function for adding multiple elements to a list
+;; https://emacs.stackexchange.com/a/68048
+(defun add-list-to-list (dst src)
+  "Similar to `add-to-list', but accepts a list as 2nd argument."
+  (set dst
+       (append (eval dst) src)))
 
 ;; toggle whether a file uses tabs or spaces
 ;; https://github.com/hlissner/doom-emacs/blob/master/core/autoload/text.el#L293
@@ -357,6 +364,14 @@ With argument, do this that many times."
 (use-package editorconfig
   :config
   (editorconfig-mode 1))
+
+;; modify tab behaviour
+;; TODO use this to write own tab behaviour
+(use-package tab-jump-out
+  :config
+  ;(add-list-to-list 'tab-jump-out-delimiters '("(" "[" "{" "\\" "<" ">"))
+  (tab-jump-out-mode))
+
 ;;----
 
 
@@ -1226,9 +1241,10 @@ _j_   zoom-out
     :states 'insert
     "C-SPC" 'company-complete
     "C-v" 'yank ;; C-v should paste clipboard contents
-    "TAB" 'tab-jump-pair
-    "M-<backspace>" 'my-backward-kill-line)
+    ;"TAB" 'tab-jump-pair
 
+    "M-<backspace>" 'my-backward-kill-line ; TODO not needed anymore?
+    "C-<backspace>" 'my-backward-kill-word)
 
   ;; motion mode hotkeys, inherited by normal/visual
   (general-define-key
