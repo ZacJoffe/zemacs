@@ -3,11 +3,14 @@
 
 ;; indent with 4 spaces
 (setq-default indent-tabs-mode nil
-             tab-width 4)
+              tab-width 4)
 
 ;; save buffers on close (sessioning)
 (setq desktop-path '("~/"))
 ;(desktop-save-mode 1) ; TODO doesn't work with perspective-el? https://github.com/nex3/perspective-el
+
+;; do not display empty cursor in other windows (especially discracting with hydras)
+(setq-default cursor-in-non-selected-windows nil)
 
 ;; remember window configuration changes
 (winner-mode 1)
@@ -222,6 +225,7 @@ With argument, do this that many times."
 
 ;; TODO
 (defun tab-jump-pair (&optional ARG)
+  ""
   (interactive "P")
   (let ((delims-close '(")" "]" "}"))
 	(delims-open '("(" "[" "{")))
@@ -339,7 +343,7 @@ With argument, do this that many times."
 (use-package evil-goggles
   :after evil
   :config
-  ;(evil-goggles-mode) ;; TODO actions are not being disabled properly
+  (evil-goggles-mode) ;; TODO actions are not being disabled properly
   (setq evil-goggles-duration 0.1)
   ;; disable slow actions
   (setq evil-goggles-enable-change nil)
@@ -370,7 +374,7 @@ With argument, do this that many times."
 ;; TODO use this to write own tab behaviour
 (use-package tab-jump-out
   :config
-  ;(add-list-to-list 'tab-jump-out-delimiters '("(" "[" "{" "\\" "<" ">"))
+  (add-list-to-list 'tab-jump-out-delimiters '("(" "[" "{" "\\" "<" ">"))
   (tab-jump-out-mode))
 
 ;;----
@@ -591,7 +595,7 @@ With argument, do this that many times."
 ;;----
 
 
-;; WORKSPACES
+;; WORKSPACES/PERSPECTIVES
 ;; my workflow is hacked on top of persp-mode.el (apparently it works better with emacsclient than perspective-el)
 (use-package persp-mode
   :config
@@ -784,6 +788,7 @@ With argument, do this that many times."
   ;; https://github.com/hlissner/doom-emacs/blob/develop/modules/ui/modeline/README.org#the-right-side-of-the-modeline-is-cut-off
   (setq all-the-icons-scale-factor 1.1))
 
+
 ;; themes
 (use-package doom-themes
   :config
@@ -879,6 +884,7 @@ With argument, do this that many times."
   :hook (LaTeX-mode . rainbow-delimiters-mode)
   :hook (prog-mode . rainbow-delimiters-mode))
 
+
 ;; highlight numbers
 (use-package highlight-numbers
   :hook ((prog-mode . highlight-numbers-mode)
@@ -894,7 +900,7 @@ With argument, do this that many times."
   (global-undo-tree-mode 1))
 
 
-;; anzu - show number of matches with a search
+;; anzu - show number of matches of search in modeline
 (use-package evil-anzu
   ;:after-call evil-ex-start-search evil-ex-start-word-search evil-ex-search-activate-highlight
   :after evil
@@ -994,10 +1000,9 @@ With argument, do this that many times."
   ;; redefine help keys to use helpful functions instead of vanilla
   ;; https://github.com/Wilfred/helpful#usage
   ;; TODO refactor with general
-  ;(global-set-key (kbd "C-h f") #'helpful-callable)
-  ;(global-set-key (kbd "C-h v") #'helpful-variable)
-  ;(global-set-key (kbd "C-h k") #'helpful-key)
-  )
+  (global-set-key (kbd "C-h f") #'helpful-callable)
+  (global-set-key (kbd "C-h v") #'helpful-variable)
+  (global-set-key (kbd "C-h k") #'helpful-key))
 
 
 ;; HYDRA
@@ -1572,4 +1577,5 @@ _j_   zoom-out
 ;; https://stackoverflow.com/a/5058752/11312409
 ;(setq custom-file "~/.emacs.d/custom.el")
 ;(load custom-file)
+
 
