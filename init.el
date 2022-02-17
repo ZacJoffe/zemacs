@@ -452,6 +452,16 @@ With argument, do this that many times."
 ;TODO config
 (use-package consult)
 
+;; consult functions
+;; TODO optional dir arg
+(defun consult-open-file ()
+  "Open file in current directory."
+  (interactive)
+  (let ((selection (completing-read "Select file to visit:" (split-string (shell-command-to-string "find .") "\n" t))))
+    (find-file selection)))
+
+
+
 ;; TODO broken
 (use-package consult-dir
   :bind (("C-x C-d" . consult-dir)
@@ -757,6 +767,10 @@ With argument, do this that many times."
   (interactive)
   (persp-cycle -1))
 
+;; TODO swap persps function
+;; TODO buffer stack doesn't work
+;; TODO display current persp in the modeline
+
 
 ;; hydra to quickly switch perspectives
 (defhydra hydra-switch-persp (:hint nil)
@@ -876,7 +890,9 @@ With argument, do this that many times."
           ;; For a known bug that needs a workaround
           ("BUG" error bold)
           ;; For warning about a problematic or misguiding code
-          ("XXX" font-lock-constant-face bold))))
+          ("XXX" font-lock-constant-face bold)
+          ;; for temp comments or TODOs to be deleted
+          ("DELETEME" error bold))))
 
 
 ;; rainbow delimiters
@@ -910,7 +926,11 @@ With argument, do this that many times."
 
 ;; solaire mode - distinguish minibuffers from "real" buffers
 (use-package solaire-mode
-  :init (solaire-global-mode 1))
+  ;;:init (solaire-global-mode 1)
+  :config
+  ;; solaire mode has issues when using the terminal
+  (when (display-graphic-p)
+      (solaire-global-mode +1)))
 
 
 ;; magit
@@ -1271,6 +1291,7 @@ _j_   zoom-out
     "C-w u" 'winner-undo
     "C-w a" 'ace-window)
 
+
   ;; company
   (general-define-key
     :keymaps '(company-active-map)
@@ -1374,23 +1395,23 @@ _j_   zoom-out
 
 ;;; LANGUAGES
 ;; lsp
-;; (use-package lsp-mode
-;;   :init
-;;   ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
-;;   (setq lsp-keymap-prefix "C-c l")
-;;   :hook ((lsp-mode . lsp-enable-which-key-integration)
-;; 	 ;(rustic-mode . lsp)
-;;          ;; for some reason headerline is enabled by default, add a hook to disable it
-;;          ;; TODO look into fixing this in lsp-mode
-;;          ;; https://emacs.stackexchange.com/a/64988
-;;          (lsp-mode . lsp-headerline-breadcrumb-mode))
-;;   :commands lsp
-;;   :config
-;;   (setq lsp-headerline-breadcrumb-enable nil))
+(use-package lsp-mode
+  :init
+  ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
+  (setq lsp-keymap-prefix "C-c l")
+  :hook ((lsp-mode . lsp-enable-which-key-integration)
+         (rustic-mode . lsp)
+         ;; for some reason headerline is enabled by default, add a hook to disable it
+         ;; TODO look into fixing this in lsp-mode
+         ;; https://emacs.stackexchange.com/a/64988
+         (lsp-mode . lsp-headerline-breadcrumb-mode))
+  :commands lsp
+  :config
+  (setq lsp-headerline-breadcrumb-enable nil))
 
-;; (use-package lsp-ui :commands lsp-ui-mode)
-;; (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
-;; (use-package consult-lsp)
+(use-package lsp-ui :commands lsp-ui-mode)
+(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+(use-package consult-lsp)
 
 
 ;; flycheck
@@ -1539,7 +1560,8 @@ _j_   zoom-out
 ;; KEYBINDINGS
 ;; map the escape key to quit mini buffers instantly
 ;; https://www.reddit.com/r/emacs/comments/4a0421/any_reason_not_to_just_rebind_keyboardquit_from/d0wo66r/
-(define-key key-translation-map (kbd "ESC") (kbd "C-g"))
+;; TODO breaks terminal mode
+;(define-key key-translation-map (kbd "ESC") (kbd "C-g"))
 
 ;; TODO I think I can delete this?
 ;(map! (:after company
