@@ -306,6 +306,7 @@ With argument, do this that many times."
   (setq evil-want-C-u-scroll t)
   (setq evil-want-integration t)
   (setq evil-want-keybinding nil)
+  (setq evil-normal-state-cursor 'box)
   :config ;; tweak evil after loading it
   (evil-mode)
   ;; highlight the current line (not explicitly evil but whatever)
@@ -387,9 +388,10 @@ With argument, do this that many times."
   (vertico-mode)
   ; https://systemcrafters.cc/emacs-tips/streamline-completions-with-vertico/
   ;; TODO refactor with general
-  :bind (:map vertico-map
-         ("C-j" . vertico-next)
-         ("C-k" . vertico-previous))
+  :general
+  (:keymaps 'vertico-map
+    "C-j" 'vertico-next
+    "C-k" 'vertico-previous)
   :config
   (setq vertico-resize nil
         vertico-count 17
@@ -440,9 +442,10 @@ With argument, do this that many times."
 
 ;; marginalia
 (use-package marginalia
-  :bind (("M-A" . marginalia-cycle)
-         :map minibuffer-local-map
-         ("M-A" . marginalia-cycle))
+  :general
+  ("M-A" 'marginalia-cycle)
+  (:keymaps 'minibuffer-local-map
+    "M-A" 'marginalia-cycle)
   :init
   ;; Must be in the :init section of use-package such that the mode gets
   ;; enabled right away. Note that this forces loading the package.
@@ -484,8 +487,7 @@ With argument, do this that many times."
 ;; spelling
 (use-package flyspell)
 (use-package flyspell-correct
-  :after flyspell
-  :bind (:map flyspell-mode-map ("C-;" . flyspell-correct-wrapper)))
+  :after flyspell)
 ;(use-package flyspell-correct-popup
 ;  :after flyspell-correct)
 (use-package spell-fu) ; TODO figure out how replacement for ispell-word
@@ -496,8 +498,6 @@ With argument, do this that many times."
 (use-package projectile
   :init
   (projectile-mode +1)
-  :bind (:map projectile-mode-map
-              ("C-c p" . projectile-command-map))
   :config
   (setq projectile-project-search-path '("~/Documents/Code")))
 
@@ -506,9 +506,9 @@ With argument, do this that many times."
 ;; TODO lots of stuff here can be deleted
 (use-package treemacs
   :defer t
-  :init
-  (with-eval-after-load 'winum
-    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+  ;:init
+  ;(with-eval-after-load 'winum
+  ;  (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
   :config
   (progn
     (setq treemacs-collapse-dirs                   (if treemacs-python-executable 3 0)
@@ -776,15 +776,15 @@ With argument, do this that many times."
 (defhydra hydra-switch-persp (:hint nil)
   "Switch perspective"
   ;; TODO refactor for index switch, may be non-trivial with a bunch of dynamic work to do before hand (use :pre with variables??)
-  ("1" (my-persp-switch "#1") "Persp #1")
-  ("2" (my-persp-switch "#2") "Persp #2")
-  ("3" (my-persp-switch "#3") "Persp #3")
-  ("4" (my-persp-switch "#4") "Persp #4")
-  ("5" (my-persp-switch "#5") "Persp #5")
-  ("6" (my-persp-switch "#6") "Persp #6")
-  ("7" (my-persp-switch "#7") "Persp #7")
-  ("8" (my-persp-switch "#8") "Persp #8")
-  ("9" (my-persp-switch "#9") "Persp #9"))
+  ("1" (my-persp-switch-index 0) "Persp #1")
+  ("2" (my-persp-switch-index 1) "Persp #2")
+  ("3" (my-persp-switch-index 2) "Persp #3")
+  ("4" (my-persp-switch-index 3) "Persp #4")
+  ("5" (my-persp-switch-index 4) "Persp #5")
+  ("6" (my-persp-switch-index 5) "Persp #6")
+  ("7" (my-persp-switch-index 6) "Persp #7")
+  ("8" (my-persp-switch-index 7) "Persp #8")
+  ("9" (my-persp-switch-index 8) "Persp #9"))
 
 ;; TODO M-RET open file in new persp in find-file
 ;; TODO hack together consult preview for persp-switch-to-buffer
@@ -965,13 +965,6 @@ With argument, do this that many times."
 (use-package org-roam
   :custom
   (org-roam-directory (file-truename "~/Documents/Google/org/roam"))
-  :bind (("C-c n l" . org-roam-buffer-toggle) ; TODO hotkeys
-         ("C-c n f" . org-roam-node-find)
-         ("C-c n g" . org-roam-graph)
-         ("C-c n i" . org-roam-node-insert)
-         ("C-c n c" . org-roam-capture)
-         ;; Dailies
-         ("C-c n j" . org-roam-dailies-capture-today))
   :config
   (org-roam-db-autosync-mode)
   ;; If using org-roam-protocol
@@ -1255,6 +1248,8 @@ _j_   zoom-out
     "g" '(:ignore t :which-key "Git") ; prefix
     "gg" '(magit-status :which-key "Git status"))
 
+  ;; evil bindings
+  ;; TODO this is a bit of a mess, I need to go through the state hierarchy to define hotkeys in highest priority
   ;; normal/visual mode hotkeys
   (general-define-key
     :states '(normal visual)
@@ -1264,6 +1259,11 @@ _j_   zoom-out
 
     ;; flyspell correct
     "z=" 'flyspell-correct-wrapper)
+
+  ;; normal mode hotkeys
+  (general-define-key
+   :states 'normal
+   "s" 'avy-goto-char)
 
   ;; visual mode hotkeys
   (general-define-key
@@ -1359,17 +1359,7 @@ _j_   zoom-out
     "M-6" (lambda () (interactive) (my-persp-switch-index 5))
     "M-7" (lambda () (interactive) (my-persp-switch-index 6))
     "M-8" (lambda () (interactive) (my-persp-switch-index 7))
-    "M-9" (lambda () (interactive) (my-persp-switch-index 8))
-    ;; "M-1" (lambda () (interactive) (my-persp-switch "#1"))
-    ;; "M-2" (lambda () (interactive) (my-persp-switch "#2"))
-    ;; "M-3" (lambda () (interactive) (my-persp-switch "#3"))
-    ;; "M-4" (lambda () (interactive) (my-persp-switch "#4"))
-    ;; "M-5" (lambda () (interactive) (my-persp-switch "#5"))
-    ;; "M-6" (lambda () (interactive) (my-persp-switch "#6"))
-    ;; "M-7" (lambda () (interactive) (my-persp-switch "#7"))
-    ;; "M-8" (lambda () (interactive) (my-persp-switch "#8"))
-    ;; "M-9" (lambda () (interactive) (my-persp-switch "#9"))
-    )
+    "M-9" (lambda () (interactive) (my-persp-switch-index 8)))
 
   ;; magit
   (general-define-key
@@ -1562,16 +1552,6 @@ _j_   zoom-out
 ;; https://www.reddit.com/r/emacs/comments/4a0421/any_reason_not_to_just_rebind_keyboardquit_from/d0wo66r/
 ;; TODO breaks terminal mode
 ;(define-key key-translation-map (kbd "ESC") (kbd "C-g"))
-
-;; TODO I think I can delete this?
-;(map! (:after company
-;        (:map company-active-map
-;          "TAB" #'company-complete-selection
-;          [tab] #'company-complete-selection))
-;      :m
-;      "C-a" #'bury-buffer
-;      "C-S-a" #'unbury-buffer)
-;(map! :m "C-z" #'buffer-menu)
 
 ;----
 
