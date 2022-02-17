@@ -928,15 +928,30 @@ With argument, do this that many times."
 (use-package magit
   ;; refresh status when you save file being tracked in repo
   :hook (after-save . magit-after-save-refresh-status)
+  ;; start magit commit in insert mode https://emacs.stackexchange.com/a/20895
+  :hook (git-commit-mode . evil-insert-state)
+  :general
+  (:keymaps 'magit-status-mode-map
+    "q" 'magit-kill-buffers)
   :config
   ;; display magit status in current buffer (no popup) https://stackoverflow.com/a/58554387/11312409
   (setq magit-display-buffer-function 'magit-display-buffer-same-window-except-diff-v1
         magit-auto-revert-mode t
         git-commit-summary-max-length 50))
 
+;; https://www.manueluberti.eu/emacs/2018/02/17/magit-bury-buffer/
+(defun magit-kill-buffers ()
+  "Restore window configuration and kill all Magit buffers."
+  (interactive)
+  (let ((buffers (magit-mode-get-buffers)))
+    (magit-restore-window-configuration)
+    (mapc #'kill-buffer buffers)))
 
+;; TODO broken
+;(bind-key "q" #'mu-magit-kill-buffers magit-status-mode-map)
+
+;; show todos in magit status
 (use-package magit-todos)
-;(use-package evil-magit)
 
 
 ; TODO
