@@ -1158,20 +1158,23 @@ _j_   zoom-out
     "u" '(universal-argument :which-key "Universal argument")
     ";" '(eval-region :which-key "eval-region")
     "SPC" '(projectile-find-file :which-key "Projectile find file")
+    ;"SPC" '(consult-find-file :which-key "consult-find-file")
     "." '(find-file :which-key "Find file")
     ":" '(execute-extended-command :which-key "M-x")
     "x" '(open-scratch-buffer :which-key "Open scratch buffer")
+    "<" '(consult-buffer :which-key "consult-buffer")
 
     ;; editor
     "e" '(:ignore t :which-key "Editor")
     "eu" '(undo-tree-visualize :which-key "undo-tree-visualize")
     "et" '(hydra-theme/body :which-key "hydra-theme") ; not sure if this is the best place for this, perhaps toggles would be more appropriate?
+    "er" '(query-replace :which-key "query-replace")
 
     ;; buffer
     ;"TAB" '(switch-to-prev-buffer :which-key "Prev buffer")
     "b" '(:ignore t :which-key "Buffer")
     ;"bb" ; TODO switch workspace buffer
-    "bB" '(consult-buffer :which-key "consult-buffer") ; TODO map to SPC-<
+    "bB" '(consult-buffer :which-key "consult-buffer")
     "b[" '(previous-buffer :which-key "Previous buffer")
     "b]" '(next-buffer :which-key "Next buffer")
     "bd" '(kill-current-buffer :which-key "Kill buffer")
@@ -1365,21 +1368,15 @@ _j_   zoom-out
     ;; https://github.com/emacs-evil/evil-magit/issues/14#issuecomment-626583736
     :keymaps 'transient-base-map
     "<escape>" 'transient-quit-one)
-  ;(general-define-key
-  ;  :keymaps 'magit-mode-map
-  ;  ;; escape key should quit buffer
-  ;  "ESC" nil)
 
-
-  ;; org mode specific evil
+  ;; org mode specific evil binding
   ;; unbind the return (enter) key so it becomes org-return
   ;; the return key is not that useful here anyways
-  ;; TODO this doesn't work
   (general-define-key
-    :major-modes 'org-mode
     :states 'motion
-    :keymaps 'local ;; only in the buffer
-    "RET" nil))
+    :keymaps 'org-mode-map
+    :major-modes t
+    "RET" 'org-return))
 
 
 ;;; LANGUAGES
