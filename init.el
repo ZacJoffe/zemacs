@@ -144,16 +144,11 @@
   "Wrapper around evil-delete-backward-word."
   (interactive)
   (if (or (bolp) (eq (current-column) (current-indentation)))
-      (delete-indentation)
+      ;(delete-indentation)
+      (progn
+        (evil-delete-backward-word)
+        (evil-delete-backward-word))
     (evil-delete-backward-word)))
-
-;; TODO delete me?
-(defun my-backward-kill-line ()
-  "Delete a line if there are no words before cursor."
-  (interactive)
-  (if (or (bolp) (eq (current-column) (current-indentation)))
-      (delete-indentation)
-    (backward-kill-word 1)))
 
 ;; backwards-kill-word without copying to kill-ring
 ;; https://www.emacswiki.org/emacs/BackwardDeleteWord
@@ -343,12 +338,14 @@ With argument, do this that many times."
 ;; show evil actions
 (use-package evil-goggles
   :after evil
-  :config
-  (evil-goggles-mode) ;; TODO actions are not being disabled properly
+  :init
   (setq evil-goggles-duration 0.1)
   ;; disable slow actions
   (setq evil-goggles-enable-change nil)
-  (setq evil-goggles-enable-delete nil))
+  (setq evil-goggles-enable-delete nil)
+  :config
+  (evil-goggles-mode) ;; TODO actions are not being disabled properly
+  )
 
 
 ;;; UNDO TREE
@@ -387,7 +384,6 @@ With argument, do this that many times."
   :init
   (vertico-mode)
   ; https://systemcrafters.cc/emacs-tips/streamline-completions-with-vertico/
-  ;; TODO refactor with general
   :general
   (:keymaps 'vertico-map
     "C-j" 'vertico-next
@@ -456,7 +452,7 @@ With argument, do this that many times."
 (use-package consult)
 
 ;; consult functions
-(defun consult-open-file (DIR)
+(defun consult-find-file (DIR)
   "Open file in directory DIR."
   (interactive "DSelect dir: ")
   (let ((selection (completing-read "Find file: " (split-string (shell-command-to-string (concat "find " DIR)) "\n" t))))
@@ -785,7 +781,7 @@ With argument, do this that many times."
 (use-package ace-window)
 
 
-;; Icons
+;; icons
 (use-package all-the-icons
   :config
   ;; needed for getting the right side of doom-modeline to render on the screen properly
@@ -996,7 +992,6 @@ With argument, do this that many times."
 ;; deft
 (use-package deft)
 (setq deft-recursive t)
-;(setq deft-directory org-roam-directory)
 (setq deft-directory "~/Documents/Google/org/roam")
 ;;----
 
@@ -1026,8 +1021,8 @@ With argument, do this that many times."
 ;; HYDRA
 (use-package hydra)
 
+;; window movement/management hydra
 ;; https://github.com/jmercouris/configuration/blob/master/.emacs.d/hydra.el#L89
-;; window movement / management
 (defhydra hydra-window (:hint nil)
    "
 Movement      ^Split^            ^Switch^        ^Resize^
@@ -1068,7 +1063,7 @@ _q_uit          ^        ^         _]_forward
 
    ("q" nil))
 
-;; TODO move up
+;; functions for hydra-window
 (defun hydra-move-splitter-left (arg)
   "Move window splitter left."
   (interactive "p")
@@ -1136,7 +1131,7 @@ _j_   zoom-out
   ("8" (my-load-theme 'doom-spacegrey) "doom-spacegrey")
   ("9" (my-load-theme 'doom-molokai) "doom-molokai"))
 
-;; TODO move up
+;; functions for hydra-theme
 (defun my-load-theme (theme)
   "Enhance `load-theme' by first disabling enabled themes."
   (mapc #'disable-theme custom-enabled-themes)
@@ -1283,7 +1278,6 @@ _j_   zoom-out
     "C-v" 'yank ;; C-v should paste clipboard contents
     ;"TAB" 'tab-jump-pair
 
-    "M-<backspace>" 'my-backward-kill-line ; TODO not needed anymore?
     "C-<backspace>" 'my-backward-kill-word)
 
   ;; motion mode hotkeys, inherited by normal/visual
@@ -1422,27 +1416,24 @@ _j_   zoom-out
 
 
 ;; tree sitter
-(use-package tree-sitter)
-(use-package tree-sitter-langs)
-;; enable tree sitter syntax highlighting whenever possible https://emacs-tree-sitter.github.io/syntax-highlighting/
+(use-package tree-sitter
+  :init
+  (global-tree-sitter-mode))
+
+(use-package tree-sitter-langs
+  ;; enable tree sitter syntax highlighting whenever possible https://emacs-tree-sitter.github.io/syntax-highlighting/
+  :hook (tree-sitter-after-on . tree-sitter-hl-mode))
+
 ; TODO use-package refactor
-(global-tree-sitter-mode)
-(add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
-
-
-;; smartparens
-; TODO not working?
-;(use-package smartparens
-;  :diminish smartparens-mode ;; Do not show in modeline
-;  :hook (prog-mode text-mode markdown-mode)
-;  :init
-;  (require 'smartparens-config)
+; DELETEME
+;(global-tree-sitter-mode)
+;(add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
 
 
 ;; rust
 (use-package rustic
   :config
-  ;; disable lsp support for now
+  ;; disable lsp support for now TODO
   (setq rustic-lsp-client nil))
 
 
