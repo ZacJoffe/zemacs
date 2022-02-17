@@ -456,21 +456,11 @@ With argument, do this that many times."
 (use-package consult)
 
 ;; consult functions
-;; TODO optional dir arg
-(defun consult-open-file ()
-  "Open file in current directory."
-  (interactive)
-  (let ((selection (completing-read "Select file to visit:" (split-string (shell-command-to-string "find .") "\n" t))))
+(defun consult-open-file (DIR)
+  "Open file in directory DIR."
+  (interactive "DSelect dir: ")
+  (let ((selection (completing-read "Find file: " (split-string (shell-command-to-string (concat "find " DIR)) "\n" t))))
     (find-file selection)))
-
-
-
-;; TODO broken
-(use-package consult-dir
-  :bind (("C-x C-d" . consult-dir)
-         :map vertico-map
-         ("C-x C-d" . consult-dir)
-         ("C-x C-j" . consult-dir-jump-file)))
 
 ;; embark
 ;TODO config
