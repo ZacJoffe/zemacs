@@ -1405,7 +1405,11 @@ _j_   zoom-out
   :init
   (global-flycheck-mode) ; TODO should this be :init or :config?
   :config
-  (setq flycheck-indication-mode 'right-fringe)) ; TODO change the direction of the arrow and look into margins instead of fringes
+  (setq flycheck-indication-mode 'right-fringe)
+  ;; change indicator to a left arrow since the fringe is now on the right
+  ;; https://github.com/hlissner/doom-emacs/blob/master/modules/ui/vc-gutter/config.el#L120
+  (define-fringe-bitmap 'flycheck-fringe-bitmap-double-arrow
+      [16 48 112 240 112 48 16] nil nil 'center))
 
 ;; flycheck-popup-tip
 (use-package flycheck-popup-tip
