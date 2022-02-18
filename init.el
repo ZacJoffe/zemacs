@@ -927,7 +927,7 @@ With argument, do this that many times."
   ;; start magit commit in insert mode https://emacs.stackexchange.com/a/20895
   :hook (git-commit-mode . evil-insert-state)
   :general
-  (:keymaps 'magit-status-mode-map
+  (:keymaps 'magit-mode-map
     "q" 'magit-kill-buffers)
   :config
   ;; display magit status in current buffer (no popup) https://stackoverflow.com/a/58554387/11312409
@@ -944,7 +944,7 @@ With argument, do this that many times."
     (mapc #'kill-buffer buffers)))
 
 ;; TODO broken
-;(bind-key "q" #'mu-magit-kill-buffers magit-status-mode-map)
+(bind-key "q" #'magit-kill-buffers magit-mode-map)
 
 ;; show todos in magit status
 (use-package magit-todos)
@@ -1163,6 +1163,7 @@ _j_   zoom-out
     ":" '(execute-extended-command :which-key "M-x")
     "x" '(open-scratch-buffer :which-key "Open scratch buffer")
     "<" '(consult-buffer :which-key "consult-buffer")
+    "d" '(dired :which-key "dired")
 
     ;; editor
     "e" '(:ignore t :which-key "Editor")
@@ -1368,6 +1369,14 @@ _j_   zoom-out
     ;; https://github.com/emacs-evil/evil-magit/issues/14#issuecomment-626583736
     :keymaps 'transient-base-map
     "<escape>" 'transient-quit-one)
+
+  ;; rebind "q" in magit-status to kill the magit buffers instead of burying them
+  (general-define-key
+    ;:states '(normal visual)
+    :states 'motion
+    :keymaps 'magit-mode-map
+    "q" 'magit-kill-buffers)
+
 
   ;; org mode specific evil binding
   ;; unbind the return (enter) key so it becomes org-return
