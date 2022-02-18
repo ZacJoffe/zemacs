@@ -926,9 +926,9 @@ With argument, do this that many times."
   :hook (after-save . magit-after-save-refresh-status)
   ;; start magit commit in insert mode https://emacs.stackexchange.com/a/20895
   :hook (git-commit-mode . evil-insert-state)
-  :general
-  (:keymaps 'magit-mode-map
-    "q" 'magit-kill-buffers)
+;  :general
+;  (:keymaps 'magit-mode-map
+;    "q" 'magit-kill-buffers)
   :config
   ;; display magit status in current buffer (no popup) https://stackoverflow.com/a/58554387/11312409
   (setq magit-display-buffer-function 'magit-display-buffer-same-window-except-diff-v1
@@ -937,14 +937,22 @@ With argument, do this that many times."
 
 ;; https://www.manueluberti.eu/emacs/2018/02/17/magit-bury-buffer/
 (defun magit-kill-buffers ()
-  "Restore window configuration and kill all Magit buffers."
-  (interactive)
+  "Restore window configuration and kill all magit buffers."
+  ;(interactive)
   (let ((buffers (magit-mode-get-buffers)))
     (magit-restore-window-configuration)
     (mapc #'kill-buffer buffers)))
 
-;; TODO broken
-(bind-key "q" #'magit-kill-buffers magit-mode-map)
+(defun magit-quit ()
+  ""
+  (interactive)
+  (unless (cl-find-if (lambda (win)
+                    (with-selected-window win
+                      (and (derived-mode-p 'magit-mode)
+                           (equal magit--default-directory magit-top-level))))
+                  (window-list))
+      ))
+
 
 ;; show todos in magit status
 (use-package magit-todos)
@@ -1005,10 +1013,6 @@ With argument, do this that many times."
 
 ;; helpful
 (use-package helpful
-  :init
-  ;; HACK emacs29
-  ;; https://github.com/hlissner/doom-emacs/commit/c6d3ceef7e8f3abdfce3cd3e51f1e570603bd230
-  (defvar read-symbol-positions-list nil)
   :config
   ;; redefine help keys to use helpful functions instead of vanilla
   ;; https://github.com/Wilfred/helpful#usage
@@ -1017,6 +1021,23 @@ With argument, do this that many times."
   (global-set-key (kbd "C-h v") #'helpful-variable)
   (global-set-key (kbd "C-h k") #'helpful-key))
 
+;; HACK for emacs 29
+;; https://github.com/Wilfred/helpful/issues/282#issuecomment-1040416413
+(defun helpful--autoloaded-p (sym buf)
+  "Return non-nil if function SYM is autoloaded."
+  (-when-let (file-name (buffer-file-name buf))
+    (setq file-name (s-chop-suffix ".gz" file-name))
+    (help-fns--autoloaded-p sym)))
+
+(defun helpful--skip-advice (docstring)
+  "Remove mentions of advice from DOCSTRING."
+  (let* ((lines (s-lines docstring))
+         (relevant-lines
+          (--take-while
+           (not (or (s-starts-with-p ":around advice:" it)
+                    (s-starts-with-p "This function has :around advice:" it)))
+           lines)))
+    (s-trim (s-join "\n" relevant-lines))))
 
 ;; HYDRA
 (use-package hydra)
