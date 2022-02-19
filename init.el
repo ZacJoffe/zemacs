@@ -939,23 +939,27 @@ With argument, do this that many times."
         magit-auto-revert-mode t
         git-commit-summary-max-length 50))
 
+;; TODO document
 ;; https://www.manueluberti.eu/emacs/2018/02/17/magit-bury-buffer/
 (defun magit-kill-buffers ()
   "Restore window configuration and kill all magit buffers."
   ;(interactive)
   (let ((buffers (magit-mode-get-buffers)))
-    (magit-restore-window-configuration)
+    ;(magit-restore-window-configuration)
     (mapc #'kill-buffer buffers)))
 
-(defun magit-quit ()
+(defun magit-quit (&optional kill-buffer)
   ""
-  (interactive)
-  (unless (cl-find-if (lambda (win)
-                    (with-selected-window win
-                      (and (derived-mode-p 'magit-mode)
-                           (equal magit--default-directory magit-top-level))))
-                  (window-list))
-      ))
+  (interactive "P")
+  (let ((toplevel (magit-toplevel)))
+    (progn
+      (funcall magit-bury-buffer-function kill-buffer))
+      (unless (cl-find-if (lambda (win)
+                            (with-selected-window win
+                              (and (derived-mode-p 'magit-mode)
+                                   (equal magit--default-directory toplevel))))
+                          (window-list))
+        (magit-kill-buffers))))
 
 
 ;; show todos in magit status
@@ -1275,6 +1279,16 @@ _j_   zoom-out
     "TAB k" '(persp-kill-current :which-key "persp-kill-current")
     "TAB K" '(persp-kill-all-except-default :which-key "persp-kill-all-except-default")
     "TAB h" '(hydra-switch-persp/body :which-key "hydra-switch-persp")
+    ;; "TAB 1" '((lambda () (interactive) (my-persp-switch-index 0)) :which-key "Switch to #1")
+    ;; "TAB 2" '((lambda () (interactive) (my-persp-switch-index 1)) :which-key "Switch to #2")
+    ;; "TAB 3" '((lambda () (interactive) (my-persp-switch-index 2)) :which-key "Switch to #3")
+    ;; "TAB 4" '((lambda () (interactive) (my-persp-switch-index 3)) :which-key "Switch to #4")
+    ;; "TAB 5" '((lambda () (interactive) (my-persp-switch-index 4)) :which-key "Switch to #5")
+    ;; "TAB 6" '((lambda () (interactive) (my-persp-switch-index 5)) :which-key "Switch to #6")
+    ;; "TAB 7" '((lambda () (interactive) (my-persp-switch-index 6)) :which-key "Switch to #7")
+    ;; "TAB 8" '((lambda () (interactive) (my-persp-switch-index 7)) :which-key "Switch to #8")
+    ;; "TAB 9" '((lambda () (interactive) (my-persp-switch-index 8)) :which-key "Switch to #9")
+
 
     ;; git
     "g" '(:ignore t :which-key "Git") ; prefix
@@ -1400,10 +1414,9 @@ _j_   zoom-out
 
   ;; rebind "q" in magit-status to kill the magit buffers instead of burying them
   (general-define-key
-    ;:states '(normal visual)
-    :states 'motion
+    :states '(normal visual)
     :keymaps 'magit-mode-map
-    "q" 'magit-kill-buffers)
+    "q" 'magit-quit)
 
 
   ;; org mode specific evil binding
