@@ -280,6 +280,9 @@ With argument, do this that many times."
 (setq use-package-always-ensure t)
 
 
+;; HACK load general first to allow use of :general keyword
+(use-package general)
+
 ;; put backup files and auto-save files in their own directory
 (use-package no-littering
   :init ;; TODO is this working?
@@ -1014,6 +1017,8 @@ With argument, do this that many times."
 
 ;; helpful
 (use-package helpful
+  :init
+  (defvar read-symbol-positions-list nil)
   :config
   ;; redefine help keys to use helpful functions instead of vanilla
   ;; https://github.com/Wilfred/helpful#usage
@@ -1024,21 +1029,21 @@ With argument, do this that many times."
 
 ;; HACK for emacs 29
 ;; https://github.com/Wilfred/helpful/issues/282#issuecomment-1040416413
-(defun helpful--autoloaded-p (sym buf)
-  "Return non-nil if function SYM is autoloaded."
-  (-when-let (file-name (buffer-file-name buf))
-    (setq file-name (s-chop-suffix ".gz" file-name))
-    (help-fns--autoloaded-p sym)))
-
-(defun helpful--skip-advice (docstring)
-  "Remove mentions of advice from DOCSTRING."
-  (let* ((lines (s-lines docstring))
-         (relevant-lines
-          (--take-while
-           (not (or (s-starts-with-p ":around advice:" it)
-                    (s-starts-with-p "This function has :around advice:" it)))
-           lines)))
-    (s-trim (s-join "\n" relevant-lines))))
+:(defun helpful--autoloaded-p (sym buf)
+:  "Return non-nil if function SYM is autoloaded."
+:  (-when-let (file-name (buffer-file-name buf))
+:    (setq file-name (s-chop-suffix ".gz" file-name))
+:    (help-fns--autoloaded-p sym)))
+:
+:(defun helpful--skip-advice (docstring)
+:  "Remove mentions of advice from DOCSTRING."
+:  (let* ((lines (s-lines docstring))
+:         (relevant-lines
+:          (--take-while
+:           (not (or (s-starts-with-p ":around advice:" it)
+:                    (s-starts-with-p "This function has :around advice:" it)))
+:           lines)))
+:    (s-trim (s-join "\n" relevant-lines))))
 
 ;; HYDRA
 (use-package hydra)
@@ -1161,6 +1166,7 @@ _j_   zoom-out
 ;;----
 
 
+;; TODO fix (maybe early init?)
 ;; general keybindings
 ;; doomesque hotkeys using spacebar as prefix
 (use-package general
@@ -1455,11 +1461,6 @@ _j_   zoom-out
 (use-package tree-sitter-langs
   ;; enable tree sitter syntax highlighting whenever possible https://emacs-tree-sitter.github.io/syntax-highlighting/
   :hook (tree-sitter-after-on . tree-sitter-hl-mode))
-
-; TODO use-package refactor
-; DELETEME
-;(global-tree-sitter-mode)
-;(add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
 
 
 ;; rust
