@@ -1029,21 +1029,21 @@ With argument, do this that many times."
 
 ;; HACK for emacs 29
 ;; https://github.com/Wilfred/helpful/issues/282#issuecomment-1040416413
-:(defun helpful--autoloaded-p (sym buf)
-:  "Return non-nil if function SYM is autoloaded."
-:  (-when-let (file-name (buffer-file-name buf))
-:    (setq file-name (s-chop-suffix ".gz" file-name))
-:    (help-fns--autoloaded-p sym)))
-:
-:(defun helpful--skip-advice (docstring)
-:  "Remove mentions of advice from DOCSTRING."
-:  (let* ((lines (s-lines docstring))
-:         (relevant-lines
-:          (--take-while
-:           (not (or (s-starts-with-p ":around advice:" it)
-:                    (s-starts-with-p "This function has :around advice:" it)))
-:           lines)))
-:    (s-trim (s-join "\n" relevant-lines))))
+(defun helpful--autoloaded-p (sym buf)
+  "Return non-nil if function SYM is autoloaded."
+  (-when-let (file-name (buffer-file-name buf))
+    (setq file-name (s-chop-suffix ".gz" file-name))
+    (help-fns--autoloaded-p sym)))
+
+(defun helpful--skip-advice (docstring)
+  "Remove mentions of advice from DOCSTRING."
+  (let* ((lines (s-lines docstring))
+         (relevant-lines
+          (--take-while
+           (not (or (s-starts-with-p ":around advice:" it)
+                    (s-starts-with-p "This function has :around advice:" it)))
+           lines)))
+    (s-trim (s-join "\n" relevant-lines))))
 
 ;; HYDRA
 (use-package hydra)
