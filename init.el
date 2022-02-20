@@ -150,6 +150,17 @@
         (evil-delete-backward-word))
     (evil-delete-backward-word)))
 
+;; basically the same as my-backward-kill-word except it creates a space when merging lines
+(defun my-backward-kill-line ()
+  "Wrapper around evil-delete-backward-word."
+  (interactive)
+  (if (or (bolp) (eq (current-column) (current-indentation)))
+      (progn
+        (delete-indentation)
+        (forward-char))
+    (evil-delete-backward-word)))
+
+
 ;; backwards-kill-word without copying to kill-ring
 ;; https://www.emacswiki.org/emacs/BackwardDeleteWord
 (defun delete-word (arg)
@@ -1335,7 +1346,14 @@ _j_   zoom-out
     "C-v" 'yank ;; C-v should paste clipboard contents
     ;"TAB" 'tab-jump-pair
 
-    "C-<backspace>" 'my-backward-kill-word)
+    "C-<backspace>" 'my-backward-kill-word
+    "M-<backspace>" 'my-backward-kill-line
+
+    ;; some emacs editing hotkeys inside insert mode
+    "C-a" 'evil-beginning-of-visual-line
+    "C-e" 'evil-end-of-visual-line
+    "C-n" 'evil-next-visual-line
+    "C-p" 'evil-previous-visual-line)
 
   ;; motion mode hotkeys, inherited by normal/visual
   (general-define-key
@@ -1359,14 +1377,6 @@ _j_   zoom-out
     "<tab>" #'company-complete-selection
     ;TODO
     )
-
-  ;; some emacs editing hotkeys inside insert mode
-  (general-def
-    :states '(insert)
-    "C-a" 'evil-beginning-of-visual-line
-    "C-e" 'evil-end-of-visual-line
-    "C-n" 'evil-next-visual-line
-    "C-p" 'evil-previous-visual-line)
 
   ;; unbind C-z from evil
   (general-unbind '(motion insert treemacs) "C-z")
