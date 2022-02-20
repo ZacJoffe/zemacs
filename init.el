@@ -486,12 +486,13 @@ With argument, do this that many times."
 
 
 ;; spelling
-(use-package flyspell)
+(use-package flyspell
+  ;; turn on flyspell for magit commit
+  :hook (git-commit-setup . git-commit-turn-on-flyspell))
+
+;; spelling correction menu using completing-read (so consult)
 (use-package flyspell-correct
   :after flyspell)
-;(use-package flyspell-correct-popup
-;  :after flyspell-correct)
-(use-package spell-fu) ; TODO figure out how replacement for ispell-word
 
 
 ;; PROJECT
@@ -1350,18 +1351,10 @@ _j_   zoom-out
     "g-" 'evil-numbers/dec-at-pt
 
     ;; flyspell correct
-    "z=" 'flyspell-correct-wrapper)
+    "z=" 'flyspell-correct-wrapper
+    "C-;" 'flyspell-correct-wrapper
 
-  ;; normal mode hotkeys
-  (general-define-key
-    :states 'normal
     "s" 'avy-goto-char)
-
-  ;; visual mode hotkeys
-  (general-define-key
-    :states 'visual
-    ;; also bound to "S", "s" and "c" are the same in visual mode anyways
-    "s" 'evil-surround-region)
 
   ;; insert mode hotkeys
   (general-define-key
@@ -1440,7 +1433,6 @@ _j_   zoom-out
     "C-<iso-lefttab>" 'persp-switch-prev
     "C-S-<tab>" 'persp-switch-prev
 
-
     ;; quick perspective switching
     "M-1" (lambda () (interactive) (my-persp-switch-index 0))
     "M-2" (lambda () (interactive) (my-persp-switch-index 1))
@@ -1501,7 +1493,8 @@ _j_   zoom-out
   :init
   (global-flycheck-mode) ; TODO should this be :init or :config?
   :config
-  (setq flycheck-indication-mode 'right-fringe)
+  (setq flycheck-indication-mode 'right-fringe
+        flycheck-display-errors-delay 0.25)
   ;; change indicator to a left arrow since the fringe is now on the right
   ;; https://github.com/hlissner/doom-emacs/blob/master/modules/ui/vc-gutter/config.el#L120
   (define-fringe-bitmap 'flycheck-fringe-bitmap-double-arrow
