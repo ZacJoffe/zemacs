@@ -171,7 +171,7 @@ With argument, do this that many times."
       (delete-region (region-beginning) (region-end))
     (delete-region (point) (progn (forward-word arg) (point)))))
 
-;; this is mainly for letting me use C-w to delete words in vertico buffers (see general.el for hotkeys)
+;; this is mainly for allowing me to use C-w to delete words in vertico buffers (see general.el for hotkeys)
 (defun backward-delete-word (arg)
   "Delete characters backward until encountering the end of a word.
 With argument, do this that many times."
@@ -810,7 +810,7 @@ With argument, do this that many times."
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-peacock t)
+  (load-theme 'doom-dracula t)
 
   ;; Enable custom treemacs theme (all-the-icons must be installed!)
   (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
@@ -952,6 +952,7 @@ With argument, do this that many times."
 
 ;; TODO document
 ;; https://www.manueluberti.eu/emacs/2018/02/17/magit-bury-buffer/
+;; TODO see how doom does this
 (defun magit-kill-buffers ()
   "Restore window configuration and kill all magit buffers."
   ;(interactive)
@@ -1193,8 +1194,19 @@ _j_   zoom-out
 
 
 ;; TODO fix (maybe early init?)
+;;; GENERAL.EL
+
+;; https://github.com/hlissner/doom-emacs/blob/master/modules/config/default/config.el#L6
+(defvar default-minibuffer-maps
+  (append '(minibuffer-local-map
+            minibuffer-local-ns-map
+            minibuffer-local-completion-map
+            minibuffer-local-must-match-map
+            minibuffer-local-isearch-map
+            read-expression-map))
+  "A list of all the keymaps used for the minibuffer.")
+
 ;; general keybindings
-;; doomesque hotkeys using spacebar as prefix
 (use-package general
   :config
   (general-evil-setup t)
@@ -1202,10 +1214,10 @@ _j_   zoom-out
   (general-create-definer my-leader-def
     :prefix my-leader)
   (general-override-mode) ;; https://github.com/noctuid/general.el/issues/99#issuecomment-360914335
+  ;; doomesque hotkeys using spacebar as prefix
   (my-leader-def
     :states '(motion normal visual treemacs) ;; note the treemacs state
     :keymaps 'override ;; https://github.com/noctuid/general.el/issues/99#issuecomment-360914335
-    ; TODO add the doom hotkeys that I use
     ; TODO ordering in which-key (is it even possible?)
 
     ;; map universal argument to SPC-u
@@ -1255,6 +1267,7 @@ _j_   zoom-out
     "hv" '(helpful-variable :which-key "describe-variable")
     "hm" '(describe-mode :which-key "describe-mode")
     "hF" '(describe-face :which-key "describe-face")
+    "hw" '(where-is :which-key "where-is")
 
     ;; zoom
     ;; the hydra is nice but the rest is kind of jank, need to pla around with this more
@@ -1316,6 +1329,17 @@ _j_   zoom-out
     "g" '(:ignore t :which-key "Git") ; prefix
     "gg" '(magit-status :which-key "Git status"))
 
+  ;; minibuffer keybindings
+  (general-define-key
+    :keymaps default-minibuffer-maps
+    [escape] 'abort-recursive-edit ;; escape should always quit
+
+    "C-a" 'move-beginning-of-line
+    "C-e" 'move-end-of-line
+
+    "C-w" 'backward-delete-word
+    "C-v" 'yank)
+
   ;; evil bindings
   ;; TODO this is a bit of a mess, I need to go through the state hierarchy to define hotkeys in highest priority
   ;; normal/visual mode hotkeys
@@ -1330,8 +1354,8 @@ _j_   zoom-out
 
   ;; normal mode hotkeys
   (general-define-key
-   :states 'normal
-   "s" 'avy-goto-char)
+    :states 'normal
+    "s" 'avy-goto-char)
 
   ;; visual mode hotkeys
   (general-define-key
@@ -1397,6 +1421,7 @@ _j_   zoom-out
     "C-M-=" 'zoom-in
     "C-M--" 'zoom-out
 
+    ;; TODO I don't think this is needed anymore with the minibuffer keybindings?
     ;; C-w should always delete the last word unless normal mode in evil
     ;; this allows me to use C-w to delete words in vertico
     "C-w" 'backward-delete-word
@@ -1448,7 +1473,7 @@ _j_   zoom-out
     :keymaps 'org-mode-map
     :major-modes t
     "RET" 'org-return))
-
+;;----
 
 ;;; LANGUAGES
 ;; lsp
