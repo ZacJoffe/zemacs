@@ -948,6 +948,8 @@ With argument, do this that many times."
     ;(magit-restore-window-configuration)
     (mapc #'kill-buffer buffers)))
 
+;; TODO document
+;; TODO also kill diff buffer
 (defun magit-quit (&optional kill-buffer)
   ""
   (interactive "P")
@@ -965,9 +967,18 @@ With argument, do this that many times."
 ;; show todos in magit status
 (use-package magit-todos)
 
+(use-package git-gutter
+  :init
+  (global-git-gutter-mode 1))
 
-; TODO
-(use-package git-gutter-fringe)
+(use-package git-gutter-fringe
+  :config
+  ;; pretty diff indicators
+  ;; https://github.com/hlissner/doom-emacs/blob/master/modules/ui/vc-gutter/config.el#L106
+  (setq-default fringes-outside-margins t)
+  (define-fringe-bitmap 'git-gutter-fr:added [224] nil nil '(center repeated))
+  (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
+  (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
 
 
 ;; ORG
