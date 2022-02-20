@@ -463,8 +463,11 @@ With argument, do this that many times."
   (marginalia-mode))
 
 ;; consult
-;TODO config
 (use-package consult)
+
+;; integration with flycheck
+(use-package consult-flycheck
+  :after (consult flycheck))
 
 ;; consult functions
 (defun consult-find-file (DIR)
@@ -474,12 +477,13 @@ With argument, do this that many times."
     (find-file selection)))
 
 ;; embark
-;TODO config
 (use-package embark
+  :after which-key ; TODO this is here so I can disable which-key C-h, unsure if it's needed
   :config
-  ;; let "C-h" after a prefix command bring up a completion search using vertico
+  ;; let "C-h" after a prefix command bring up a completion search using consult
   ;; https://www.reddit.com/r/emacs/comments/otjn19/comment/h6vyx9q/?utm_source=share&utm_medium=web2x&context=3
-  (setq prefix-help-command #'embark-prefix-help-command))
+  (setq prefix-help-command #'embark-prefix-help-command
+        which-key-use-C-h-commands nil))
 (use-package embark-consult)
 
 ;;----
@@ -1237,6 +1241,7 @@ _j_   zoom-out
     "eu" '(undo-tree-visualize :which-key "undo-tree-visualize")
     "et" '(hydra-theme/body :which-key "hydra-theme") ; not sure if this is the best place for this, perhaps toggles would be more appropriate?
     "er" '(query-replace :which-key "query-replace")
+    "ec" '(consult-theme :which-key "consult-theme")
 
     ;; buffer
     ;"TAB" '(switch-to-prev-buffer :which-key "Prev buffer")
