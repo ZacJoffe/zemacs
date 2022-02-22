@@ -846,8 +846,8 @@ With argument, do this that many times."
         doom-modeline-persp-name nil
         doom-modeline-minor-modes nil
         doom-modeline-major-mode-icon nil
-        doom-modeline-buffer-file-name-style 'relative-from-project
-        doom-modeline-indent-info t
+        doom-modeline-buffer-file-name-style 'truncate-nil
+        doom-modeline-indent-info nil
         ;; Only show file encoding if it's non-UTF-8 and different line endings
         ;; than the current OSes preference
         doom-modeline-buffer-encoding 'nondefault
@@ -857,15 +857,14 @@ With argument, do this that many times."
   ;; display symlink file paths https://github.com/seagle0128/doom-modeline#faq
   (setq find-file-visit-truename t)
 
-  ;; persp-mode integration
-  (setq doom-modeline-persp-name t)
-  (setq doom-modeline-display-defualt-persp-name t)
-
-  ;; add padding to the right side of the modeline to prevent it from getting cutoff
-  ;; https://github.com/hlissner/doom-emacs/blob/develop/modules/ui/modeline/README.org#the-right-side-of-the-modeline-is-cut-off
+  ;; doom uses the default modeline that is defined here: https://github.com/seagle0128/doom-modeline/blob/master/doom-modeline.el#L90
+  ;; as far as I can tell you can't change the ordering of segments without redefining the modeline entirely (segments can be toggled though)
+  ;;
+  ;; this is a bit messy since I already set ab unch of toggles, TODO need to work on this
   (doom-modeline-def-modeline 'main
-    '(bar matches buffer-info remote-host buffer-position parrot selection-info)
-    '(misc-info minor-modes checker input-method buffer-encoding major-mode process vcs "  "))) ; <-- added padding here
+    '(bar modals matches buffer-info buffer-position selection-info)
+    '(misc-info input-method buffer-encoding lsp minor-modes major-mode process vcs checker "  "))) ;; note the extra space
+
 
 
 ;; highlight todos
