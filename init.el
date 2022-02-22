@@ -897,7 +897,9 @@ With argument, do this that many times."
           ;; For warning about a problematic or misguiding code
           ("XXX" font-lock-constant-face bold)
           ;; for temp comments or TODOs to be deleted
-          ("DELETEME" error bold))))
+          ("DELETEME" error bold)
+          ;; for works in progress
+          ("WIP" font-lock-keyword-face bold))))
 
 
 ;; rainbow delimiters
