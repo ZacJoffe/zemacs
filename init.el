@@ -612,6 +612,18 @@ With argument, do this that many times."
 
 
 ;; WORKSPACES/PERSPECTIVES
+;; WIP trying out eyebrowse mode since persp is buggy
+(use-package eyebrowse)
+
+;; eyebrowse defuns
+(defun my-eyebrowse-switch-to-window-config (index)
+  ""
+  (interactive "P")
+  (if (eyebrowse--window-config-present-p index)
+      (eyebrowse-switch-to-window-config index)
+    (message "Invalid workspace")))
+
+
 ;; my workflow is hacked on top of persp-mode.el (apparently it works better with emacsclient than perspective-el)
 (use-package persp-mode
   :config
@@ -1435,20 +1447,38 @@ _j_   zoom-out
 
     ;; perspective management
     ;; persp cycling
-    "C-<tab>" 'persp-switch-next
-    "C-<iso-lefttab>" 'persp-switch-prev
-    "C-S-<tab>" 'persp-switch-prev
+    ;"C-<tab>" 'persp-switch-next
+    ;"C-<iso-lefttab>" 'persp-switch-prev
+    ;"C-S-<tab>" 'persp-switch-prev
 
     ;; quick perspective switching
-    "M-1" (lambda () (interactive) (my-persp-switch-index 0))
-    "M-2" (lambda () (interactive) (my-persp-switch-index 1))
-    "M-3" (lambda () (interactive) (my-persp-switch-index 2))
-    "M-4" (lambda () (interactive) (my-persp-switch-index 3))
-    "M-5" (lambda () (interactive) (my-persp-switch-index 4))
-    "M-6" (lambda () (interactive) (my-persp-switch-index 5))
-    "M-7" (lambda () (interactive) (my-persp-switch-index 6))
-    "M-8" (lambda () (interactive) (my-persp-switch-index 7))
-    "M-9" (lambda () (interactive) (my-persp-switch-index 8)))
+    ;"M-1" (lambda () (interactive) (my-persp-switch-index 0))
+    ;"M-2" (lambda () (interactive) (my-persp-switch-index 1))
+    ;"M-3" (lambda () (interactive) (my-persp-switch-index 2))
+    ;"M-4" (lambda () (interactive) (my-persp-switch-index 3))
+    ;"M-5" (lambda () (interactive) (my-persp-switch-index 4))
+    ;"M-6" (lambda () (interactive) (my-persp-switch-index 5))
+    ;"M-7" (lambda () (interactive) (my-persp-switch-index 6))
+    ;"M-8" (lambda () (interactive) (my-persp-switch-index 7))
+    ;"M-9" (lambda () (interactive) (my-persp-switch-index 8))
+
+
+    ;; workspace cycling TODO doesn't wrap around
+    "C-<tab>" 'eyebrowse-prev-window-config
+    "C-<iso-lefttab>" 'eyebrowse-next-window-config
+    "C-S-<tab>" 'eyebrowse-next-window-config
+
+    ;; quick workspace switching
+    "M-1" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 1))
+    "M-2" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 2))
+    "M-3" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 3))
+    "M-4" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 4))
+    "M-5" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 5))
+    "M-6" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 6))
+    "M-7" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 7))
+    "M-8" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 8))
+    "M-9" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 9))
+    )
 
   ;; magit
   (general-define-key
