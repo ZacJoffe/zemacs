@@ -1068,16 +1068,17 @@ With argument, do this that many times."
 
 
 ;; helpful
+;; TODO figure out how to reuse window for recursive helps
 (use-package helpful
   :init
   (defvar read-symbol-positions-list nil)
   :config
   ;; redefine help keys to use helpful functions instead of vanilla
   ;; https://github.com/Wilfred/helpful#usage
-  ;; TODO refactor with general
-  (global-set-key (kbd "C-h f") #'helpful-callable)
-  (global-set-key (kbd "C-h v") #'helpful-variable)
-  (global-set-key (kbd "C-h k") #'helpful-key))
+  :general ;; global
+  ("C-h f" 'helpful-callable)
+  ("C-h v" 'helpful-variable)
+  ("C-h k" 'helpful-key))
 
 ;; HACK for emacs 29
 ;; https://github.com/Wilfred/helpful/issues/282#issuecomment-1040416413
@@ -1405,7 +1406,9 @@ _j_   zoom-out
     ;; window management
     "C-w C-u" 'winner-undo
     "C-w u" 'winner-undo
-    "C-w a" 'ace-window)
+    "C-w a" 'ace-window
+    "C-w C-w" 'ace-window
+    "C-w w" 'ace-window)
 
 
   ;; company
@@ -1438,11 +1441,6 @@ _j_   zoom-out
     "C--" 'text-scale-decrease
     "C-M-=" 'zoom-in
     "C-M--" 'zoom-out
-
-    ;; TODO I don't think this is needed anymore with the minibuffer keybindings?
-    ;; C-w should always delete the last word unless normal mode in evil
-    ;; this allows me to use C-w to delete words in vertico
-    "C-w" 'backward-delete-word
 
      ;; C-v to paste (or "yank" in emacs jargon) from clipboard, useful for minibuffers (such as query-replace and M-x)
     "C-v" 'yank
@@ -1509,6 +1507,7 @@ _j_   zoom-out
     :major-modes t
     "RET" 'org-return))
 ;;----
+
 
 ;;; LANGUAGES
 ;; lsp
