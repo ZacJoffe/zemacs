@@ -308,19 +308,26 @@ With argument, do this that many times."
 ;; evil
 (use-package evil
   :init ;; tweak evil's configuration before loading it
-  (setq evil-search-module 'evil-search)
-  (setq evil-ex-complete-emacs-commands nil)
-  (setq evil-vsplit-window-right t)
-  (setq evil-split-window-below t)
-  (setq evil-shift-round nil)
-  (setq evil-want-C-u-scroll t)
-  (setq evil-want-integration t)
-  (setq evil-want-keybinding nil)
-  (setq evil-normal-state-cursor 'box)
-  :config ;; tweak evil after loading it
-  (evil-mode)
+  (setq evil-search-module 'evil-search
+        evil-ex-complete-emacs-commands nil
+        evil-vsplit-window-right t
+        evil-split-window-below t
+        evil-shift-round nil
+        evil-want-C-u-scroll t
+        evil-want-integration t
+        evil-want-keybinding nil
+        evil-normal-state-cursor 'box
+        evil-ex-search-vim-style-regexp t)
+  :config
   ;; highlight the current line (not explicitly evil but whatever)
-  (global-hl-line-mode 1))
+  (global-hl-line-mode 1)
+
+  ;; HACK prevent evil from moving window location when splitting by forcing a recenter
+  ;; also do not switch to new buffer
+  (advice-add 'evil-window-vsplit :after (lambda (&rest r) (progn (evil-window-prev 1) (recenter))))
+  (advice-add 'evil-window-split :after (lambda (&rest r) (progn (evil-window-prev 1) (recenter))))
+
+  (evil-mode))
 
 ;; evil collection
 (use-package evil-collection
