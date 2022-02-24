@@ -631,14 +631,47 @@ With argument, do this that many times."
     (message "Invalid workspace")))
 
 
-;; my workflow is hacked on top of persp-mode.el (apparently it works better with emacsclient than perspective-el)
-(use-package persp-mode
+(use-package perspective
   :config
-  (setq persp-nil-name "#1" ;; new default name
-        persp-autokill-buffer-on-remove t
-        persp-add-buffer-on-after-change-major-mode t)
-  ;; start persp-mode
-  (persp-mode 1))
+  (setq persp-initial-frame-name "1") ;; "main" perspective
+  (persp-mode))
+
+;; using this naming convention ("+" prefix) to avoid namespace collision during migration
+(defun +persp/add-new ()
+  ""
+  (interactive)
+  (let ((num-persps (length (persp-names))))
+    (persp-switch (number-to-string (+ num-persps 1)))))
+
+(defun +persp/kill-top ()
+  ""
+  (interactive)
+  (if (eq (length (persp-names)) 1)
+      (message "Cannot kill default perspective")
+    (let ((last-persp (car (last (persp-names)))))
+      (persp-kill last-persp)
+      (message (concat "Killed perspective " last-persp)))))
+
+(defun +persp/switch-by-index (index)
+  ""
+  (interactive "P")
+  (if-let* ((persps (persp-names))
+            (name (nth index persps)))
+      (if (string= name (persp-current-name))
+          (message (concat "Already on persp " name))
+        (persp-switch name)
+        (message (concat "Switched to persp " name)))
+    (message (concat "Invalid persp index: " (number-to-string index)))))
+
+
+;; my workflow is hacked on top of persp-mode.el (apparently it works better with emacsclient than perspective-el)
+;(use-package persp-mode
+;  :config
+;  (setq persp-nil-name "#1" ;; new default name
+;        persp-autokill-buffer-on-remove t
+;        persp-add-buffer-on-after-change-major-mode t)
+;  ;; start persp-mode
+;  (persp-mode 1))
 
 ;; a bunch of functions to hack my workflow for perspectives
 (defun persp-exists (NAME)
@@ -681,7 +714,7 @@ With argument, do this that many times."
   "Kill the perspective at the top of the stack."
   (interactive)
   (if (eq (length persp-names-cache) 1)
-      (message "Cannot kill last perspective")
+      (message "Cannot kill default perspective")
     (let ((last-persp (cons (car (last persp-names-cache)) '()) ))
       (persp-kill last-persp))))
 
@@ -1450,11 +1483,11 @@ _j_   zoom-out
     "C-S-a" 'unbury-buffer
     "C-z" 'consult-buffer
 
-    ;; perspective management
+    ;; persp management
     ;; persp cycling
-    ;"C-<tab>" 'persp-switch-next
-    ;"C-<iso-lefttab>" 'persp-switch-prev
-    ;"C-S-<tab>" 'persp-switch-prev
+    "C-<tab>" 'persp-switch-next
+    "C-<iso-lefttab>" 'persp-switch-prev
+    "C-S-<tab>" 'persp-switch-prev
 
     ;; quick perspective switching
     ;"M-1" (lambda () (interactive) (my-persp-switch-index 0))
@@ -1467,22 +1500,34 @@ _j_   zoom-out
     ;"M-8" (lambda () (interactive) (my-persp-switch-index 7))
     ;"M-9" (lambda () (interactive) (my-persp-switch-index 8))
 
+    ;; perspective
+    "M-1" (lambda () (interactive) (+persp/switch-by-index 0))
+    "M-2" (lambda () (interactive) (+persp/switch-by-index 1))
+    "M-3" (lambda () (interactive) (+persp/switch-by-index 2))
+    "M-4" (lambda () (interactive) (+persp/switch-by-index 3))
+    "M-5" (lambda () (interactive) (+persp/switch-by-index 4))
+    "M-6" (lambda () (interactive) (+persp/switch-by-index 5))
+    "M-7" (lambda () (interactive) (+persp/switch-by-index 6))
+    "M-8" (lambda () (interactive) (+persp/switch-by-index 7))
+    "M-9" (lambda () (interactive) (+persp/switch-by-index 8))
+
+
 
     ;; workspace cycling TODO doesn't wrap around
-    "C-<tab>" 'eyebrowse-prev-window-config
-    "C-<iso-lefttab>" 'eyebrowse-next-window-config
-    "C-S-<tab>" 'eyebrowse-next-window-config
+    ;"C-<tab>" 'eyebrowse-prev-window-config
+    ;"C-<iso-lefttab>" 'eyebrowse-next-window-config
+    ;"C-S-<tab>" 'eyebrowse-next-window-config
 
     ;; quick workspace switching
-    "M-1" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 1))
-    "M-2" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 2))
-    "M-3" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 3))
-    "M-4" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 4))
-    "M-5" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 5))
-    "M-6" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 6))
-    "M-7" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 7))
-    "M-8" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 8))
-    "M-9" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 9))
+    ;"M-1" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 1))
+    ;"M-2" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 2))
+    ;"M-3" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 3))
+    ;"M-4" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 4))
+    ;"M-5" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 5))
+    ;"M-6" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 6))
+    ;"M-7" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 7))
+    ;"M-8" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 8))
+    ;"M-9" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 9))
     )
 
   ;; magit
