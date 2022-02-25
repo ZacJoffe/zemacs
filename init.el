@@ -631,6 +631,7 @@ With argument, do this that many times."
     (message "Invalid workspace")))
 
 
+;; TODO move persp segment to left part of modeline
 (use-package perspective
   :config
   (setq persp-initial-frame-name "1") ;; "main" perspective
@@ -638,13 +639,14 @@ With argument, do this that many times."
 
 ;; using this naming convention ("+" prefix) to avoid namespace collision during migration
 (defun +persp/add-new ()
-  ""
+  "Switch to a new perspective and open scratch buffer."
   (interactive)
+  ;; TODO refactor to say name
   (let ((num-persps (length (persp-names))))
     (persp-switch (number-to-string (+ num-persps 1)))))
 
 (defun +persp/kill-top ()
-  ""
+  "Kill the top perspective."
   (interactive)
   (if (eq (length (persp-names)) 1)
       (message "Cannot kill default perspective")
@@ -749,11 +751,11 @@ With argument, do this that many times."
   (interactive)
   (if (eq (length persp-names-cache) 1)
       (message "No other perspectives to kill!")
-      (let ((persps-to-kill (cdr persp-names-cache)))
-        (progn
-          (persp-switch persp-nil-name)
-          (persp-kill persps-to-kill)
-          (message (concat "Killed persps " (format "%s" persps-to-kill) ", switched to persp " persp-nil-name))))))
+    (let ((persps-to-kill (cdr persp-names-cache)))
+      (progn
+        (persp-switch persp-nil-name)
+        (persp-kill persps-to-kill)
+        (message (concat "Killed persps " (format "%s" persps-to-kill) ", switched to persp " persp-nil-name))))))
 
 (defun persp-kill-all-except-current-and-default ()
   "Kill all perspectives other than the current and the default."
