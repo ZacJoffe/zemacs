@@ -648,6 +648,16 @@ With argument, do this that many times."
   (let ((num-persps (length (persp-names))))
     (persp-switch (number-to-string (+ num-persps 1)))))
 
+;; TODO test this more
+(defun +persp/add-new-import-buffer ()
+  "Switch to a new perspective, copying over currently selected buffer."
+  (interactive)
+  ;; TODO refactor to output message
+  (let ((curr-buffer (current-buffer)))
+    (+persp/add-new)
+    (persp-add-buffer curr-buffer)
+    (persp-switch-to-buffer* curr-buffer)))
+
 (defun +persp/kill-top ()
   "Kill the top perspective."
   (interactive)
@@ -657,10 +667,34 @@ With argument, do this that many times."
       (persp-kill last-persp)
       (message (concat "Killed perspective " last-persp)))))
 
-(defun +persp/switch-by-index (index)
+;; NOTE you can kill default perspective, but I don't see a reason to do that
+;; so for now I am going to prevent that through these wrappers
+(defun +persp/kill-current ()
   ""
+  (interactive)
+  (let ((curr (persp-current-name)))
+    (if (string= curr persp-initial-frame-name)
+        (message "Cannot kill protected perspective %s" curr)
+      (persp-prev)
+      (persp-kill curr)
+      (let ((new-curr (persp-current-name)))
+        ;; TODO shift names
+        (message "Killed persp %s, switched to persp %s" curr new-curr)))))
+
+;; TODO refactor to explicitly switch to (car (persp-names))
+(defun +persp/kill-all-except-default ()
+  ""
+  (interactive)
+  (if (eq (length (persp-names)) 1)
+      (message "Cannot kill default perspective")
+    (let ((persps-to-kill (cdr (persp-names))))
+      (mapc (lambda (persp-name) (persp-kill persp-name)) persps-to-kill))))
+
+
+(defun +persp/switch-by-index (index)
+  "Switch to perspective at index INDEX, if it exists."
   (interactive "P")
-  (if-let* ((persps (persp-names))
+  (if-let* ((persps (persp-names)) ;; TODO refactor persps out?
             (name (nth index persps)))
       (if (string= name (persp-current-name))
           (message (concat "Already on persp " name))
