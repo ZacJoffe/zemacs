@@ -1403,25 +1403,27 @@ _j_   zoom-out
     "ni" '(org-roam-node-insert :which-key "insert-node")
     "nt" '(org-roam-dailies-goto-today :which-key "org-roam-dailies-goto-today")
 
-    ;; workspaces/perspectives
+    ;; persps
+    ;"TAB" '(:ignore t :which-key "Perspective")
+    ;"TAB TAB" '(persp-switch :which-key "persp-switch")
+    ;"TAB [" '(persp-switch-prev :which-key "persp-switch-prev")
+    ;"TAB ]" '(persp-switch-next :which-key "persp-switch-next")
+    ;"TAB n" '(persp-add-new-anonymous-scratch-buffer :which-key "persp-add-new-anonymous-scratch-buffer")
+    ;"TAB N" '(persp-add-new-anonymous :which-key "persp-add-new-anonymous")
+    ;"TAB k" '(persp-kill-current :which-key "persp-kill-current")
+    ;"TAB K" '(persp-kill-all-except-default :which-key "persp-kill-all-except-default")
+    ;"TAB h" '(hydra-switch-persp/body :which-key "hydra-switch-persp")
+
+    ;; perspectives
     "TAB" '(:ignore t :which-key "Perspective")
     "TAB TAB" '(persp-switch :which-key "persp-switch")
-    "TAB [" '(persp-switch-prev :which-key "persp-switch-prev")
-    "TAB ]" '(persp-switch-next :which-key "persp-switch-next")
-    "TAB n" '(persp-add-new-anonymous-scratch-buffer :which-key "persp-add-new-anonymous-scratch-buffer")
-    "TAB N" '(persp-add-new-anonymous :which-key "persp-add-new-anonymous")
-    "TAB k" '(persp-kill-current :which-key "persp-kill-current")
-    "TAB K" '(persp-kill-all-except-default :which-key "persp-kill-all-except-default")
-    "TAB h" '(hydra-switch-persp/body :which-key "hydra-switch-persp")
-    ;; "TAB 1" '((lambda () (interactive) (my-persp-switch-index 0)) :which-key "Switch to #1")
-    ;; "TAB 2" '((lambda () (interactive) (my-persp-switch-index 1)) :which-key "Switch to #2")
-    ;; "TAB 3" '((lambda () (interactive) (my-persp-switch-index 2)) :which-key "Switch to #3")
-    ;; "TAB 4" '((lambda () (interactive) (my-persp-switch-index 3)) :which-key "Switch to #4")
-    ;; "TAB 5" '((lambda () (interactive) (my-persp-switch-index 4)) :which-key "Switch to #5")
-    ;; "TAB 6" '((lambda () (interactive) (my-persp-switch-index 5)) :which-key "Switch to #6")
-    ;; "TAB 7" '((lambda () (interactive) (my-persp-switch-index 6)) :which-key "Switch to #7")
-    ;; "TAB 8" '((lambda () (interactive) (my-persp-switch-index 7)) :which-key "Switch to #8")
-    ;; "TAB 9" '((lambda () (interactive) (my-persp-switch-index 8)) :which-key "Switch to #9")
+    "TAB [" '(persp-prev :which-key "persp-prev")
+    "TAB ]" '(persp-next :which-key "persp-next")
+    "TAB n" '(+persp/add-new :which-key "+persp/add-new")
+    ;"TAB N" '(persp-add-new-anonymous :which-key "persp-add-new-anonymous")
+    "TAB k" '(+persp/kill-current :which-key "+persp/kill-current")
+    "TAB K" '(+persp/kill-all-except-default :which-key "+persp/kill-all-except-default")
+    ;"TAB h" '(hydra-switch-persp/body :which-key "hydra-switch-persp")
 
 
     ;; git
@@ -1525,24 +1527,14 @@ _j_   zoom-out
     "C-S-a" 'unbury-buffer
     "C-z" 'consult-buffer
 
-    ;; persp management
+    ;; perspective
     ;; persp cycling
-    "C-<tab>" 'persp-switch-next
-    "C-<iso-lefttab>" 'persp-switch-prev
-    "C-S-<tab>" 'persp-switch-prev
+    "C-<tab>" 'persp-next
+    "C-<iso-lefttab>" 'persp-prev
+    "C-S-<tab>" 'persp-prev
+
 
     ;; quick perspective switching
-    ;"M-1" (lambda () (interactive) (my-persp-switch-index 0))
-    ;"M-2" (lambda () (interactive) (my-persp-switch-index 1))
-    ;"M-3" (lambda () (interactive) (my-persp-switch-index 2))
-    ;"M-4" (lambda () (interactive) (my-persp-switch-index 3))
-    ;"M-5" (lambda () (interactive) (my-persp-switch-index 4))
-    ;"M-6" (lambda () (interactive) (my-persp-switch-index 5))
-    ;"M-7" (lambda () (interactive) (my-persp-switch-index 6))
-    ;"M-8" (lambda () (interactive) (my-persp-switch-index 7))
-    ;"M-9" (lambda () (interactive) (my-persp-switch-index 8))
-
-    ;; perspective
     "M-1" (lambda () (interactive) (+persp/switch-by-index 0))
     "M-2" (lambda () (interactive) (+persp/switch-by-index 1))
     "M-3" (lambda () (interactive) (+persp/switch-by-index 2))
@@ -1552,8 +1544,6 @@ _j_   zoom-out
     "M-7" (lambda () (interactive) (+persp/switch-by-index 6))
     "M-8" (lambda () (interactive) (+persp/switch-by-index 7))
     "M-9" (lambda () (interactive) (+persp/switch-by-index 8))
-
-
 
     ;; workspace cycling TODO doesn't wrap around
     ;"C-<tab>" 'eyebrowse-prev-window-config
