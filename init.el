@@ -5,6 +5,9 @@
 (setq-default indent-tabs-mode nil
               tab-width 4)
 
+;; wrap at 80 characters for auto-fill-mode
+(setq-default fill-column 80)
+
 ;; save buffers on close (sessioning)
 (setq desktop-path '("~/"))
 ;(desktop-save-mode 1) ; TODO doesn't work with perspective-el? https://github.com/nex3/perspective-el
