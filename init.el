@@ -135,6 +135,10 @@
                             (?\{ . ?\})
                             ))
 
+;; prevent electric pair mode from being enabled in the mini buffer (for things like consult)
+;; https://emacs.stackexchange.com/a/29342
+(setq electric-pair-inhibit-predicate (lambda (char) (minibufferp)))
+
 ;; use aspell backend
 (if (eq system-type 'darwin)
   (setq ispell-program-name "/opt/homebrew/bin/aspell" ; mac specific
