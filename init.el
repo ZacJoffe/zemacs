@@ -864,7 +864,7 @@ With argument, do this that many times."
   ;; this is a bit messy since I already set a bunch of toggles, TODO need to work on this
   (doom-modeline-def-modeline 'main
     '(bar modals matches buffer-info buffer-position selection-info)
-    '(misc-info input-method buffer-encoding lsp minor-modes major-mode process vcs checker "  "))) ;; note the extra space
+    '(input-method buffer-encoding lsp major-mode process vcs checker " " misc-info "  ")))
 
 
 
