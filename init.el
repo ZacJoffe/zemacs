@@ -476,14 +476,17 @@ With argument, do this that many times."
 
 ;; embark
 (use-package embark
+  :general
+  ("C-l" 'embark-act) ;; TODO C-. not working
   :after which-key ; TODO this is here so I can disable which-key C-h, unsure if it's needed
   :config
   ;; let "C-h" after a prefix command bring up a completion search using consult
   ;; https://www.reddit.com/r/emacs/comments/otjn19/comment/h6vyx9q/?utm_source=share&utm_medium=web2x&context=3
   (setq prefix-help-command #'embark-prefix-help-command
         which-key-use-C-h-commands nil))
-(use-package embark-consult)
 
+(use-package embark-consult
+  :after (embark consult))
 ;;----
 
 
