@@ -144,16 +144,22 @@
   (setq ispell-program-name "/usr/bin/aspell"
         ispell-dictionary "english"))
 
+;; inspired by https://owoga.com/how-to-zap-whitespace-in-emacs/
+(defun delete-whitespace-left-of-cursor ()
+  "Delete all whitespace to the left of cursor's current position."
+  (interactive)
+  (let ((skip-chars "\t\n\r ")
+        (old-point (point)))
+    (skip-chars-backward skip-chars)
+    (let ((start (point)))
+      (delete-region start old-point))))
 
 ;; I like the behaviour of evil-delete-backward-word over backward-kill-word, this is a small wrapper to make it more usable for me
 (defun my-backward-kill-word ()
   "Wrapper around evil-delete-backward-word."
   (interactive)
   (if (or (bolp) (eq (current-column) (current-indentation)))
-      ;(delete-indentation)
-      (progn
-        (evil-delete-backward-word)
-        (evil-delete-backward-word))
+      (delete-whitespace-left-of-cursor)
     (evil-delete-backward-word)))
 
 ;; basically the same as my-backward-kill-word except it creates a space when merging lines
