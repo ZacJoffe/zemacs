@@ -83,37 +83,9 @@
 (add-hook 'conf-mode-hook 'display-line-numbers-mode)
 
 
-;; automatically refresh dired on changes
-;; TODO no longer needed?
-(add-hook 'dired-mode-hook 'auto-revert-mode)
-
-
-;; TODO group defuns together
-;; revert buffer without confirmation
-;; http://www.emacswiki.org/emacs-en/download/misc-cmds.el
-(defun revert-buffer-no-confirm ()
-    "Revert buffer without confirmation."
-    (interactive)
-    (revert-buffer :ignore-auto :noconfirm))
-
-
-;; kill all other buffers
-;; https://www.emacswiki.org/emacs/KillingBuffers#h5o-2
-(defun kill-other-buffers ()
-     "Kill all other buffers."
-     (interactive)
-     (mapc 'kill-buffer (delq (current-buffer) (buffer-list))))
-
-
 ;; I use chemacs2 on my desktop, slightly ugly hack to open the correct file in open-init-file
 (when (eq computer 'linux-desktop)
   (setq user-init-file "~/.zemacs/init.el"))
-
-;; open init.el
-(defun open-init-file ()
-  "Open the init file."
-  (interactive)
-  (find-file user-init-file))
 
 
 ;; relative line numbers
@@ -147,6 +119,28 @@
 (if (eq system-type 'gnu/linux)
   (setq ispell-program-name "/usr/bin/aspell"
         ispell-dictionary "english"))
+
+;;;; DEFUNS
+;; revert buffer without confirmation
+;; http://www.emacswiki.org/emacs-en/download/misc-cmds.el
+(defun revert-buffer-no-confirm ()
+    "Revert buffer without confirmation."
+    (interactive)
+    (revert-buffer :ignore-auto :noconfirm))
+
+;; kill all other buffers
+;; https://www.emacswiki.org/emacs/KillingBuffers#h5o-2
+(defun kill-other-buffers ()
+     "Kill all other buffers."
+     (interactive)
+     (mapc 'kill-buffer (delq (current-buffer) (buffer-list))))
+
+;; open init.el
+(defun open-init-file ()
+  "Open the init file."
+  (interactive)
+  (find-file user-init-file))
+
 
 ;; inspired by https://owoga.com/how-to-zap-whitespace-in-emacs/
 (defun delete-whitespace-left-of-cursor ()
