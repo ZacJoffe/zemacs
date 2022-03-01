@@ -1,12 +1,15 @@
+;; TODO early init setup https://www.reddit.com/r/emacs/comments/enmbv4/earlyinitel_reduce_init_time_about_02_sec_and/
+
 ;;; EDITOR GENERAL
 (setq inhibit-startup-message t)
 
-;; indent with 4 spaces
-(setq-default indent-tabs-mode nil
-              tab-width 4)
-
-;; wrap at 80 characters for auto-fill-mode
-(setq-default fill-column 80)
+;; some editor settings
+(setq-default indent-tabs-mode nil ;; indent with spaces
+              tab-width 4          ;; 1 tab <=> 4 spaces
+              c-basic-offset 4     ;; indentation for cc modes
+              fill-column 80       ;; wrap at 80 characters for auto-fill-mode
+              word-wrap t          ;; do not wrap characters in the middle of words
+              truncate-lines t)    ;; do not wrap by default
 
 ;; save buffers on close (sessioning)
 (setq desktop-path '("~/"))
