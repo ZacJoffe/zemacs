@@ -495,6 +495,11 @@ With argument, do this that many times."
   (let ((selection (completing-read "Find file: " (split-string (shell-command-to-string (concat "find " DIR)) "\n" t))))
     (find-file selection)))
 
+(defun my-consult-ripgrep (DIR)
+  "Ripgrep directory DIR."
+  (interactive "DSelect dir: ")
+  (consult-ripgrep DIR))
+
 ;; embark
 (use-package embark
   :after which-key ; TODO this is here so I can disable which-key C-h, unsure if it's needed
@@ -1337,6 +1342,7 @@ _j_   zoom-out
     "x" '(open-scratch-buffer :which-key "Open scratch buffer")
     "<" '(consult-buffer :which-key "consult-buffer")
     "d" '(dired :which-key "dired")
+    "/" '(my-consult-ripgrep :which-key "my-consult-ripgrep")
 
     ;; editor
     "e" '(:ignore t :which-key "Editor")
