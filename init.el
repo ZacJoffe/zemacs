@@ -72,7 +72,7 @@
 (set-face-attribute 'default nil :font "Iosevka Fixed" :height 170 :weight 'light)
 ;; float height value (1.0) makes fixed-pitch take height 1.0 * height of default
 (set-face-attribute 'fixed-pitch nil :font "Iosevka Fixed" :height 1.0 :weight 'light)
-(set-face-attribute 'variable-pitch nil :font "Iosevka Aile" :height 1.0 :weight 'light)
+(set-face-attribute 'variable-pitch nil :font "Iosevka" :height 1.0 :weight 'light)
 
 ;; setup line numbers
 ;; do not dynamically resize line number column when a digit needs to be added
@@ -159,7 +159,7 @@
     (evil-delete-backward-word)))
 
 
-;; backwards-kill-word without copying to kill-ring
+;; backward-kill-word without copying to kill-ring
 ;; https://www.emacswiki.org/emacs/BackwardDeleteWord
 (defun delete-word (arg)
   "Delete characters forward until encountering the end of a word.
@@ -261,6 +261,7 @@ With argument, do this that many times."
   "Open *scractch* buffer."
   (interactive)
   (switch-to-buffer "*scratch*"))
+;;----
 
 
 ;; straight.el bootstrap
@@ -375,8 +376,7 @@ With argument, do this that many times."
   (setq evil-goggles-enable-change nil)
   (setq evil-goggles-enable-delete nil)
   :config
-  (evil-goggles-mode) ;; TODO actions are not being disabled properly
-  )
+  (evil-goggles-mode))
 
 
 ;;; UNDO TREE
@@ -492,7 +492,7 @@ With argument, do this that many times."
   (let ((selection (completing-read "Find file: " (split-string (shell-command-to-string (concat "find " DIR)) "\n" t))))
     (find-file selection)))
 
-(defun my-consult-ripgrep (DIR)
+(defun +consult/ripgrep (DIR)
   "Ripgrep directory DIR."
   (interactive "DSelect dir: ")
   (consult-ripgrep DIR))
@@ -910,7 +910,6 @@ With argument, do this that many times."
   ;; https://github.com/hlissner/doom-emacs/blob/develop/modules/ui/modeline/README.org#the-right-side-of-the-modeline-is-cut-off
   (setq all-the-icons-scale-factor 1.1))
 
-
 ;; themes
 (use-package doom-themes
   :config
@@ -930,7 +929,6 @@ With argument, do this that many times."
 
 ;; modeline
 (use-package doom-modeline
-  ;:init (doom-modeline-mode 1) TODO delete me
   :hook (after-init . doom-modeline-mode)
   :hook (doom-modeline-mode . size-indication-mode) ; filesize in modeline
   :hook (doom-modeline-mode . column-number-mode)   ; cursor column in modeline
@@ -962,7 +960,7 @@ With argument, do this that many times."
   ;; doom uses the default modeline that is defined here: https://github.com/seagle0128/doom-modeline/blob/master/doom-modeline.el#L90
   ;; as far as I can tell you can't change the ordering of segments without redefining the modeline entirely (segments can be toggled though)
   ;;
-  ;; this is a bit messy since I already set ab unch of toggles, TODO need to work on this
+  ;; this is a bit messy since I already set a bunch of toggles, TODO need to work on this
   (doom-modeline-def-modeline 'main
     '(bar modals matches buffer-info buffer-position selection-info)
     '(misc-info input-method buffer-encoding lsp minor-modes major-mode process vcs checker "  "))) ;; note the extra space
@@ -1341,7 +1339,7 @@ _j_   zoom-out
     "x" '(open-scratch-buffer :which-key "Open scratch buffer")
     "<" '(consult-buffer :which-key "consult-buffer")
     "d" '(dired :which-key "dired")
-    "/" '(my-consult-ripgrep :which-key "my-consult-ripgrep")
+    "/" '(+consult/ripgrep :which-key "+consult/ripgrep")
 
     ;; editor
     "e" '(:ignore t :which-key "Editor")
@@ -1394,7 +1392,6 @@ _j_   zoom-out
     ;; window
     "w" '(:ignore t :which-key "Window")
     "ww" '(hydra-window/body :which-key "hydra-window")
-    "wg" '(golden-ratio :which-key "golden-ratio")
     "wt" '(toggle-window-split :which-key "toggle-window-split")
     "wa" '(ace-window :which-key "ace-window")
     "wf" '(toggle-maximize-buffer :which-key "toggle-maximize-buffer")
@@ -1406,7 +1403,6 @@ _j_   zoom-out
     "tc" '(flycheck-mode :which-key "flycheck-mode")
     "tC" '(company-mode :which-key "company-mode") ; not sure how good of a hotkey this is lol
     "tm" '(minimap-mode :which-key "minimap-mode")
-    "tg" '(golden-ratio-mode :which-key "golden-ratio-mode")
     "tg" '(evil-goggles-mode :which-key "evil-goggles")
     "tI" '(toggle-indent-style :which-key "Indent style")
     "tv" '(visual-line-mode :which-key "visual-line-mode")
@@ -1511,9 +1507,7 @@ _j_   zoom-out
     "C-n" #'company-select-next
     "C-p" #'company-select-previous
     "TAB" #'company-complete-selection
-    "<tab>" #'company-complete-selection
-    ;TODO
-    )
+    "<tab>" #'company-complete-selection)
 
   ;; unbind C-z from evil
   (general-unbind '(motion insert treemacs) "C-z")
@@ -1821,23 +1815,8 @@ _j_   zoom-out
 
 ;; ranger enhancement for dired
 (use-package ranger)
-
-
-;; golden ratio windows
-;; TODO this does not work with evil window switching
-(use-package golden-ratio
-  :config
-  (setq golden-ratio-auto-scale t))
-
-
-
-;; KEYBINDINGS
-;; map the escape key to quit mini buffers instantly
-;; https://www.reddit.com/r/emacs/comments/4a0421/any_reason_not_to_just_rebind_keyboardquit_from/d0wo66r/
-;; TODO breaks terminal mode
-;(define-key key-translation-map (kbd "ESC") (kbd "C-g"))
-
 ;----
+
 
 ;; MACOS SPECIFIC CONFIGS
 (setq mac-option-modifier 'super)
@@ -1858,10 +1837,5 @@ _j_   zoom-out
 ;; workspaces https://github.com/hlissner/doom-emacs/tree/master/modules/ui/workspaces
 ;; left fringe prettify (I think doom disables it and renders errors in the line using a popup, get that working)
 ;; solve errors
-
-
-;; https://stackoverflow.com/a/5058752/11312409
-;(setq custom-file "~/.emacs.d/custom.el")
-;(load custom-file)
 
 
