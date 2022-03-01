@@ -181,20 +181,6 @@ With argument, do this that many times."
   (delete-word (- arg)))
 
 
-;; (defun my-tab ()
-;;   ""
-;;   (interactive)
-;;   )
-
-
-
-;; helper function for adding multiple elements to a list
-;; https://emacs.stackexchange.com/a/68048
-(defun add-list-to-list (dst src)
-  "Similar to `add-to-list', but accepts a list as 2nd argument."
-  (set dst
-       (append (eval dst) src)))
-
 ;; toggle whether a file uses tabs or spaces
 ;; https://github.com/hlissner/doom-emacs/blob/master/core/autoload/text.el#L293
 (defun toggle-indent-style ()
@@ -231,24 +217,19 @@ With argument, do this that many times."
 
 
 
-;; TODO
-(defun tab-jump-pair (&optional ARG)
+;; TODO refactor into define-advice maybe?
+;; TODO move defun into advice/hooks section?
+(defun +tab/jump-out (oldfun &rest args)
   ""
-  (interactive "P")
-  (let ((delims-close '(")" "]" "}"))
-	(delims-open '("(" "[" "{")))
-    (if (or (memq (string (following-char)) delims-open) (memq (string (following-char)) delims-close))
-	(forward-char)
-      (forward-whitespace 1)
-      )
-      ;; https://stackoverflow.com/questions/16651180/jump-to-the-first-occurrence-of-symbol-in-emacs
-      ;; (eval
-      ;;  `(progn
-      ;;    (search-forward-regexp
-      ;; 	   (rx symbol-start ,(thing-at-point 'symbol) symbol-end))
-      ;; 	  (beginning-of-thing 'symbol))
-      ;;   ) ;; TODO find previous occurence of close delim, find matching closed delim, jump out of it
-      ))
+  (let ((delimiters '("(" ")" "[" "]" "{" "}" "\\" "<" ">" ";" "|" "`" "'" "\""))
+        (next-char (string (char-after))))
+    (if (member next-char delimiters)
+        (forward-char)
+      (apply oldfun args))))
+
+(advice-add 'indent-for-tab-command :around #'+tab/jump-out)
+(advice-add 'org-cycle :around #'+tab/jump-out)
+
 
 ;; https://gist.github.com/mads-hartmann/3402786?permalink_comment_id=693878#gistcomment-693878
 (defun toggle-maximize-buffer ()
@@ -402,14 +383,6 @@ With argument, do this that many times."
 (use-package editorconfig
   :config
   (editorconfig-mode 1))
-
-;; modify tab behaviour
-;; TODO use this to write own tab behaviour
-(use-package tab-jump-out
-  :config
-  (add-list-to-list 'tab-jump-out-delimiters '("(" "[" "{" "\\" "<" ">"))
-  (tab-jump-out-mode))
-
 ;;----
 
 
@@ -1479,7 +1452,6 @@ _j_   zoom-out
     :states 'insert
     "C-SPC" 'company-complete
     "C-v" 'yank ;; C-v should paste clipboard contents
-    ;"TAB" 'tab-jump-pair
 
     "C-<backspace>" 'my-backward-kill-word
     "M-<backspace>" 'my-backward-kill-line
