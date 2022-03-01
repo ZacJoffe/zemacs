@@ -152,13 +152,14 @@
     (evil-delete-backward-word)))
 
 ;; basically the same as my-backward-kill-word except it creates a space when merging lines
+;; TODO repeated code, this should likely be merged into my-backward-kill-word
 (defun my-backward-kill-line ()
-  "Wrapper around evil-delete-backward-word."
+  "Same as my-backward-kill-word but inserts a space after merging lines"
   (interactive)
   (if (or (bolp) (eq (current-column) (current-indentation)))
       (progn
-        (delete-indentation)
-        (forward-char))
+        (my-backward-kill-word)
+        (insert " "))
     (evil-delete-backward-word)))
 
 
