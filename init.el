@@ -18,6 +18,9 @@
 ;; remember window configuration changes
 (winner-mode 1)
 
+;; automatically refresh buffers
+(global-auto-revert-mode 1)
+
 (scroll-bar-mode -1)        ; Disable visible scrollbar
 (tool-bar-mode -1)          ; Disable the toolbar
 (tooltip-mode -1)           ; Disable tooltips
@@ -81,7 +84,7 @@
 
 
 ;; automatically refresh dired on changes
-;; https://www.reddit.com/r/emacs/comments/1acg6q/comment/c8w2itz/?utm_source=share&utm_medium=web2x&context=3
+;; TODO no longer needed?
 (add-hook 'dired-mode-hook 'auto-revert-mode)
 
 
