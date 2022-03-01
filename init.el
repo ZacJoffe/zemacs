@@ -310,6 +310,7 @@ With argument, do this that many times."
 ;; HACK load general first to allow use of :general keyword
 (use-package general)
 
+
 ;; put backup files and auto-save files in their own directory
 (use-package no-littering
   :init ;; TODO is this working?
@@ -1007,6 +1008,7 @@ With argument, do this that many times."
           ("XXX" font-lock-constant-face bold)
           ;; for temp comments or TODOs to be deleted
           ("DELETEME" error bold)
+          ("KILLME" error bold)
           ;; for works in progress
           ("WIP" font-lock-keyword-face bold))))
 
@@ -1193,6 +1195,7 @@ With argument, do this that many times."
 
 ;; window movement/management hydra
 ;; https://github.com/jmercouris/configuration/blob/master/.emacs.d/hydra.el#L89
+;; TODO hotkeys are not displayed correctly
 (defhydra hydra-window (:hint nil)
    "
 Movement      ^Split^            ^Switch^        ^Resize^
@@ -1222,7 +1225,7 @@ _q_uit          ^        ^         _]_forward
    ("f" find-file)
    ("P" projectile-find-file)
    ("F" follow-mode)
-   ("s" switch-window-then-swap-buffer)
+   ("r" switch-window-then-swap-buffer)
    ("v" split-window-right)
    ("s" split-window-below)
    ("3" split-window-right)
@@ -1414,6 +1417,7 @@ _j_   zoom-out
     "tg" '(golden-ratio-mode :which-key "golden-ratio-mode")
     "tg" '(evil-goggles-mode :which-key "evil-goggles")
     "tI" '(toggle-indent-style :which-key "Indent style")
+    "tv" '(visual-line-mode :which-key "visual-line-mode")
 
     ;; notes
     "n" '(:ignore t :which-key "Notes")
@@ -1819,6 +1823,12 @@ _j_   zoom-out
   :after pdf-view)
 ;;----
 
+;; dired
+(use-package dired
+  :straight nil
+  :general
+  (:keymaps 'dired-mode-map
+    "c" 'find-file))
 
 ;; ranger enhancement for dired
 (use-package ranger)
