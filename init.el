@@ -98,6 +98,7 @@
 ;; line-by-line scrolling
 (setq scroll-step            1
       scroll-conservatively  10000)
+(pixel-scroll-precision-mode 1)
 
 ;; disable bells (distracting)
 (setq ring-bell-function 'ignore)
