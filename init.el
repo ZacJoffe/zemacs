@@ -102,6 +102,18 @@
 ;; disable bells (distracting)
 (setq ring-bell-function 'ignore)
 
+;; delimeter pairing
+(electric-pair-mode 1)
+(setq electric-pair-delete-adjacent-pairs t)
+;; TODO
+(setq electric-pair-pairs '((?\" . ?\")
+                            (?\{ . ?\})
+                            ))
+
+;; prevent electric pair mode from being enabled in the mini buffer (for things like consult)
+;; https://emacs.stackexchange.com/a/29342
+(setq electric-pair-inhibit-predicate (lambda (char) (minibufferp)))
+
 ;; use aspell backend
 (if (eq system-type 'darwin)
   (setq ispell-program-name "/opt/homebrew/bin/aspell" ; mac specific
@@ -287,16 +299,6 @@ With argument, do this that many times."
 
 
 ;;;; EDITOR PACKAGES
-;; smartparens
-;; TODO config
-(use-package smartparens
-  :init
-  (smartparens-global-mode t))
-(use-package evil-smartparens
-  :after (evil smartparens)
-  :hook (smartparens-enabled . evil-smartparens-mode))
-
-
 ;;; EVIL
 ;; evil
 (use-package evil
@@ -1550,7 +1552,10 @@ _j_   zoom-out
 
 ;; latex
 (use-package auctex
-  :hook (LaTeX-mode . visual-line-mode))
+  :hook (LaTeX-mode . visual-line-mode)
+  ;; electric pair mode for '$' https://tex.stackexchange.com/a/75884
+  :hook (LaTeX-mode . (lambda ()
+                       (define-key LaTeX-mode-map (kbd "$") 'self-insert-command))))
 (use-package latex-preview-pane)
 (use-package evil-tex
   :hook (LaTeX-mode . evil-tex-mode))
