@@ -215,22 +215,6 @@ With argument, do this that many times."
 	  (select-window first-win)
 	  (if this-win-2nd (other-window 1))))))
 
-
-
-;; TODO refactor into define-advice maybe?
-;; TODO move defun into advice/hooks section?
-(defun +tab/jump-out (oldfun &rest args)
-  ""
-  (let ((delimiters '("(" ")" "[" "]" "{" "}" "\\" "<" ">" ";" "|" "`" "'" "\""))
-        (next-char (string (char-after))))
-    (if (member next-char delimiters)
-        (forward-char)
-      (apply oldfun args))))
-
-(advice-add 'indent-for-tab-command :around #'+tab/jump-out)
-(advice-add 'org-cycle :around #'+tab/jump-out)
-
-
 ;; https://gist.github.com/mads-hartmann/3402786?permalink_comment_id=693878#gistcomment-693878
 (defun toggle-maximize-buffer ()
   "Maximize window."
@@ -246,6 +230,20 @@ With argument, do this that many times."
   "Open *scractch* buffer."
   (interactive)
   (switch-to-buffer "*scratch*"))
+;;----
+
+
+;; ADVICE/HOOKS
+(defun +tab/jump-out (oldfun &rest args)
+  "Forward-char if next-char is a delimiter, otherwise call OLDFUN with ARGS."
+  (let ((delimiters '("(" ")" "[" "]" "{" "}" "\\" "<" ">" ";" "|" "`" "'" "\""))
+        (next-char (string (char-after))))
+    (if (member next-char delimiters)
+        (forward-char)
+      (apply oldfun args))))
+
+(advice-add 'indent-for-tab-command :around #'+tab/jump-out)
+(advice-add 'org-cycle :around #'+tab/jump-out)
 ;;----
 
 
