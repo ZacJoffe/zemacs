@@ -654,6 +654,38 @@ With argument, do this that many times."
         (+persp/display))
     (+persp-message (format "Invalid persp index %d" (1+ index)) 'error)))
 
+;(autoload 'consult--multi "consult") TODO needed?
+;; TODO needs work
+(defun +persp--consult-buffer-sources ()
+  ""
+  (list `(:name ,(persp-current-name)
+    :narrow ?b
+    :category buffer
+    :state    ,#'consult--buffer-state
+    :items ,(lambda ()
+              (consult--buffer-query
+               :sort 'visibility
+               :as #'buffer-name
+               :predicate (lambda (buf)
+                            (member buf (persp-get-buffers))))))))
+
+;; this function is essentially a copy of consult-buffer
+(defun +persp/consult-buffer ()
+  ""
+  (interactive)
+  (when-let (buffer (consult--multi (+persp--consult-buffer-sources)
+                                    :require-match
+                                    (confirm-nonexistent-file-or-buffer)
+                                    :prompt "Switch to: "
+                                    :history 'consult--buffer-history
+                                    :sort nil))
+    ;; When the buffer does not belong to a source,
+    ;; create a new buffer with the name.
+    (unless (cdr buffer)
+      (consult--buffer-action (car buffer)))))
+
+
+
 ;; my workflow is hacked on top of persp-mode.el (apparently it works better with emacsclient than perspective-el)
 ;(use-package persp-mode
 ;  :config
