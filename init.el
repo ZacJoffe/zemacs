@@ -553,6 +553,24 @@ With argument, do this that many times."
   (setq persp-initial-frame-name "1") ;; "main" perspective
   (persp-mode))
 
+;; https://github.com/hlissner/doom-emacs/blob/master/modules/ui/workspaces/autoload/workspaces.el#L442-L454
+(defun +persp--tabline ()
+  "Build string containing persp list, with the current persp highlighted."
+  (let ((names (persp-names))
+        (curr (persp-current-name)))
+    (mapconcat
+     #'identity
+     (cl-loop for index from 0
+              for name in names
+              collect
+              (propertize (format " [%d] %s " (1+ index) name)
+                          'face (if (string= curr name)
+                                    'highlight
+                                  'default)))
+     " ")))
+
+;; TODO call this whenever switching persps
+;(message (+persp--tabline))
 ;; using this naming convention ("+" prefix) to avoid namespace collision during migration
 (defun +persp/add-new ()
   "Switch to a new perspective and open scratch buffer."
