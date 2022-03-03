@@ -547,9 +547,13 @@ With argument, do this that many times."
     (message "Invalid workspace")))
 
 
-;; TODO move persp segment to left part of modeline
+;; WIP perspective-el migration
+;; TODO buffers
+;; TODO save persps?
+;; TODO emacs server integration
 (use-package perspective
   :config
+  ;; TODO change this to "main", create new perspectives based on index
   (setq persp-initial-frame-name "1") ;; "main" perspective
   (persp-mode))
 
@@ -593,15 +597,14 @@ With argument, do this that many times."
 (defun +persp/add-new ()
   "Switch to a new perspective and open scratch buffer."
   (interactive)
-  ;; TODO refactor to say name
   (let ((num-persps (length (persp-names))))
-    (persp-switch (number-to-string (+ num-persps 1)))))
+    (persp-switch (number-to-string (+ num-persps 1)))
+    (+persp/display)))
 
 ;; TODO test this more
 (defun +persp/add-new-import-buffer ()
   "Switch to a new perspective, copying over currently selected buffer."
   (interactive)
-  ;; TODO refactor to output message
   (let ((curr-buffer (current-buffer)))
     (+persp/add-new)
     (persp-add-buffer curr-buffer)
@@ -643,14 +646,13 @@ With argument, do this that many times."
 (defun +persp/switch-by-index (index)
   "Switch to perspective at index INDEX, if it exists."
   (interactive "P")
-  (if-let* ((persps (persp-names)) ;; TODO refactor persps out?
+  (if-let* ((persps (persp-names))
             (name (nth index persps)))
       (if (string= name (persp-current-name))
-          (message (concat "Already on persp " name))
+          (+persp-message (concat "Already in " name) 'warning)
         (persp-switch name)
-        (message (concat "Switched to persp " name)))
-    (message (concat "Invalid persp index: " (number-to-string index)))))
-
+        (+persp/display))
+    (+persp-message (format "Invalid persp index %d" (1+ index)) 'error)))
 
 ;; my workflow is hacked on top of persp-mode.el (apparently it works better with emacsclient than perspective-el)
 ;(use-package persp-mode
