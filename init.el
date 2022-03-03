@@ -571,6 +571,24 @@ With argument, do this that many times."
 
 ;; TODO call this whenever switching persps
 ;(message (+persp--tabline))
+
+(defun +persp--message (msg &optional face-type)
+  ""
+  (concat (+persp--tabline)
+          (propertize " | " 'face 'font-lock-comment-face)
+          (propertize (format "%s" msg)
+                      'face face-type))) ;; TODO check for face-type
+
+(defun +persp-message (msg &optional face-type)
+  ""
+  (message "%s" (+persp--message msg face-type)))
+
+(defun +persp/display ()
+  ""
+  (interactive)
+  (message "%s" (+persp--tabline)))
+
+
 ;; using this naming convention ("+" prefix) to avoid namespace collision during migration
 (defun +persp/add-new ()
   "Switch to a new perspective and open scratch buffer."
