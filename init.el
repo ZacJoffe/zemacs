@@ -535,22 +535,11 @@ With argument, do this that many times."
 
 
 ;; WORKSPACES/PERSPECTIVES
-;; WIP trying out eyebrowse mode since persp is buggy
-(use-package eyebrowse)
-
-;; eyebrowse defuns
-(defun my-eyebrowse-switch-to-window-config (index)
-  ""
-  (interactive "P")
-  (if (eyebrowse--window-config-present-p index)
-      (eyebrowse-switch-to-window-config index)
-    (message "Invalid workspace")))
-
-
 ;; WIP perspective-el migration
 ;; TODO buffers
 ;; TODO save persps?
 ;; TODO emacs server integration
+;; TODO winner mode support https://github.com/nex3/perspective-el/issues/137
 (use-package perspective
   :config
   ;; TODO change this to "main", create new perspectives based on index
@@ -573,9 +562,6 @@ With argument, do this that many times."
                                   'default)))
      " ")))
 
-;; TODO call this whenever switching persps
-;(message (+persp--tabline))
-
 (defun +persp--message (msg &optional face-type)
   ""
   (concat (+persp--tabline)
@@ -591,7 +577,6 @@ With argument, do this that many times."
   ""
   (interactive)
   (message "%s" (+persp--tabline)))
-
 
 ;; using this naming convention ("+" prefix) to avoid namespace collision during migration
 (defun +persp/add-new ()
@@ -697,125 +682,11 @@ With argument, do this that many times."
     (funcall oldfun)
     (+persp/display)))
 
-;; my workflow is hacked on top of persp-mode.el (apparently it works better with emacsclient than perspective-el)
-;(use-package persp-mode
-;  :config
-;  (setq persp-nil-name "#1" ;; new default name
-;        persp-autokill-buffer-on-remove t
-;        persp-add-buffer-on-after-change-major-mode t)
-;  ;; start persp-mode
-;  (persp-mode 1))
-
-;; a bunch of functions to hack my workflow for perspectives
-(defun persp-exists (NAME)
-  "Return non-nil if NAME is name of existing persp."
-  (member NAME persp-names-cache))
-
-;; thanks again doom lol
-;; https://github.com/hlissner/doom-emacs/blob/master/modules/ui/workspaces/autoload/workspaces.el#L62
-(defun persp-get-current-name ()
-  "Wrapper to get current perspective name."
-  (interactive)
-  (safe-persp-name (get-current-persp)))
-
 (advice-add 'persp-prev :around #'+persp/cycle)
 (advice-add 'persp-next :around #'+persp/cycle)
 
-;; TODO refactor using index of persp-names-cache
-;; create new "anonymous" perspective and switch to it
-;; essentially this allows me to quickly create a new perspective without having to name it, which I find cumbersome
-(defun persp-add-new-anonymous ()
-  "Switch to new perspective."
-  (interactive)
-  ;; hacky approach - perspective names are numbers, add 1 to latest persective
-  ;; and create new one with that number as the name
-  (let* ((last-persp (substring (car (last persp-names-cache)) 1))
-         (new-persp (concat "#" (number-to-string (+ (string-to-number last-persp) 1)))))
-    (progn
-      (persp-rename-all-to-index)
-      (persp-switch new-persp)
-      (clear-window-persp)
-      (message (concat "Created and switched to persp " new-persp)))))
 
-(defun persp-add-new-anonymous-scratch-buffer ()
-  "Switch to new perspective and open *scratch* buffer."
-  (interactive)
-  (progn
-    (persp-add-new-anonymous)
-    (open-scratch-buffer)))
-
-;; kill the perspective most recently created
-(defun persp-kill-top ()
-  "Kill the perspective at the top of the stack."
-  (interactive)
-  (if (eq (length persp-names-cache) 1)
-      (message "Cannot kill default perspective")
-    (let ((last-persp (cons (car (last persp-names-cache)) '()) ))
-      (persp-kill last-persp))))
-
-;; wrapper for switching perspectives, only allow switch if NAME is a valid persp
-;; TODO refactor using index into persp-names-cache as parameter (or create another function)
-(defun my-persp-switch (NAME)
-  "Switch to the perspective with name NAME, if it exists."
-  (if (persp-exists NAME)
-      (if (string= (persp-get-current-name) NAME)
-          (message (concat "Already on persp " NAME))
-        (progn
-          (persp-switch NAME)
-          (message (concat "Persp: " NAME))))
-    (message (concat "Invalid persp: " NAME))))
-
-;; another wrapper for switching perspectives, except parameterizing index in persp list
-(defun my-persp-switch-index (index)
-  "Switch to the perspective at index INDEX of persp-names-cache, if it exists."
-  (interactive "P")
-  (if-let ((name (nth index persp-names-cache)))
-      (if (string= name (persp-get-current-name))
-          (message (concat "Already on persp " name))
-        (progn
-          (persp-switch name)
-          (message (concat "Persp: " name))))
-    (message "Invalid persp")))
-
-
-;; kill all perspectives and their associated buffers other
-(defun persp-kill-all-except-default ()
-  "Switch to persp #1 and kill all other persps."
-  (interactive)
-  (if (eq (length persp-names-cache) 1)
-      (message "No other perspectives to kill!")
-    (let ((persps-to-kill (cdr persp-names-cache)))
-      (progn
-        (persp-switch persp-nil-name)
-        (persp-kill persps-to-kill)
-        (message (concat "Killed persps " (format "%s" persps-to-kill) ", switched to persp " persp-nil-name))))))
-
-(defun persp-kill-all-except-current-and-default ()
-  "Kill all perspectives other than the current and the default."
-  (interactive)
-  (let ((curr (persp-get-current-name)))
-    (if (or (eq (length persp-names-cache) 1) (and (eq (length persp-names-cache) 2) (not (string= curr persp-nil-name))) )
-        (message "No perspectives to kill!")
-      (let ((persps-to-kill (remove curr (cdr persp-names-cache))))
-        (progn
-          (persp-rename-all-to-index)
-          (persp-kill persps-to-kill)
-          (message (concat "Killed persps " (format "%s" persps-to-kill))))))))
-
-;; kill current perspective and switch to previous persp
-(defun persp-kill-current ()
-  "Kill the current perspective (unless it's the protected perspective) and switch to previous perspective."
-  (interactive)
-  (let ((curr (persp-get-current-name)))
-    (if (string= curr persp-nil-name)
-        (message (concat "Cannot kill protected perspective " curr))
-      (progn
-        (persp-switch-prev)
-        (persp-kill curr)
-        (let ((new-curr (persp-get-current-name)))
-          (progn
-            (persp-rename-all-to-index)
-            (message (concat "Killed persp " curr ", switched to persp " new-curr))))))))
+;; OLD
 
 ;; TODO this may require some groundwork in the package itself since persp-rename only works on the current
 ;; iterate through persp names, rename them all to their current index inside persp-names-cache
@@ -835,31 +706,6 @@ With argument, do this that many times."
                         (persp-rename new-persp))))))
       (persp-switch (nth curr-index persp-names-cache))))
 
-
-;; cycle through persps
-;; https://github.com/hlissner/doom-emacs/blob/master/modules/ui/workspaces/autoload/workspaces.el#L366
-(defun persp-cycle (n)
-  "Cycle N perspectives to the right (default) or left."
-  (interactive (list 1))
-  (let* ((curr (persp-get-current-name))
-         (num-persps (length persp-names-cache))
-         (index (cl-position curr persp-names-cache :test 'string=))) ;; for whatever reason this sometimes fails, explicitly setting :test seems to fix it though
-    (if (eq num-persps 1)
-        (message "No other perspectives")
-      (let* ((new-index (% (+ index n num-persps) num-persps)) ;; adding num-persps is for handling when n < 0
-             (new-persp-name (nth new-index persp-names-cache)))
-        (my-persp-switch new-persp-name)))))
-
-(defun persp-switch-next ()
-  "Switch to next perspective."
-  (interactive)
-  (persp-cycle 1))
-
-(defun persp-switch-prev ()
-  "Switch to prev perspective."
-  (interactive)
-  (persp-cycle -1))
-
 ;; TODO swap persps function
 ;; TODO buffer stack doesn't work
 ;; TODO display current persp in the modeline
@@ -869,20 +715,19 @@ With argument, do this that many times."
 (defhydra hydra-switch-persp (:hint nil)
   "Switch perspective"
   ;; TODO refactor for index switch, may be non-trivial with a bunch of dynamic work to do before hand (use :pre with variables??)
-  ("1" (my-persp-switch-index 0) "Persp #1")
-  ("2" (my-persp-switch-index 1) "Persp #2")
-  ("3" (my-persp-switch-index 2) "Persp #3")
-  ("4" (my-persp-switch-index 3) "Persp #4")
-  ("5" (my-persp-switch-index 4) "Persp #5")
-  ("6" (my-persp-switch-index 5) "Persp #6")
-  ("7" (my-persp-switch-index 6) "Persp #7")
-  ("8" (my-persp-switch-index 7) "Persp #8")
-  ("9" (my-persp-switch-index 8) "Persp #9"))
+  ("1" (+persp/switch-by-index 0) "Persp #1")
+  ("2" (+persp/switch-by-index 1) "Persp #2")
+  ("3" (+persp/switch-by-index 2) "Persp #3")
+  ("4" (+persp/switch-by-index 3) "Persp #4")
+  ("5" (+persp/switch-by-index 4) "Persp #5")
+  ("6" (+persp/switch-by-index 5) "Persp #6")
+  ("7" (+persp/switch-by-index 6) "Persp #7")
+  ("8" (+persp/switch-by-index 7) "Persp #8")
+  ("9" (+persp/switch-by-index 8) "Persp #9"))
 
 ;; TODO M-RET open file in new persp in find-file
-;; TODO hack together consult preview for persp-switch-to-buffer
-
 ;;----
+
 
 ;; ace window
 (use-package ace-window)
@@ -894,6 +739,7 @@ With argument, do this that many times."
   ;; needed for getting the right side of doom-modeline to render on the screen properly
   ;; https://github.com/hlissner/doom-emacs/blob/develop/modules/ui/modeline/README.org#the-right-side-of-the-modeline-is-cut-off
   (setq all-the-icons-scale-factor 1.1))
+
 
 ;; themes
 (use-package doom-themes
@@ -1536,24 +1382,7 @@ _j_   zoom-out
     "M-6" (lambda () (interactive) (+persp/switch-by-index 5))
     "M-7" (lambda () (interactive) (+persp/switch-by-index 6))
     "M-8" (lambda () (interactive) (+persp/switch-by-index 7))
-    "M-9" (lambda () (interactive) (+persp/switch-by-index 8))
-
-    ;; workspace cycling TODO doesn't wrap around
-    ;"C-<tab>" 'eyebrowse-prev-window-config
-    ;"C-<iso-lefttab>" 'eyebrowse-next-window-config
-    ;"C-S-<tab>" 'eyebrowse-next-window-config
-
-    ;; quick workspace switching
-    ;"M-1" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 1))
-    ;"M-2" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 2))
-    ;"M-3" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 3))
-    ;"M-4" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 4))
-    ;"M-5" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 5))
-    ;"M-6" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 6))
-    ;"M-7" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 7))
-    ;"M-8" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 8))
-    ;"M-9" (lambda () (interactive) (my-eyebrowse-switch-to-window-config 9))
-    )
+    "M-9" (lambda () (interactive) (+persp/switch-by-index 8)))
 
   ;; magit
   (general-define-key
