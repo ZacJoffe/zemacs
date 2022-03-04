@@ -614,10 +614,10 @@ With argument, do this that many times."
   "Kill the top perspective."
   (interactive)
   (if (eq (length (persp-names)) 1)
-      (message "Cannot kill default perspective")
+      (+persp-message (format "Cannot kill protected persp %s" (persp-current-name)) 'error)
     (let ((last-persp (car (last (persp-names)))))
       (persp-kill last-persp)
-      (message (concat "Killed perspective " last-persp)))))
+      (+persp-message (format "Killed persp %s" last-persp) 'success))))
 
 ;; NOTE you can kill default perspective, but I don't see a reason to do that
 ;; so for now I am going to prevent that through these wrappers
@@ -626,21 +626,24 @@ With argument, do this that many times."
   (interactive)
   (let ((curr (persp-current-name)))
     (if (string= curr persp-initial-frame-name)
-        (message "Cannot kill protected perspective %s" curr)
+        (+persp-message (format "Cannot kill protected persp %s" curr) 'error)
       (persp-prev)
       (persp-kill curr)
       (let ((new-curr (persp-current-name)))
-        ;; TODO shift names
-        (message "Killed persp %s, switched to persp %s" curr new-curr)))))
+        ;; TODO shift names?
+        (+persp-message (format "Killed persp %s" curr) 'success)))))
 
 ;; TODO refactor to explicitly switch to (car (persp-names))
 (defun +persp/kill-all-except-default ()
   ""
   (interactive)
   (if (eq (length (persp-names)) 1)
-      (message "Cannot kill default perspective")
+      (+persp-message "No persps to kill!" 'warning)
     (let ((persps-to-kill (cdr (persp-names))))
-      (mapc (lambda (persp-name) (persp-kill persp-name)) persps-to-kill))))
+      (mapc (lambda (persp-name) (persp-kill persp-name)) persps-to-kill)
+      (if (eq (length persps-to-kill) 1)
+          (+persp-message (format "Killed persp %s" (nth 0 persps-to-kill)) 'success)
+        (+persp-message (format "Killed persps %s" (mapconcat #'identity persps-to-kill ", ")) 'success)))))
 
 
 (defun +persp/switch-by-index (index)
@@ -684,7 +687,15 @@ With argument, do this that many times."
     (unless (cdr buffer)
       (consult--buffer-action (car buffer)))))
 
+;; TODO how does doom handle the bury buffer with persp-mode?
 
+;; persp display when cycling through perspectives
+(defun +persp--cycle (oldfun)
+  "Persp display on persp cycling"
+  (if (eq (length (persp-names)) 1)
+      (+persp-message "No other persps" 'warning)
+    (funcall oldfun)
+    (+persp/display)))
 
 ;; my workflow is hacked on top of persp-mode.el (apparently it works better with emacsclient than perspective-el)
 ;(use-package persp-mode
@@ -707,6 +718,8 @@ With argument, do this that many times."
   (interactive)
   (safe-persp-name (get-current-persp)))
 
+(advice-add 'persp-prev :around #'+persp/cycle)
+(advice-add 'persp-next :around #'+persp/cycle)
 
 ;; TODO refactor using index of persp-names-cache
 ;; create new "anonymous" perspective and switch to it
