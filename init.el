@@ -1166,6 +1166,7 @@ _j_   zoom-out
     "SPC" '(projectile-find-file :which-key "Projectile find file")
     ;"SPC" '(consult-find-file :which-key "consult-find-file")
     "." '(find-file :which-key "Find file")
+    "," '(+persp/consult-buffer :which-key "+persp/consult-buffer")
     ":" '(execute-extended-command :which-key "M-x")
     "x" '(open-scratch-buffer :which-key "Open scratch buffer")
     "<" '(consult-buffer :which-key "consult-buffer")
@@ -1262,10 +1263,10 @@ _j_   zoom-out
     "TAB [" '(persp-prev :which-key "persp-prev")
     "TAB ]" '(persp-next :which-key "persp-next")
     "TAB n" '(+persp/add-new :which-key "+persp/add-new")
-    ;"TAB N" '(persp-add-new-anonymous :which-key "persp-add-new-anonymous")
+    "TAB N" '(+persp/add-new-import-buffer :which-key "+persp/add-new-import-buffer")
     "TAB k" '(+persp/kill-current :which-key "+persp/kill-current")
     "TAB K" '(+persp/kill-all-except-default :which-key "+persp/kill-all-except-default")
-    ;"TAB h" '(hydra-switch-persp/body :which-key "hydra-switch-persp")
+    "TAB h" '(hydra-switch-persp/body :which-key "hydra-switch-persp")
 
 
     ;; git
@@ -1304,7 +1305,8 @@ _j_   zoom-out
   ;; insert mode hotkeys
   (general-define-key
     :states 'insert
-    "C-SPC" 'company-complete
+    ;"C-SPC" 'company-complete
+    "C-SPC" 'completion-at-point ;; bring up corfu completion
     "C-v" 'yank ;; C-v should paste clipboard contents
 
     "C-<backspace>" 'my-backward-kill-word
@@ -1324,9 +1326,13 @@ _j_   zoom-out
     ;; window management
     "C-w C-u" 'winner-undo
     "C-w u" 'winner-undo
+
     "C-w a" 'ace-window
     "C-w C-w" 'ace-window
-    "C-w w" 'ace-window)
+    "C-w w" 'ace-window
+
+    "C-w C-l" 'evil-window-right
+    "C-w C-h" 'evil-window-left)
 
 
   ;; company
