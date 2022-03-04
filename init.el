@@ -540,10 +540,16 @@ With argument, do this that many times."
 ;; TODO save persps?
 ;; TODO emacs server integration
 ;; TODO winner mode support https://github.com/nex3/perspective-el/issues/137
+
+;; TODOPRIO better support for name defaults
 (use-package perspective
   :config
   ;; TODO change this to "main", create new perspectives based on index
   (setq persp-initial-frame-name "1") ;; "main" perspective
+  (setq persp-sort 'created) ;; do not reorder perspectives (renaming persp sorts list by default)
+  ;; HACK the ordering is from most-least recent, which doesn't make much sense - reverse it to fix display
+  ;; while not breaking persp functions (like 'persp-prev' and 'persp-next')
+  (advice-add #'persp-names :filter-return (lambda (persps) (reverse persps)))
   (persp-mode))
 
 ;; https://github.com/hlissner/doom-emacs/blob/master/modules/ui/workspaces/autoload/workspaces.el#L442-L454
@@ -586,6 +592,10 @@ With argument, do this that many times."
   (interactive)
   (let* ((persps (persp-names))
          (num-persps (length persps))
+         ;; NOTE this is sort of hacky but works since 'number-to-string' returns '0' if the number cannot be converted.
+         ;; i.e. the max number of a list of perspectives is 0 (if none of the persp names are numbers). There will
+         ;; always be one persp (the default/protected), hence the max of the list will always be >= 1.
+         ;; TODO handle case where max of list is 0 - this would make a new persp called 2, it should be 1
          (new-persp-name (number-to-string (1+ (apply #'max (cons num-persps (mapcar #'string-to-number persps)))))))
     (persp-switch new-persp-name)
     (+persp/display)))
@@ -623,6 +633,8 @@ With argument, do this that many times."
         (+persp-message (format "Killed persp %s" curr) 'success)))))
 
 ;; TODO refactor to explicitly switch to (car (persp-names))
+;;
+;; TODO reset name of default
 (defun +persp/kill-all-except-default ()
   ""
   (interactive)
@@ -686,8 +698,8 @@ With argument, do this that many times."
     (funcall oldfun)
     (+persp/display)))
 
-(advice-add 'persp-prev :around #'+persp/cycle)
-(advice-add 'persp-next :around #'+persp/cycle)
+(advice-add 'persp-prev :around #'+persp--cycle)
+(advice-add 'persp-next :around #'+persp--cycle)
 
 
 ;; wrapper around 'persp-rename' to use persp display
@@ -701,10 +713,6 @@ With argument, do this that many times."
           (+persp-message (format "Persp '%s' already exists" new-name) 'error)
         (persp-rename new-name)
         (+persp-message (format "Renamed '%s'->'%s'" curr-name new-name) 'success)))))
-
-(advice-add 'persp-rename :around (lambda (oldfun &rest )
-                                    (interactive "sNew name: ")
-                                    (unless (persp-valid-name-p))))
 
 
 ;; TODO
@@ -836,6 +844,7 @@ With argument, do this that many times."
         hl-todo-keyword-faces
         `(;; For things that need to be done, just not today.
           ("TODO" warning bold)
+          ("TODOPRIO" error bold)
           ;; For problems that will become bigger problems later if not
           ;; fixed ASAP.
           ("FIXME" error bold)
