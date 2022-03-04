@@ -690,6 +690,29 @@ With argument, do this that many times."
 (advice-add 'persp-next :around #'+persp/cycle)
 
 
+;; wrapper around 'persp-rename' to use persp display
+(defun +persp/rename (new-name)
+  "Switch to persp NEW-NAME."
+  (interactive "sNew name: ")
+  (let ((curr-name (persp-current-name)))
+    (if (not (persp-valid-name-p new-name))
+        (+persp-message "Invalid persp name" 'error)
+      (if (gethash new-name (perspectives-hash))
+          (+persp-message (format "Persp '%s' already exists" new-name) 'error)
+        (persp-rename new-name)
+        (+persp-message (format "Renamed '%s'->'%s'" curr-name new-name) 'success)))))
+
+(advice-add 'persp-rename :around (lambda (oldfun &rest )
+                                    (interactive "sNew name: ")
+                                    (unless (persp-valid-name-p))))
+
+
+;; TODO
+;(defun +persp--delete-associated-workspace (&optional frame)
+;  ""
+;  )
+
+
 ;; OLD
 
 ;; TODO this may require some groundwork in the package itself since persp-rename only works on the current
@@ -1271,6 +1294,7 @@ _j_   zoom-out
     "TAB k" '(+persp/kill-current :which-key "+persp/kill-current")
     "TAB K" '(+persp/kill-all-except-default :which-key "+persp/kill-all-except-default")
     "TAB h" '(hydra-switch-persp/body :which-key "hydra-switch-persp")
+    "TAB r" '(+persp/rename :which-key "+persp/rename")
 
 
     ;; git
