@@ -1,5 +1,4 @@
 ;; TODO early init setup https://www.reddit.com/r/emacs/comments/enmbv4/earlyinitel_reduce_init_time_about_02_sec_and/
-
 ;;; EDITOR GENERAL
 (setq inhibit-startup-message t)
 
@@ -137,7 +136,7 @@
 (defun kill-other-buffers ()
      "Kill all other buffers."
      (interactive)
-     (mapc 'kill-buffer (delq (current-buffer) (buffer-list))))
+     (mapc #'kill-buffer (delq (current-buffer) (buffer-list))))
 
 ;; open init.el
 (defun open-init-file ()
@@ -247,7 +246,7 @@ With argument, do this that many times."
 
 
 ;; ADVICE/HOOKS
-(defun +tab/jump-out (oldfun &rest args)
+(defun +tab--jump-out (oldfun &rest args)
   "Forward-char if next-char is a delimiter, otherwise call OLDFUN with ARGS."
   (let ((delimiters '("(" ")" "[" "]" "{" "}" "\\" "<" ">" ";" "|" "`" "'" "\""))
         (next-char (string (char-after))))
@@ -255,8 +254,8 @@ With argument, do this that many times."
         (forward-char)
       (apply oldfun args))))
 
-(advice-add 'indent-for-tab-command :around #'+tab/jump-out)
-(advice-add 'org-cycle :around #'+tab/jump-out)
+(advice-add 'indent-for-tab-command :around #'+tab--jump-out)
+(advice-add 'org-cycle :around #'+tab--jump-out)
 ;;----
 
 
@@ -479,8 +478,7 @@ With argument, do this that many times."
 (use-package embark
   :general
   ("C-l" 'embark-act) ;; TODO C-. not working
-  :after which-key ; TODO this is here so I can disable which-key C-h, unsure if it's needed
-  :config
+  :init
   ;; let "C-h" after a prefix command bring up a completion search using consult
   ;; https://www.reddit.com/r/emacs/comments/otjn19/comment/h6vyx9q/?utm_source=share&utm_medium=web2x&context=3
   (setq prefix-help-command #'embark-prefix-help-command
@@ -526,11 +524,6 @@ With argument, do this that many times."
 
 (use-package treemacs-magit
   :after (treemacs magit))
-
-;; TODO with persp-mode
-;(use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
-;  :after (treemacs persp-mode) ;;or perspective vs. persp-mode
-;  :config (treemacs-set-scope-type 'Perspectives))
 ;;----
 
 
@@ -721,32 +714,6 @@ With argument, do this that many times."
 ;(defun +persp--delete-associated-workspace (&optional frame)
 ;  ""
 ;  )
-
-
-;; OLD
-
-;; TODO this may require some groundwork in the package itself since persp-rename only works on the current
-;; iterate through persp names, rename them all to their current index inside persp-names-cache
-;; HACK can only rename current persp, so switch to each one before renaming
-(defun persp-rename-all-to-index ()
-  "Rename all perspectives to match their respective index in persp-names-cache."
-  (interactive)
-  (let ((persps (cdr persp-names-cache))
-        (curr-index (cl-position (persp-get-current-name) persp-names-cache :test 'string=)))
-    (progn
-      (cl-loop for index from 0
-               for persp in persps
-               do (progn
-                    (persp-switch persp)
-                    (let ((new-persp (concat "#" (number-to-string (+ index 2)))))
-                      (unless (string= new-persp (persp-get-current-name))
-                        (persp-rename new-persp))))))
-      (persp-switch (nth curr-index persp-names-cache))))
-
-;; TODO swap persps function
-;; TODO buffer stack doesn't work
-;; TODO display current persp in the modeline
-
 
 ;; hydra to quickly switch perspectives
 (defhydra hydra-switch-persp (:hint nil)
@@ -1285,17 +1252,6 @@ _j_   zoom-out
     "nt" '(org-roam-dailies-goto-today :which-key "org-roam-dailies-goto-today")
 
     ;; persps
-    ;"TAB" '(:ignore t :which-key "Perspective")
-    ;"TAB TAB" '(persp-switch :which-key "persp-switch")
-    ;"TAB [" '(persp-switch-prev :which-key "persp-switch-prev")
-    ;"TAB ]" '(persp-switch-next :which-key "persp-switch-next")
-    ;"TAB n" '(persp-add-new-anonymous-scratch-buffer :which-key "persp-add-new-anonymous-scratch-buffer")
-    ;"TAB N" '(persp-add-new-anonymous :which-key "persp-add-new-anonymous")
-    ;"TAB k" '(persp-kill-current :which-key "persp-kill-current")
-    ;"TAB K" '(persp-kill-all-except-default :which-key "persp-kill-all-except-default")
-    ;"TAB h" '(hydra-switch-persp/body :which-key "hydra-switch-persp")
-
-    ;; perspectives
     "TAB" '(:ignore t :which-key "Perspective")
     "TAB TAB" '(persp-switch :which-key "persp-switch")
     "TAB [" '(persp-prev :which-key "persp-prev")
@@ -1306,7 +1262,6 @@ _j_   zoom-out
     "TAB K" '(+persp/kill-all-except-default :which-key "+persp/kill-all-except-default")
     "TAB h" '(hydra-switch-persp/body :which-key "hydra-switch-persp")
     "TAB r" '(+persp/rename :which-key "+persp/rename")
-
 
     ;; git
     "g" '(:ignore t :which-key "Git") ; prefix
@@ -1411,14 +1366,12 @@ _j_   zoom-out
     "C-S-a" 'unbury-buffer
     "C-z" 'consult-buffer
 
-    ;; perspective
     ;; persp cycling
     "C-<tab>" 'persp-next
     "C-<iso-lefttab>" 'persp-prev
     "C-S-<tab>" 'persp-prev
 
-
-    ;; quick perspective switching
+    ;; quick persp switching
     "M-1" (lambda () (interactive) (+persp/switch-by-index 0))
     "M-2" (lambda () (interactive) (+persp/switch-by-index 1))
     "M-3" (lambda () (interactive) (+persp/switch-by-index 2))
@@ -1625,7 +1578,6 @@ _j_   zoom-out
   ;;(add-to-list 'completion-at-point-functions #'cape-line)
 )
 ;;----
-
 
 
 ;; change font size in all buffers (frame)
