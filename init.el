@@ -541,11 +541,10 @@ With argument, do this that many times."
 ;; TODO emacs server integration
 ;; TODO winner mode support https://github.com/nex3/perspective-el/issues/137
 
-;; TODOPRIO better support for name defaults
 (use-package perspective
   :config
   ;; TODO change this to "main", create new perspectives based on index
-  (setq persp-initial-frame-name "1") ;; "main" perspective
+  (setq persp-initial-frame-name "main") ;; "main" perspective
   (setq persp-sort 'created) ;; do not reorder perspectives (renaming persp sorts list by default)
   ;; HACK the ordering is from most-least recent, which doesn't make much sense - reverse it to fix display
   ;; while not breaking persp functions (like 'persp-prev' and 'persp-next')
@@ -592,12 +591,15 @@ With argument, do this that many times."
   (interactive)
   (let* ((persps (persp-names))
          (num-persps (length persps))
-         ;; NOTE this is sort of hacky but works since 'number-to-string' returns '0' if the number cannot be converted.
-         ;; i.e. the max number of a list of perspectives is 0 (if none of the persp names are numbers). There will
-         ;; always be one persp (the default/protected), hence the max of the list will always be >= 1.
-         ;; TODO handle case where max of list is 0 - this would make a new persp called 2, it should be 1
-         (new-persp-name (number-to-string (1+ (apply #'max (cons num-persps (mapcar #'string-to-number persps)))))))
-    (persp-switch new-persp-name)
+         ;; if there exist a persp with the name of a number, the new name will be 1+ that num
+         ;; otherwise, make the name 0
+         (new-persp-name (number-to-string
+                          ;; NOTE `string-to-number' returns 0 if the number cannot be converted
+                          (let ((max-persp-name (apply #'max (mapcar #'string-to-number persps))))
+                            (if (eq max-persp-name 0)
+                                1)
+                            (1+ max-persp-name)))))
+             (persp-switch new-persp-name)
     (+persp/display)))
 
 ;; TODO test this more
