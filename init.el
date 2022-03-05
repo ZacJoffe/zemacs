@@ -1511,26 +1511,33 @@ _j_   zoom-out
   :config
   (company-flx-mode +1))
 
-;; TODO try out corfu
+;; TODO cleanup comments
 (use-package corfu
   :custom
   (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
   (corfu-auto t)                 ;; Enable auto completion
   ;; (corfu-separator ?\s)          ;; Orderless field separator
   ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
-  ;; (corfu-preview-current nil)    ;; Disable current candidate preview
-  ;; (corfu-preselect-first nil)    ;; Disable candidate preselection
+  (corfu-preview-current nil)    ;; Disable current candidate preview
+  ;(corfu-preselect-first nil)    ;; Disable candidate preselection
   ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
   ;; (corfu-echo-documentation nil) ;; Disable documentation in the echo area
   ;; (corfu-scroll-margin 5)        ;; Use scroll margin
+  (corfu-min-width 40)
+  (corfu-max-width corfu-min-width)
+  (corfu-count 14)
+  (corfu-echo-documentation t)
 
   ;; You may want to enable Corfu only for certain modes.
   :hook (prog-mode . corfu-mode)
   :general
   (:keymaps 'corfu-map
             "C-n" 'corfu-next
+            "C-j" 'corfu-next
             "C-p" 'corfu-previous
-            "C-SPC" 'corfu-insert-separator)
+            "C-k" 'corfu-previous
+            "C-SPC" 'corfu-insert-separator
+            "<escape>" 'corfu-quit)
 
   :init
   (corfu-global-mode)
@@ -1541,9 +1548,36 @@ _j_   zoom-out
   (advice-add 'corfu--teardown :after 'evil-normalize-keymaps)
   (evil-make-overriding-map corfu-map))
 
-;(use-package corfu-doc
-;  :after corfu
-;  :hook (corfu-mode . corfu-doc-mode))
+;; https://github.com/minad/corfu#completing-with-corfu-in-the-minibuffer
+(defun corfu-enable-always-in-minibuffer ()
+  "Enable Corfu in the minibuffer if Vertico/Mct are not active."
+  (unless (or (bound-and-true-p mct--active)
+              (bound-and-true-p vertico--input))
+    ;; (setq-local corfu-auto nil) Enable/disable auto completion
+    (corfu-mode 1)))
+(add-hook 'minibuffer-setup-hook #'corfu-enable-always-in-minibuffer 1)
+
+;; https://kristofferbalintona.me/posts/corfu-kind-icon-and-corfu-doc/
+;; (use-package corfu-doc
+;;   ;; NOTE 2022-02-05: At the time of writing, `corfu-doc' is not yet on melpa
+;;   :straight (corfu-doc :type git :host github :repo "galeo/corfu-doc")
+;;   :after corfu
+;;   :hook (corfu-mode . corfu-doc-mode)
+;;   :general (:keymaps 'corfu-map
+;;                      ;; This is a manual toggle for the documentation popup.
+;;                      [remap corfu-show-documentation] #'corfu-doc-toggle ; Remap the default doc command
+;;                      ;; Scroll in the documentation window
+;;                      "M-n" #'corfu-doc-scroll-up
+;;                      "M-p" #'corfu-doc-scroll-down)
+;;   :custom
+;;   (corfu-doc-delay corfu-auto-delay)
+;;   (corfu-doc-max-width 70)
+;;   (corfu-doc-max-height 20)
+
+;;   ;; NOTE 2022-02-05: I've also set this in the `corfu' use-package to be
+;;   ;; extra-safe that this is set when corfu-doc is loaded. I do not want
+;;   ;; documentation shown in both the echo area and in the `corfu-doc' popup.
+;;   (corfu-echo-documentation nil))
 
 ;; Add extensions
 (use-package cape
