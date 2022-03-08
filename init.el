@@ -295,7 +295,8 @@ With argument, do this that many times."
   ;; auto-saves go in another directory
   ;; https://github.com/emacscollective/no-littering#auto-save-settings
   (setq auto-save-file-name-transforms
-      `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
+        `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))
+        create-lockfiles nil))
 
 
 ;;;; EDITOR PACKAGES
