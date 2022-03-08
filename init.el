@@ -315,9 +315,16 @@
         evil-want-keybinding nil
         evil-normal-state-cursor 'box
         evil-search-module 'evil-search)
+  :general
+  ;; j and k should operate line-by-line with text wrapping
+  ([remap evil-next-line] 'evil-next-visual-line
+   [remap evil-previous-line] 'evil-previous-visual-line)
   :config
   ;; highlight the current line (not explicitly evil but whatever)
   (global-hl-line-mode 1)
+
+  ;; make horizontal movement cross lines
+  (setq-default evil-cross-lines t)
 
   ;; HACK prevent evil from moving window location when splitting by forcing a recenter
   ;; also do not switch to new buffer
