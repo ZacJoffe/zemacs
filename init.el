@@ -387,11 +387,6 @@
   (global-undo-tree-mode 1))
 
 
-;; vim-like handling of empty lines
-(use-package vi-tilde-fringe
-  :hook (prog-mode . vi-tilde-fringe-mode))
-
-
 ;; editor config
 (use-package editorconfig
   :config
@@ -502,7 +497,9 @@
 ;; embark
 (use-package embark
   :general
-  ("C-l" 'embark-act) ;; TODO C-. not working
+  ("C-l" 'embark-act)
+  (:keymaps 'evil-normal-state-map
+   "C-." 'embark-act)
   :init
   ;; let "C-h" after a prefix command bring up a completion search using consult
   ;; https://www.reddit.com/r/emacs/comments/otjn19/comment/h6vyx9q/?utm_source=share&utm_medium=web2x&context=3
@@ -817,8 +814,6 @@
   ;; on the active window. This segment is the same as misc-info, without the check for the active window
   ;; so the persp list always shows
   ;; https://github.com/seagle0128/doom-modeline/blob/master/doom-modeline-segments.el#L1616-L1621
-  ;;
-  ;; TODO define segment just for persp list
   (doom-modeline-def-segment +my/misc-info
     (when (not doom-modeline--limited-width-p)
       '("" mode-line-misc-info)))
@@ -901,9 +896,7 @@
 
 ;; solaire mode - distinguish minibuffers from "real" buffers
 (use-package solaire-mode
-  ;;:init (solaire-global-mode 1)
   :config
-  ;; solaire mode has issues when using the terminal
   (when (display-graphic-p)
       (solaire-global-mode +1)))
 
@@ -922,20 +915,18 @@
         git-commit-summary-max-length 50))
 
 ;; magit functions
-;; TODO document
-;; https://www.manueluberti.eu/emacs/2018/02/17/magit-bury-buffer/
-;; TODO see how doom does this
+;; inpsired by https://www.manueluberti.eu/emacs/2018/02/17/magit-bury-buffer/
 (defun magit-kill-buffers ()
   "Restore window configuration and kill all magit buffers."
-  ;(interactive)
   (let ((buffers (magit-mode-get-buffers)))
-    ;(magit-restore-window-configuration)
     (mapc #'kill-buffer buffers)))
 
-;; TODO document, rename
 ;; TODO also kill diff buffer
-(defun magit-quit (&optional kill-buffer)
-  ""
+(defun +magit/quit (&optional kill-buffer)
+  "Bury the current magit Buffer.
+If KILL-BUFFER, kill this buffer instead of burying it.
+If the buried/killed magit buffer was the last magit buffer open for this repo,
+kill all magit buffers for this repo."
   (interactive "P")
   (let ((toplevel (magit-toplevel)))
     (progn
@@ -946,7 +937,6 @@
                                    (equal magit--default-directory toplevel))))
                           (window-list))
         (magit-kill-buffers))))
-
 
 ;; show todos in magit status
 (use-package magit-todos)
@@ -1408,7 +1398,7 @@ _j_   zoom-out
     :states '(normal visual)
     :keymaps 'magit-mode-map
     ;; rebind "q" in magit-status to kill the magit buffers instead of burying them
-    "q" 'magit-quit
+    "q" '+magit/quit
 
     ;; persp switching within magit
     "M-1" (lambda () (interactive) (+persp/switch-by-index 0))
@@ -1654,6 +1644,8 @@ _j_   zoom-out
 
 ;; PDF
 (use-package pdf-tools
+  :hook (TeX-after-compilation-finished-functions . TeX-revert-document-buffer)
+  :hook (pdf-view-mode . pdf-view-midnight-minor-mode)
   :config
   (pdf-tools-install)
   ; HiDPI support
@@ -1662,16 +1654,13 @@ _j_   zoom-out
   (setq TeX-view-program-selection '((output-pdf "PDF Tools"))
 	TeX-view-program-list '(("PDF Tools" TeX-pdf-tools-sync-view))
 	TeX-source-correlate-start-server t)
-  ; TODO refactor with :hook
-  (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
-  ;(add-hook 'pdf-tools-enabled-hook 'pdf-view-midnight-minor-mode) ; dark mode ; TODO I think this is broken?
-  (add-hook 'pdf-view-mode-hook 'pdf-view-midnight-minor-mode) ; dark mode
 
   ;; https://www.reddit.com/r/emacs/comments/dgywoo/issue_with_pdfview_midnight_mode/f3hdhf2/
   ;; disable cursor in pdf-view, otherwise there is a distracting border on the pdf
   (add-hook 'pdf-view-mode-hook
     (lambda ()
       (set (make-local-variable 'evil-normal-state-cursor) (list nil)))))
+
 (use-package saveplace-pdf-view
   :after pdf-view)
 ;;----
