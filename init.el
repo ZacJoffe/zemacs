@@ -12,7 +12,6 @@
 
 ;; save buffers on close (sessioning)
 (setq desktop-path '("~/"))
-;(desktop-save-mode 1) ; TODO doesn't work with perspective-el? https://github.com/nex3/perspective-el
 
 ;; do not display empty cursor in other windows (especially discracting with hydras)
 (setq-default cursor-in-non-selected-windows nil)
@@ -55,6 +54,7 @@
 ;; show trailing whitespace
 (setq-default show-trailing-whitespace nil)
 (defun show-trailing-whitespace-hook ()
+  "Hook to enable displaying trailing whitespace."
   (setq show-trailing-whitespace t))
 
 (add-hook 'prog-mode-hook 'show-trailing-whitespace-hook)
@@ -94,7 +94,7 @@
 (setq display-line-numbers-type 'relative)
 
 
-;; line-by-line scrolling
+;; line-by-line smooth scrolling
 (setq scroll-step            1
       scroll-conservatively  10000)
 (pixel-scroll-precision-mode 1)
@@ -166,7 +166,7 @@
 ;; basically the same as my-backward-kill-word except it creates a space when merging lines
 ;; TODO repeated code, this should likely be merged into my-backward-kill-word
 (defun my-backward-kill-line ()
-  "Same as my-backward-kill-word but inserts a space after merging lines"
+  "Same as my-backward-kill-word, but insert a space after merging lines."
   (interactive)
   (if (or (bolp) (eq (current-column) (current-indentation)))
       (progn
@@ -291,7 +291,7 @@ With argument, do this that many times."
 
 ;; put backup files and auto-save files in their own directory
 (use-package no-littering
-  :init ;; TODO is this working?
+  :init
   ;; auto-saves go in another directory
   ;; https://github.com/emacscollective/no-littering#auto-save-settings
   (setq auto-save-file-name-transforms
@@ -463,7 +463,7 @@ With argument, do this that many times."
   :after (consult flycheck))
 
 ;; consult functions
-(defun consult-find-file (DIR)
+(defun +consult/find-file (DIR)
   "Open file in directory DIR."
   (interactive "DSelect dir: ")
   (let ((selection (completing-read "Find file: " (split-string (shell-command-to-string (concat "find " DIR)) "\n" t))))
@@ -536,7 +536,6 @@ With argument, do this that many times."
 
 (use-package perspective
   :config
-  ;; TODO change this to "main", create new perspectives based on index
   (setq persp-initial-frame-name "main") ;; "main" perspective
   (setq persp-sort 'created) ;; do not reorder perspectives (renaming persp sorts list by default)
   ;; HACK the ordering is from most-least recent, which doesn't make much sense - reverse it to fix display
@@ -624,11 +623,9 @@ With argument, do this that many times."
       (persp-prev)
       (persp-kill curr)
       (let ((new-curr (persp-current-name)))
-        ;; TODO shift names?
         (+persp-message (format "Killed persp %s" curr) 'success)))))
 
 ;; TODO refactor to explicitly switch to (car (persp-names))
-;;
 ;; TODO reset name of default
 (defun +persp/kill-all-except-default ()
   ""
@@ -641,7 +638,6 @@ With argument, do this that many times."
           (+persp-message (format "Killed persp %s" (nth 0 persps-to-kill)) 'success)
         (+persp-message (format "Killed persps %s" (mapconcat #'identity persps-to-kill ", ")) 'success)))))
 
-
 (defun +persp/switch-by-index (index)
   "Switch to perspective at index INDEX, if it exists."
   (interactive "P")
@@ -653,7 +649,6 @@ With argument, do this that many times."
         (+persp/display))
     (+persp-message (format "Invalid persp index %d" (1+ index)) 'error)))
 
-;(autoload 'consult--multi "consult") TODO needed?
 ;; TODO needs work
 (defun +persp--consult-buffer-sources ()
   ""
@@ -970,7 +965,6 @@ With argument, do this that many times."
   (setq org-appear-autolinks nil)
   (setq org-appear-autosubmarkers t)) ;; Enable on subscript and superscript
 
-
 ;; deft
 (use-package deft)
 (setq deft-recursive t)
@@ -1015,6 +1009,7 @@ With argument, do this that many times."
                     (s-starts-with-p "This function has :around advice:" it)))
            lines)))
     (s-trim (s-join "\n" relevant-lines))))
+
 
 ;; HYDRA
 (use-package hydra)
@@ -1138,9 +1133,7 @@ _j_   zoom-out
 ;;----
 
 
-;; TODO fix (maybe early init?)
 ;;; GENERAL.EL
-
 ;; https://github.com/hlissner/doom-emacs/blob/master/modules/config/default/config.el#L6
 (defvar default-minibuffer-maps
   (append '(minibuffer-local-map
@@ -1163,13 +1156,12 @@ _j_   zoom-out
   (my-leader-def
     :states '(motion normal visual treemacs) ;; note the treemacs state
     :keymaps 'override ;; https://github.com/noctuid/general.el/issues/99#issuecomment-360914335
-    ; TODO ordering in which-key (is it even possible?)
 
     ;; map universal argument to SPC-u
     "u" '(universal-argument :which-key "Universal argument")
     ";" '(eval-region :which-key "eval-region")
     "SPC" '(projectile-find-file :which-key "Projectile find file")
-    ;"SPC" '(consult-find-file :which-key "consult-find-file")
+    ;"SPC" '(+consult/find-file :which-key "+consult/find-file")
     "." '(find-file :which-key "Find file")
     "," '(+persp/consult-buffer :which-key "+persp/consult-buffer")
     ":" '(execute-extended-command :which-key "M-x")
@@ -1232,7 +1224,6 @@ _j_   zoom-out
     "wt" '(toggle-window-split :which-key "toggle-window-split")
     "wa" '(ace-window :which-key "ace-window")
     "wf" '(toggle-maximize-buffer :which-key "toggle-maximize-buffer")
-    ; TODO more window stuff
 
     ;; toggles
     "t" '(:ignore t :which-key "Toggles")
@@ -1244,9 +1235,8 @@ _j_   zoom-out
     "tI" '(toggle-indent-style :which-key "Indent style")
     "tv" '(visual-line-mode :which-key "visual-line-mode")
 
-    ;; notes
+    ;; notes/org
     "n" '(:ignore t :which-key "Notes")
-    ;"nr" '(:ignore t :which-key "org-roam")
     "nf" '(org-roam-node-find :which-key "find-node")
     "ni" '(org-roam-node-insert :which-key "insert-node")
     "nt" '(org-roam-dailies-goto-today :which-key "org-roam-dailies-goto-today")
@@ -1394,7 +1384,6 @@ _j_   zoom-out
     :keymaps 'magit-mode-map
     "q" 'magit-quit)
 
-
   ;; org mode specific evil binding
   ;; unbind the return (enter) key so it becomes org-return
   ;; the return key is not that useful here anyways
@@ -1430,7 +1419,7 @@ _j_   zoom-out
 ;; flycheck
 (use-package flycheck
   :init
-  (global-flycheck-mode) ; TODO should this be :init or :config?
+  (global-flycheck-mode)
   :config
   (setq flycheck-indication-mode 'right-fringe
         flycheck-display-errors-delay 0.25)
@@ -1478,7 +1467,6 @@ _j_   zoom-out
 ;;----
 
 ;; AUTOCOMPLETE
-;; TODO cycle completion options
 ;; company
 (use-package company
   ;; trying out tab and go mode
@@ -1503,7 +1491,6 @@ _j_   zoom-out
         ;; domain-specific words with particular casing.
         company-dabbrev-ignore-case nil
         company-dabbrev-downcase nil))
-;; TODO common highlighting (probably with company-tooltip-common face) not working
 
 ;; fuzzy autocomplete for company
 (use-package company-flx
@@ -1579,7 +1566,7 @@ _j_   zoom-out
 ;;   ;; documentation shown in both the echo area and in the `corfu-doc' popup.
 ;;   (corfu-echo-documentation nil))
 
-;; Add extensions
+;; TODO configure
 (use-package cape
   ;; Bind dedicated completion commands
   :bind (("C-c p p" . completion-at-point) ;; capf
@@ -1619,7 +1606,6 @@ _j_   zoom-out
   :config
   ;; more granular zooming
   (setq text-scale-mode-step 1.1))
-
 
 
 ;; adaptive text wrap
