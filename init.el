@@ -1039,82 +1039,6 @@ With argument, do this that many times."
 ;; HYDRA
 (use-package hydra)
 
-;; window movement/management hydra
-;; https://github.com/jmercouris/configuration/blob/master/.emacs.d/hydra.el#L89
-;; TODO hotkeys are not displayed correctly
-(defhydra hydra-window (:hint nil)
-   "
-Movement      ^Split^            ^Switch^        ^Resize^
-----------------------------------------------------------
-_h_ ←           _v_ertical         _b_uffer        _M-h_ ←
-_j_ ↓           _h_orizontal       _f_ind files    _M-j_ ↓
-_k_ ↑           _1_only this       _P_rojectile    _M-k_ ↑
-_l_ →           _d_elete           _s_wap          _M-l_ →
-_F_ollow        _e_qualize         _[_backward
-_q_uit          ^        ^         _]_forward
-"
-   ;; movement
-   ("h" windmove-left)
-   ("j" windmove-down)
-   ("k" windmove-up)
-   ("l" windmove-right)
-   ("[" previous-buffer)
-   ("]" next-buffer)
-
-   ;; resize
-   ("M-h" hydra-move-splitter-left)
-   ("M-j" hydra-move-splitter-down)
-   ("M-k" hydra-move-splitter-up)
-   ("M-l" hydra-move-splitter-right)
-
-   ("b" consult-buffer)
-   ("f" find-file)
-   ("P" projectile-find-file)
-   ("F" follow-mode)
-   ("r" switch-window-then-swap-buffer)
-   ("v" split-window-right)
-   ("s" split-window-below)
-   ("3" split-window-right)
-   ("2" split-window-below)
-   ("d" delete-window)
-   ("1" delete-other-windows)
-   ("e" balance-windows)
-
-   ("q" nil))
-
-;; functions for hydra-window
-(defun hydra-move-splitter-left (arg)
-  "Move window splitter left."
-  (interactive "p")
-  (if (let ((windmove-wrap-around))
-        (windmove-find-other-window 'right))
-      (shrink-window-horizontally arg)
-    (enlarge-window-horizontally arg)))
-
-(defun hydra-move-splitter-right (arg)
-  "Move window splitter right."
-  (interactive "p")
-  (if (let ((windmove-wrap-around))
-        (windmove-find-other-window 'right))
-      (enlarge-window-horizontally arg)
-    (shrink-window-horizontally arg)))
-
-(defun hydra-move-splitter-up (arg)
-  "Move window splitter up."
-  (interactive "p")
-  (if (let ((windmove-wrap-around))
-        (windmove-find-other-window 'up))
-      (enlarge-window arg)
-    (shrink-window arg)))
-
-(defun hydra-move-splitter-down (arg)
-  "Move window splitter down."
-  (interactive "p")
-  (if (let ((windmove-wrap-around))
-        (windmove-find-other-window 'up))
-      (shrink-window arg)
-    (enlarge-window arg)))
-
 ;; buffer/frame zoom hydra
 (defhydra hydra-zoom (:hint nil)
   "
@@ -1245,7 +1169,6 @@ _j_   zoom-out
 
     ;; window
     "w" '(:ignore t :which-key "Window")
-    "ww" '(hydra-window/body :which-key "hydra-window")
     "wt" '(toggle-window-split :which-key "toggle-window-split")
     "wa" '(ace-window :which-key "ace-window")
     "wf" '(toggle-maximize-buffer :which-key "toggle-maximize-buffer")
