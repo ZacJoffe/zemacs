@@ -797,11 +797,22 @@
         ;; Only show file encoding if it's non-UTF-8 and different line endings
         ;; than the current OSes preference
         doom-modeline-buffer-encoding 'nondefault
-        doom-modeline-default-eol-type (if (eq system-type 'gnu/linux) 2 0)) ;; TODO breaks on Windows
+        ;; default line endings are LF on mac/linux, CRLF on windows
+        doom-modeline-default-eol-type (if (or (eq system-type 'gnu/linux) (eq system-type 'darwin)) 0 1))
 
   :config
   ;; display symlink file paths https://github.com/seagle0128/doom-modeline#faq
   (setq find-file-visit-truename t)
+
+  ;; HACK perspective list is shown in global-mode-string, and the misc-info segment only displays this
+  ;; on the active window. This segment is the same as misc-info, without the check for the active window
+  ;; so the persp list always shows
+  ;; https://github.com/seagle0128/doom-modeline/blob/master/doom-modeline-segments.el#L1616-L1621
+  ;;
+  ;; TODO define segment just for persp list
+  (doom-modeline-def-segment +my/misc-info
+    (when (not doom-modeline--limited-width-p)
+      '("" mode-line-misc-info)))
 
   ;; doom uses the default modeline that is defined here: https://github.com/seagle0128/doom-modeline/blob/master/doom-modeline.el#L90
   ;; as far as I can tell you can't change the ordering of segments without redefining the modeline entirely (segments can be toggled though)
@@ -809,8 +820,8 @@
   ;; this is a bit messy since I already set a bunch of toggles, TODO need to work on this
   (doom-modeline-def-modeline 'main
     '(bar modals matches buffer-info buffer-position selection-info)
-    '(input-method buffer-encoding lsp major-mode process vcs checker " " misc-info "  ")))
-
+    ;'(buffer-encoding lsp major-mode process vcs checker " " +my/misc-info "  ")))
+    '(buffer-encoding lsp major-mode process vcs checker " ")))
 
 
 ;; highlight todos
