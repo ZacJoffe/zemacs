@@ -890,15 +890,11 @@ With argument, do this that many times."
 
 
 ;; magit
-;; TODO replicate magit-quit from doom (instead of magit bury buffer on q)
 (use-package magit
   ;; refresh status when you save file being tracked in repo
   :hook (after-save . magit-after-save-refresh-status)
   ;; start magit commit in insert mode https://emacs.stackexchange.com/a/20895
   :hook (git-commit-mode . evil-insert-state)
-;  :general
-;  (:keymaps 'magit-mode-map
-;    "q" 'magit-kill-buffers)
   :config
   ;; display magit status in current buffer (no popup) https://stackoverflow.com/a/58554387/11312409
   (setq magit-display-buffer-function 'magit-display-buffer-same-window-except-diff-v1
@@ -915,7 +911,7 @@ With argument, do this that many times."
     ;(magit-restore-window-configuration)
     (mapc #'kill-buffer buffers)))
 
-;; TODO document
+;; TODO document, rename
 ;; TODO also kill diff buffer
 (defun magit-quit (&optional kill-buffer)
   ""
@@ -1404,11 +1400,24 @@ _j_   zoom-out
     :keymaps 'transient-base-map
     "<escape>" 'transient-quit-one)
 
-  ;; rebind "q" in magit-status to kill the magit buffers instead of burying them
+  ;; magit keybindings
+  ;; TODO refactor within use-package
   (general-define-key
     :states '(normal visual)
     :keymaps 'magit-mode-map
-    "q" 'magit-quit)
+    ;; rebind "q" in magit-status to kill the magit buffers instead of burying them
+    "q" 'magit-quit
+
+    ;; persp switching within magit
+    "M-1" (lambda () (interactive) (+persp/switch-by-index 0))
+    "M-2" (lambda () (interactive) (+persp/switch-by-index 1))
+    "M-3" (lambda () (interactive) (+persp/switch-by-index 2))
+    "M-4" (lambda () (interactive) (+persp/switch-by-index 3))
+    "M-5" (lambda () (interactive) (+persp/switch-by-index 4))
+    "M-6" (lambda () (interactive) (+persp/switch-by-index 5))
+    "M-7" (lambda () (interactive) (+persp/switch-by-index 6))
+    "M-8" (lambda () (interactive) (+persp/switch-by-index 7))
+    "M-9" (lambda () (interactive) (+persp/switch-by-index 8)))
 
   ;; org mode specific evil binding
   ;; unbind the return (enter) key so it becomes org-return
