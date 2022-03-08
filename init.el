@@ -994,8 +994,13 @@ With argument, do this that many times."
 
 ;; which-key
 (use-package which-key
-    :config
-    (setq which-key-sort-order 'which-key-key-order-alpha)
+    :init
+    (setq which-key-sort-order #'which-key-key-order-alpha
+        which-key-sort-uppercase-first nil
+        which-key-add-column-padding 1
+        which-key-max-display-columns nil
+        which-key-min-display-lines 6
+        which-key-side-window-slot -10)
     (which-key-mode))
 
 
