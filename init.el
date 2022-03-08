@@ -312,15 +312,19 @@ With argument, do this that many times."
         evil-want-integration t
         evil-want-keybinding nil
         evil-normal-state-cursor 'box
-        evil-ex-search-vim-style-regexp t)
+        evil-search-module 'evil-search) ;; trying out isearch
   :config
   ;; highlight the current line (not explicitly evil but whatever)
   (global-hl-line-mode 1)
 
   ;; HACK prevent evil from moving window location when splitting by forcing a recenter
   ;; also do not switch to new buffer
-  (advice-add 'evil-window-vsplit :after (lambda (&rest r) (progn (evil-window-prev 1) (recenter))))
-  (advice-add 'evil-window-split :after (lambda (&rest r) (progn (evil-window-prev 1) (recenter))))
+  ;(advice-add 'evil-window-vsplit :after (lambda (&rest r) (progn (evil-window-prev 1) (recenter))))
+  ;(advice-add 'evil-window-split :after (lambda (&rest r) (progn (evil-window-prev 1) (recenter))))
+
+  ;; HACK
+  (advice-add 'evil-window-vsplit :override (lambda (&rest r) (split-window (selected-window) nil 'right)))
+  (advice-add 'evil-window-split :override (lambda (&rest r) (split-window (selected-window) nil 'below)))
 
   (evil-mode))
 
@@ -456,7 +460,14 @@ With argument, do this that many times."
   (marginalia-mode))
 
 ;; consult
-(use-package consult)
+(use-package consult
+  :config
+  ;; TODO consult-line working with evil-ex-search-forward
+  ;; https://github.com/abo-abo/swiper/issues/2344#issuecomment-561454647
+  ;(dolist (variable '(evil-ex-search-history consult--line-history evil-search-forward-history evil-search-backward-history))
+  ;  (defvaralias variable 'regexp-search-ring))
+  ;(defvaralias 'consult--line-history 'evil-search-forward-history)
+  )
 
 ;; integration with flycheck
 (use-package consult-flycheck
