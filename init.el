@@ -1039,6 +1039,58 @@
 ;; HYDRA
 (use-package hydra)
 
+;; simple hydra for resizing windows
+(defhydra hydra-window (:hint nil)
+  "
+^Movement^  ^Resize^
+---------------------------------------
+_h_ ←       _H_ X←
+_j_ ↓       _J_ X↓
+_k_ ↑       _K_ X↑
+_l_ →       _L_ X→
+"
+   ("h" windmove-left )
+   ("j" windmove-down )
+   ("k" windmove-up )
+   ("l" windmove-right )
+
+   ("H" hydra-move-splitter-left)
+   ("J" hydra-move-splitter-down)
+   ("K" hydra-move-splitter-up)
+   ("L" hydra-move-splitter-right))
+
+(defun hydra-move-splitter-left (arg)
+  "Move window splitter left."
+  (interactive "p")
+  (if (let ((windmove-wrap-around))
+        (windmove-find-other-window 'right))
+      (shrink-window-horizontally arg)
+    (enlarge-window-horizontally arg)))
+
+(defun hydra-move-splitter-right (arg)
+  "Move window splitter right."
+  (interactive "p")
+  (if (let ((windmove-wrap-around))
+        (windmove-find-other-window 'right))
+      (enlarge-window-horizontally arg)
+    (shrink-window-horizontally arg)))
+
+(defun hydra-move-splitter-up (arg)
+  "Move window splitter up."
+  (interactive "p")
+  (if (let ((windmove-wrap-around))
+        (windmove-find-other-window 'up))
+      (enlarge-window arg)
+    (shrink-window arg)))
+
+(defun hydra-move-splitter-down (arg)
+  "Move window splitter down."
+  (interactive "p")
+  (if (let ((windmove-wrap-around))
+        (windmove-find-other-window 'up))
+      (shrink-window arg)
+    (enlarge-window arg)))
+
 ;; buffer/frame zoom hydra
 (defhydra hydra-zoom (:hint nil)
   "
@@ -1171,6 +1223,7 @@ _j_   zoom-out
     "wt" '(toggle-window-split :which-key "toggle-window-split")
     "wa" '(ace-window :which-key "ace-window")
     "wf" '(toggle-maximize-buffer :which-key "toggle-maximize-buffer")
+    "wr" '(hydra-window/body :which-key "hydra-window")
 
     ;; toggles
     "t" '(:ignore t :which-key "Toggles")
