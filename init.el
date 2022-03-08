@@ -71,7 +71,9 @@
 (defalias 'yes-or-no-p 'y-or-n-p)
 
 ;; font setup
-(set-face-attribute 'default nil :font "Iosevka Fixed" :height 170 :weight 'light)
+(if (eq system-type 'darwin)
+    (set-face-attribute 'default nil :font "Iosevka Fixed" :height 240 :weight 'regular)
+  (set-face-attribute 'default nil :font "Iosevka Fixed" :height 170 :weight 'light))
 ;; float height value (1.0) makes fixed-pitch take height 1.0 * height of default
 (set-face-attribute 'fixed-pitch nil :font "Iosevka Fixed" :height 1.0 :weight 'light)
 (set-face-attribute 'variable-pitch nil :font "Iosevka" :height 1.0 :weight 'light)
@@ -312,7 +314,7 @@
         evil-want-integration t
         evil-want-keybinding nil
         evil-normal-state-cursor 'box
-        evil-search-module 'evil-search) ;; trying out isearch
+        evil-search-module 'evil-search)
   :config
   ;; highlight the current line (not explicitly evil but whatever)
   (global-hl-line-mode 1)
@@ -899,6 +901,7 @@
       (solaire-global-mode +1)))
 
 
+;; GIT
 ;; magit
 (use-package magit
   ;; refresh status when you save file being tracked in repo
@@ -911,6 +914,7 @@
         magit-auto-revert-mode t
         git-commit-summary-max-length 50))
 
+;; magit functions
 ;; TODO document
 ;; https://www.manueluberti.eu/emacs/2018/02/17/magit-bury-buffer/
 ;; TODO see how doom does this
@@ -1191,7 +1195,7 @@ _j_   zoom-out
     ;; buffer
     ;"TAB" '(switch-to-prev-buffer :which-key "Prev buffer")
     "b" '(:ignore t :which-key "Buffer")
-    ;"bb" ; TODO switch workspace buffer
+    "bb" '(+persp/consult-buffer :which-key "+persp/consult-buffer")
     "bB" '(consult-buffer :which-key "consult-buffer")
     "b[" '(previous-buffer :which-key "Previous buffer")
     "b]" '(next-buffer :which-key "Next buffer")
@@ -1262,6 +1266,7 @@ _j_   zoom-out
     "TAB n" '(+persp/add-new :which-key "+persp/add-new")
     "TAB N" '(+persp/add-new-import-buffer :which-key "+persp/add-new-import-buffer")
     "TAB k" '(+persp/kill-current :which-key "+persp/kill-current")
+    "TAB d" '(+persp/kill-current :which-key "+persp/kill-current")
     "TAB K" '(+persp/kill-all-except-default :which-key "+persp/kill-all-except-default")
     "TAB h" '(hydra-switch-persp/body :which-key "hydra-switch-persp")
     "TAB r" '(+persp/rename :which-key "+persp/rename")
@@ -1330,7 +1335,6 @@ _j_   zoom-out
 
     "C-w C-l" 'evil-window-right
     "C-w C-h" 'evil-window-left)
-
 
   ;; company
   (general-define-key
@@ -1493,7 +1497,7 @@ _j_   zoom-out
 ;;----
 
 ;; AUTOCOMPLETE
-;; company
+;; company TODO remove?
 (use-package company
   ;; trying out tab and go mode
   ;:hook (company-mode . company-tng-mode)
