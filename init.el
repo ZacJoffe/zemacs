@@ -486,6 +486,11 @@ With argument, do this that many times."
   (interactive "DSelect dir: ")
   (consult-ripgrep DIR))
 
+(defun +consult/org-roam-ripgrep ()
+  "Ripgrep org-directory."
+  (interactive)
+  (consult-ripgrep org-directory))
+
 ;; embark
 (use-package embark
   :general
@@ -945,24 +950,30 @@ With argument, do this that many times."
 
 ;; ORG
 (use-package org
-  :straight nil
+  ;; HACK (?) prevents needed `org-reload' to fix org agenda (which seems to break org mode)
+  ;; https://www.reddit.com/r/emacs/comments/rr203h/using_straightel_and_usepackage_to_configure_org/hqdzpc5/
+  :straight (:type built-in)
   ;; indent hook
   :hook (org-mode . org-indent-mode)
   :config
-  (setq org-return-follows-link t))
+  (setq org-agenda-span 10 ; https://stackoverflow.com/a/32426234
+        org-agenda-start-on-weekday nil
+        org-todo-keywords '((sequence "TODO(t)" "EXAM(e)" "WAIT(w)" "|" "DONE(d)" "KILL(k)" "SKIPPED(s)" "LATE(s)"))
+        org-return-follows-link t
+        org-directory "~/Documents/Google/org"
+        org-agenda-files '("~/Documents/Google/org/roam/agenda")) ; https://stackoverflow.com/a/11384907
+  )
 
 ;; org-roam 2
 (use-package org-roam
   :custom
   (org-roam-directory (file-truename "~/Documents/Google/org/roam"))
   :config
-  (org-roam-db-autosync-mode)
-  ;; If using org-roam-protocol
-  (require 'org-roam-protocol))
+  (org-roam-db-autosync-mode))
 
-; TODO org agenda install needed?
-(setq org-directory "~/Documents/Google/org")
-(setq org-agenda-files '("~/Documents/Google/org/roam/agenda")) ; https://stackoverflow.com/a/11384907
+(use-package org-roam-protocol
+  :straight nil
+  :after org-protocol)
 
 ;; prettier headings
 (use-package org-superstar)
@@ -978,9 +989,10 @@ With argument, do this that many times."
   (setq org-appear-autosubmarkers t)) ;; Enable on subscript and superscript
 
 ;; deft
-(use-package deft)
-(setq deft-recursive t)
-(setq deft-directory "~/Documents/Google/org/roam")
+;(use-package deft
+;  :config
+;  (setq deft-recursive t
+;        deft-directory "~/Documents/Google/org/roam"))
 ;;----
 
 
@@ -1252,6 +1264,8 @@ _j_   zoom-out
     "nf" '(org-roam-node-find :which-key "find-node")
     "ni" '(org-roam-node-insert :which-key "insert-node")
     "nt" '(org-roam-dailies-goto-today :which-key "org-roam-dailies-goto-today")
+    "n/" '(+consult/org-roam-ripgrep :which-key "+consult/org-roam-ripgrep")
+    "na" '(org-agenda :which-key "org-agenda")
 
     ;; persps
     "TAB" '(:ignore t :which-key "Perspective")
