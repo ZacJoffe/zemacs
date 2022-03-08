@@ -178,8 +178,7 @@
 ;; backward-kill-word without copying to kill-ring
 ;; https://www.emacswiki.org/emacs/BackwardDeleteWord
 (defun delete-word (arg)
-  "Delete characters forward until encountering the end of a word.
-With argument, do this that many times."
+  "Delete characters forward until encountering the end of a word ARG times."
   (interactive "p")
   (if (use-region-p)
       (delete-region (region-beginning) (region-end))
@@ -187,22 +186,21 @@ With argument, do this that many times."
 
 ;; this is mainly for allowing me to use C-w to delete words in vertico buffers (see general.el for hotkeys)
 (defun backward-delete-word (arg)
-  "Delete characters backward until encountering the end of a word.
-With argument, do this that many times."
+  "Delete characters backward until encountering the end of a word ARG times."
   (interactive "p")
   (delete-word (- arg)))
 
 
-;; toggle whether a file uses tabs or spaces
 ;; https://github.com/hlissner/doom-emacs/blob/master/core/autoload/text.el#L293
 (defun toggle-indent-style ()
+  "Toggle use of tabs or spaces."
   (interactive)
   (setq indent-tabs-mode (not indent-tabs-mode))
   (message "Indent style changed to %s" (if indent-tabs-mode "tabs" "spaces")))
 
-;; toggle horizontal/vertical split
 ;; https://www.emacswiki.org/emacs/ToggleWindowSplit
 (defun toggle-window-split ()
+  "Toggle horizontal/vertical split."
   (interactive)
   (if (= (count-windows) 2)
       (let* ((this-win-buffer (window-buffer))
@@ -227,6 +225,7 @@ With argument, do this that many times."
 	  (select-window first-win)
 	  (if this-win-2nd (other-window 1))))))
 
+;; TODO DELETEME?
 ;; https://gist.github.com/mads-hartmann/3402786?permalink_comment_id=693878#gistcomment-693878
 (defun toggle-maximize-buffer ()
   "Maximize window."
@@ -942,6 +941,7 @@ With argument, do this that many times."
   (define-fringe-bitmap 'git-gutter-fr:added [224] nil nil '(center repeated))
   (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
   (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
+;;----
 
 
 ;; ORG
@@ -1060,7 +1060,6 @@ _j_   zoom-out
 
 
 ;; use hydra to quickly load themes
-;; the themes here are (mostly)
 ;; https://github.com/jakebox/jake-emacs/blob/main/jake-emacs/init.org#hydra
 (defhydra hydra-theme (:hint nil)
   "Switch theme"
@@ -1076,7 +1075,7 @@ _j_   zoom-out
 
 ;; functions for hydra-theme
 (defun my-load-theme (theme)
-  "Enhance `load-theme' by first disabling enabled themes."
+  "Disable enabled themes, then load THEME."
   (mapc #'disable-theme custom-enabled-themes)
   (load-theme theme t))
 ;;----
