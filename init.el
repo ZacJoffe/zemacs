@@ -700,11 +700,22 @@
     (unless (cdr buffer)
       (consult--buffer-action (car buffer)))))
 
+;; TODO currently a simple wrapper around `persp-add-buffer' that switches to the new buffer
+;; this should be refactored to use consult with sources from each persp, would required modification to `+persp--consult-buffer-sources'
+(defun +persp/add-buffer-switch (buffer-or-name)
+  "Associate BUFFER-OR-NAME with the current perspective and switch to it."
+  (interactive
+   (list
+    (let ((read-buffer-function nil))
+      (read-buffer "Add buffer to perspective: "))))
+  (persp-add-buffer buffer-or-name)
+  (switch-to-buffer buffer-or-name))
+
 ;; TODO how does doom handle the bury buffer with persp-mode?
 
 ;; persp display when cycling through perspectives
 (defun +persp--cycle (oldfun)
-  "Persp display on persp cycling"
+  "Persp display on persp cycling."
   (if (eq (length (persp-names)) 1)
       (+persp-message "No other persps" 'warning)
     (funcall oldfun)
@@ -713,6 +724,24 @@
 (advice-add 'persp-prev :around #'+persp--cycle)
 (advice-add 'persp-next :around #'+persp--cycle)
 
+
+;; code is very similar to `persp-names' with `persp-sort' equal to 'access
+(defun +persp--last-accessed ()
+  "Get the previously accesed persp."
+  (interactive)
+  (let ((persps (hash-table-values (perspectives-hash))))
+    (if (eq (length persps) 1)
+        (persp-current-name)
+      (nth 1 (mapcar 'persp-name
+                     (sort persps (lambda (a b)
+                                    (time-less-p (persp-last-switch-time b)
+                                                 (persp-last-switch-time a)))))))))
+
+(defun +persp/switch-to-last-accessed ()
+  "Switch to the previously accessed persp."
+  (interactive)
+  (persp-switch (+persp--last-accessed))
+  (+persp/display))
 
 ;; wrapper around 'persp-rename' to use persp display
 (defun +persp/rename (new-name)
@@ -1181,6 +1210,9 @@ _j_   zoom-out
     "<" '(consult-buffer :which-key "consult-buffer")
     "d" '(dired :which-key "dired")
     "/" '(+consult/ripgrep :which-key "+consult/ripgrep")
+    "[" '(persp-prev :which-key "persp-prev")
+    "]" '(persp-next :which-key "persp-next")
+
 
     ;; editor
     "e" '(:ignore t :which-key "Editor")
@@ -1267,6 +1299,7 @@ _j_   zoom-out
     "TAB K" '(+persp/kill-all-except-default :which-key "+persp/kill-all-except-default")
     "TAB h" '(hydra-switch-persp/body :which-key "hydra-switch-persp")
     "TAB r" '(+persp/rename :which-key "+persp/rename")
+    "TAB a" '(+persp/add-buffer-switch :which-key "+persp/add-buffer-switch")
 
     ;; git
     "g" '(:ignore t :which-key "Git") ; prefix
@@ -1374,6 +1407,7 @@ _j_   zoom-out
     "C-<tab>" 'persp-next
     "C-<iso-lefttab>" 'persp-prev
     "C-S-<tab>" 'persp-prev
+    "<backtab>" '+persp/switch-to-last-accessed
 
     ;; quick persp switching
     "M-1" (lambda () (interactive) (+persp/switch-by-index 0))
