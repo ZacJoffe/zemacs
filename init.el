@@ -672,24 +672,43 @@
     (+persp-message (format "Invalid persp index %d" (1+ index)) 'error)))
 
 ;; TODO needs work
-(defun +persp--consult-buffer-sources ()
+;(defun +persp--consult-buffer-sources ()
+;  ""
+;  (list `(:name ,(persp-current-name)
+;    :narrow ?b
+;    :category buffer
+;    :state    ,#'consult--buffer-state
+;    :items ,(lambda ()
+;              (consult--buffer-query
+;               :sort 'visibility
+;               :as #'buffer-name
+;               :predicate (lambda (buf)
+;                            (member buf (persp-get-buffers))))))))
+
+(defun +persp--consult-buffer-sources (persp)
   ""
-  (list `(:name ,(persp-current-name)
-    :narrow ?b
-    :category buffer
-    :state    ,#'consult--buffer-state
-    :items ,(lambda ()
-              (consult--buffer-query
-               :sort 'visibility
-               :as #'buffer-name
-               :predicate (lambda (buf)
-                            (member buf (persp-get-buffers))))))))
+  (list
+   `(:name ,persp
+     :narrow   ?b
+     :category buffer
+     :state    ,#'consult--buffer-state
+     :items    ,`(lambda () ;; TODO lexical scope, also remove ,`
+                   (consult--buffer-query
+                    :sort      'visibility
+                    :as        #'buffer-name
+                    :predicate (lambda (buf)
+                                  (member buf (persp-get-buffers ,persp))))))))
+
+;; TODO FIXME
+(defun +persp--consult-buffer-sources-all-persps ()
+  ""
+  (mapcar #'+persp--consult-buffer-sources (persp-names)))
 
 ;; this function is essentially a copy of consult-buffer
 (defun +persp/consult-buffer ()
   ""
   (interactive)
-  (when-let (buffer (consult--multi (+persp--consult-buffer-sources)
+  (when-let (buffer (consult--multi (+persp--consult-buffer-sources (persp-current-name))
                                     :require-match
                                     (confirm-nonexistent-file-or-buffer)
                                     :prompt "Switch to: "
@@ -706,6 +725,12 @@
   "Associate BUFFER-OR-NAME with the current perspective and switch to it."
   (interactive
    (list
+;    (consult--multi (+persp--consult-buffer-sources-all-persps)
+;                    :require-match
+;                    (confirm-nonexistent-file-or-buffer)
+;                    :prompt "Switch to: "
+;                    :history 'consult--buffer-history
+;                    :sort nil)))
     (let ((read-buffer-function nil))
       (read-buffer "Add buffer to perspective: "))))
   (persp-add-buffer buffer-or-name)
