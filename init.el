@@ -814,26 +814,6 @@
         (persp-rename new-name)
         (+persp-message (format "Renamed '%s'->'%s'" curr-name new-name) 'success)))))
 
-
-;; TODO
-;(defun +persp--delete-associated-workspace (&optional frame)
-;  ""
-;  )
-
-;; hydra to quickly switch perspectives
-(defhydra hydra-switch-persp (:hint nil)
-  "Switch perspective"
-  ;; TODO refactor for index switch, may be non-trivial with a bunch of dynamic work to do before hand (use :pre with variables??)
-  ("1" (+persp/switch-by-index 0) "Persp #1")
-  ("2" (+persp/switch-by-index 1) "Persp #2")
-  ("3" (+persp/switch-by-index 2) "Persp #3")
-  ("4" (+persp/switch-by-index 3) "Persp #4")
-  ("5" (+persp/switch-by-index 4) "Persp #5")
-  ("6" (+persp/switch-by-index 5) "Persp #6")
-  ("7" (+persp/switch-by-index 6) "Persp #7")
-  ("8" (+persp/switch-by-index 7) "Persp #8")
-  ("9" (+persp/switch-by-index 8) "Persp #9"))
-
 ;; TODO M-RET open file in new persp in find-file
 ;;----
 
@@ -1356,7 +1336,6 @@ _j_   zoom-out
     "TAB k" '(+persp/kill-current :which-key "+persp/kill-current")
     "TAB d" '(+persp/kill-current :which-key "+persp/kill-current")
     "TAB K" '(+persp/kill-all-except-default :which-key "+persp/kill-all-except-default")
-    "TAB h" '(hydra-switch-persp/body :which-key "hydra-switch-persp")
     "TAB r" '(+persp/rename :which-key "+persp/rename")
     "TAB a" '(+persp/add-buffer-switch :which-key "+persp/add-buffer-switch")
 
