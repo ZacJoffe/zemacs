@@ -227,17 +227,6 @@
 	  (select-window first-win)
 	  (if this-win-2nd (other-window 1))))))
 
-;; TODO DELETEME?
-;; https://gist.github.com/mads-hartmann/3402786?permalink_comment_id=693878#gistcomment-693878
-(defun toggle-maximize-buffer ()
-  "Maximize window."
-  (interactive)
-  (if (= 1 (length (window-list)))
-      (jump-to-register '_)
-    (progn
-      (window-configuration-to-register '_)
-      (delete-other-windows))))
-
 ;; useful to have on an easily accessible key, also used a bunch with persp mode hacks
 (defun open-scratch-buffer ()
   "Open *scractch* buffer."
@@ -1064,11 +1053,6 @@ kill all magit buffers for this repo."
   (setq org-appear-autolinks nil)
   (setq org-appear-autosubmarkers t)) ;; Enable on subscript and superscript
 
-;; deft
-;(use-package deft
-;  :config
-;  (setq deft-recursive t
-;        deft-directory "~/Documents/Google/org/roam"))
 ;;----
 
 
@@ -1305,7 +1289,6 @@ _j_   zoom-out
     "w" '(:ignore t :which-key "Window")
     "wt" '(toggle-window-split :which-key "toggle-window-split")
     "wa" '(ace-window :which-key "ace-window")
-    "wf" '(toggle-maximize-buffer :which-key "toggle-maximize-buffer")
     "wr" '(hydra-window/body :which-key "hydra-window")
 
     ;; toggles
@@ -1594,8 +1577,7 @@ _j_   zoom-out
 ;; fuzzy autocomplete for company
 (use-package company-flx
   :after company
-  :config
-  (company-flx-mode +1))
+  :hook (company-mode . company-flx-mode))
 
 ;; TODO cleanup comments
 (use-package corfu
@@ -1744,8 +1726,6 @@ _j_   zoom-out
   (:keymaps 'dired-mode-map
     "c" 'find-file))
 
-;; ranger enhancement for dired
-(use-package ranger)
 ;----
 
 
