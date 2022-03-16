@@ -1013,6 +1013,22 @@ kill all magit buffers for this repo."
 ;;----
 
 
+
+;; ediff
+(use-package ediff
+  :straight (:type built-in)
+  :config
+  ;; sane configs
+  (setq ediff-diff-options "-w" ; turn off whitespace checking
+        ediff-split-window-function #'split-window-horizontally
+        ediff-window-setup-function #'ediff-setup-windows-plain)
+
+  ;; restore window after ediff https://emacs.stackexchange.com/a/17089
+  (defvar ediff--saved-wconf nil)
+  :hook (ediff-before-setup . (lambda () (setq ediff--saved-wconf (current-window-configuration))))
+  :hook (ediff-quit . (lambda () (when (window-configuration-p ediff--saved-wconf)
+                         (set-window-configuration ediff--saved-wconf)))))
+
 ;; ORG
 (use-package org
   ;; HACK (?) prevents needed `org-reload' to fix org agenda (which seems to break org mode)
