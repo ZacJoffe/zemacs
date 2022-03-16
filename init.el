@@ -2,6 +2,9 @@
 ;;; EDITOR GENERAL
 (setq inhibit-startup-message t)
 
+;; scratch buffer defaults
+(setq initial-major-mode 'text-mode)
+
 ;; some editor settings
 (setq-default indent-tabs-mode nil ;; indent with spaces
               tab-width 4          ;; 1 tab <=> 4 spaces
@@ -307,7 +310,9 @@
   :general
   ;; j and k should operate line-by-line with text wrapping
   ([remap evil-next-line] 'evil-next-visual-line
-   [remap evil-previous-line] 'evil-previous-visual-line)
+   [remap evil-previous-line] 'evil-previous-visual-line
+   ;; inverse of evil jump backward
+   "C-S-o" 'evil-jump-forward)
   :config
   ;; highlight the current line (not explicitly evil but whatever)
   (global-hl-line-mode 1)
@@ -476,7 +481,16 @@
 (defun +consult/ripgrep (DIR)
   "Ripgrep directory DIR."
   (interactive "DSelect dir: ")
+  ;(let ((consult-ripgrep-args "rg --null --multiline --max-columns=1000 --path-separator /\ --smart-case --no-heading --line-number .")))
   (consult-ripgrep DIR))
+
+;; FIXME broken
+(defun +consult/search-project ()
+  ""
+  (interactive)
+  (if-let ((dir (projectile-project-root)))
+      (+consult/ripgrep dir)
+    (call-interactively (+consult/ripgrep))))
 
 (defun +consult/org-roam-ripgrep ()
   "Ripgrep org-directory."
@@ -1078,6 +1092,15 @@ kill all magit buffers for this repo."
   (setq org-appear-autolinks nil)
   (setq org-appear-autosubmarkers t)) ;; Enable on subscript and superscript
 
+;; TODO preview org dailies with consult
+;(defun +org--consult-dailies-sources ()
+;  ""
+;  `(:name "dailies"
+;    :narrow ?f
+;    :category file
+;    :face consult-file
+;    :items
+;          ))
 ;;----
 
 
@@ -1346,6 +1369,17 @@ _j_   zoom-out
     "TAB K" '(+persp/kill-all-except-default :which-key "+persp/kill-all-except-default")
     "TAB r" '(+persp/rename :which-key "+persp/rename")
     "TAB a" '(+persp/add-buffer-switch :which-key "+persp/add-buffer-switch")
+
+    ;; quick persp switching
+    "1" '((lambda () (interactive) (+persp/switch-by-index 0)) :which-key nil)
+    "2" '((lambda () (interactive) (+persp/switch-by-index 1)) :which-key nil)
+    "3" '((lambda () (interactive) (+persp/switch-by-index 2)) :which-key nil)
+    "4" '((lambda () (interactive) (+persp/switch-by-index 3)) :which-key nil)
+    "5" '((lambda () (interactive) (+persp/switch-by-index 4)) :which-key nil)
+    "6" '((lambda () (interactive) (+persp/switch-by-index 5)) :which-key nil)
+    "7" '((lambda () (interactive) (+persp/switch-by-index 6)) :which-key nil)
+    "8" '((lambda () (interactive) (+persp/switch-by-index 7)) :which-key nil)
+    "9" '((lambda () (interactive) (+persp/switch-by-index 8)) :which-key nil)
 
     ;; git
     "g" '(:ignore t :which-key "Git") ; prefix
