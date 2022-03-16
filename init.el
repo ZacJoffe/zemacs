@@ -1013,6 +1013,14 @@ kill all magit buffers for this repo."
 ;;----
 
 
+;; terminal emulator
+(use-package vterm
+  ;; disable hl line mode in terminal
+  :hook (vterm-mode . (lambda () (setq-local global-hl-line-mode nil)))
+  :config
+  ;; do not allow backspace on terminal prompt
+  (setq comint-prompt-read-only t))
+
 
 ;; ediff
 (use-package ediff
@@ -1028,6 +1036,7 @@ kill all magit buffers for this repo."
   :hook (ediff-before-setup . (lambda () (setq ediff--saved-wconf (current-window-configuration))))
   :hook (ediff-quit . (lambda () (when (window-configuration-p ediff--saved-wconf)
                          (set-window-configuration ediff--saved-wconf)))))
+
 
 ;; ORG
 (use-package org
