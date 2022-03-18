@@ -1341,9 +1341,9 @@ _j_   zoom-out
 
     ;; toggles
     "t" '(:ignore t :which-key "Toggles")
+    "ta" '(corfu-mode :which-key "corfu-mode") ;; 'a' for autocomplete
     "ts" '(flyspell-mode :which-key "flyspell-mode")
     "tc" '(flycheck-mode :which-key "flycheck-mode")
-    "tC" '(company-mode :which-key "company-mode") ; not sure how good of a hotkey this is lol
     "tm" '(minimap-mode :which-key "minimap-mode")
     "tg" '(evil-goggles-mode :which-key "evil-goggles")
     "tI" '(toggle-indent-style :which-key "Indent style")
@@ -1664,7 +1664,9 @@ _j_   zoom-out
             "C-p" 'corfu-previous
             "C-k" 'corfu-previous
             "C-SPC" 'corfu-insert-separator
-            "<escape>" 'corfu-quit)
+            "<tab>" '+corfu-complete-quit
+            "<escape>" '+corfu-quit) ;; note also sets functionality of "C-["
+
 
   :init
   (corfu-global-mode)
@@ -1675,14 +1677,17 @@ _j_   zoom-out
   (advice-add 'corfu--teardown :after 'evil-normalize-keymaps)
   (evil-make-overriding-map corfu-map))
 
-;; https://github.com/minad/corfu#completing-with-corfu-in-the-minibuffer
-(defun corfu-enable-always-in-minibuffer ()
-  "Enable Corfu in the minibuffer if Vertico/Mct are not active."
-  (unless (or (bound-and-true-p mct--active)
-              (bound-and-true-p vertico--input))
-    ;; (setq-local corfu-auto nil) Enable/disable auto completion
-    (corfu-mode 1)))
-(add-hook 'minibuffer-setup-hook #'corfu-enable-always-in-minibuffer 1)
+(defun +corfu-quit ()
+  "Quit corfu completion, go back to normal mode."
+  (interactive)
+  (corfu-quit)
+  (evil-normal-state))
+
+(defun +corfu-complete-quit ()
+  "Corfu complete and quit."
+  (interactive)
+  (corfu-complete)
+  (corfu-quit))
 
 ;; https://kristofferbalintona.me/posts/corfu-kind-icon-and-corfu-doc/
 ;; (use-package corfu-doc
