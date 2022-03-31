@@ -16,7 +16,7 @@
 ;; save buffers on close (sessioning)
 (setq desktop-path '("~/"))
 
-;; do not display empty cursor in other windows (especially discracting with hydras)
+;; do not display empty cursor in other windows (which is especially discracting with hydras)
 (setq-default cursor-in-non-selected-windows nil)
 
 ;; remember window configuration changes
@@ -393,7 +393,7 @@
 (use-package vertico
   :init
   (vertico-mode)
-  ; https://systemcrafters.cc/emacs-tips/streamline-completions-with-vertico/
+  ;; https://systemcrafters.cc/emacs-tips/streamline-completions-with-vertico/
   :general
   (:keymaps 'vertico-map
     "C-j" 'vertico-next
@@ -684,10 +684,11 @@
   (if-let* ((persps (persp-names))
             (name (nth index persps)))
       (if (string= name (persp-current-name))
-          (+persp-message (concat "Already in " name) 'warning)
+          (+persp-message (concat "Already in persp " name) 'warning)
         (persp-switch name)
         (+persp/display))
     (+persp-message (format "Invalid persp index %d" (1+ index)) 'error)))
+
 
 ;; TODO needs work
 ;(defun +persp--consult-buffer-sources ()
@@ -1070,6 +1071,7 @@ kill all magit buffers for this repo."
   :straight (:type built-in)
   ;; indent hook
   :hook (org-mode . org-indent-mode)
+  :hook (org-mode . visual-line-mode)
   :config
   (setq org-agenda-span 10 ; https://stackoverflow.com/a/32426234
         org-agenda-start-on-weekday nil
@@ -1172,15 +1174,15 @@ _j_ ↓       _J_ X↓
 _k_ ↑       _K_ X↑
 _l_ →       _L_ X→
 "
-   ("h" windmove-left )
-   ("j" windmove-down )
-   ("k" windmove-up )
-   ("l" windmove-right )
+  ("h" windmove-left)
+  ("j" windmove-down)
+  ("k" windmove-up)
+  ("l" windmove-right)
 
-   ("H" hydra-move-splitter-left)
-   ("J" hydra-move-splitter-down)
-   ("K" hydra-move-splitter-up)
-   ("L" hydra-move-splitter-right))
+  ("H" hydra-move-splitter-left)
+  ("J" hydra-move-splitter-down)
+  ("K" hydra-move-splitter-up)
+  ("L" hydra-move-splitter-right))
 
 (defun hydra-move-splitter-left (arg)
   "Move window splitter left."
@@ -1459,6 +1461,7 @@ _j_   zoom-out
     "C-w C-h" 'evil-window-left)
 
   ;; company
+  ;; DELETEME keeping for now to help configure corfu
   (general-define-key
     :keymaps '(company-active-map)
     "C-w" nil ; allow C-w to act normally during completion
@@ -1607,6 +1610,7 @@ _j_   zoom-out
 (use-package auctex
   :hook (LaTeX-mode . visual-line-mode)
   ;; electric pair mode for '$' https://tex.stackexchange.com/a/75884
+  ;; TODO refactor with general
   :hook (LaTeX-mode . (lambda ()
                        (define-key LaTeX-mode-map (kbd "$") 'self-insert-command))))
 (use-package latex-preview-pane)
@@ -1677,9 +1681,7 @@ _j_   zoom-out
             "C-k" 'corfu-previous
             "C-SPC" 'corfu-insert-separator
             "<tab>" '+corfu-complete-quit
-            "<escape>" '+corfu-quit) ;; note also sets functionality of "C-["
-
-
+            "<escape>" '+corfu-quit) ;; NOTE also sets functionality of "C-["
   :init
   (corfu-global-mode)
   :config
