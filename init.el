@@ -1036,6 +1036,34 @@ kill all magit buffers for this repo."
   (define-fringe-bitmap 'git-gutter-fr:added [224] nil nil '(center repeated))
   (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
   (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
+
+(defhydra hydra-git-gutter (:body-pre (git-gutter-mode 1)
+                            :hint nil)
+  "
+Git gutter:
+  _j_: next hunk        _s_tage hunk     _q_uit
+  _k_: previous hunk    _r_evert hunk    _Q_uit and deactivate git-gutter
+  ^ ^                   _p_opup hunk
+  _h_: first hunk
+  _l_: last hunk        set start _R_evision
+"
+  ("j" git-gutter:next-hunk)
+  ("k" git-gutter:previous-hunk)
+  ("h" (progn (goto-char (point-min))
+              (git-gutter:next-hunk 1)))
+  ("l" (progn (goto-char (point-min))
+              (git-gutter:previous-hunk 1)))
+  ("s" git-gutter:stage-hunk)
+  ("r" git-gutter:revert-hunk)
+  ("p" git-gutter:popup-hunk)
+  ("R" git-gutter:set-start-revision)
+  ("q" nil :color blue)
+  ("Q" (progn (git-gutter-mode -1)
+              ;; git-gutter-fringe doesn't seem to
+              ;; clear the markup right away
+              (sit-for 0.1)
+              (git-gutter:clear))
+       :color blue))
 ;;----
 
 
@@ -1161,8 +1189,16 @@ kill all magit buffers for this repo."
     (s-trim (s-join "\n" relevant-lines))))
 
 
+;; TODO checkout hercules as hydra replacement
+;(use-package hercules)
+
 ;; HYDRA
 (use-package hydra)
+;; TODO hydra posframe glitches when used
+;(use-package hydra-posframe
+;  :straight (hydra-posframe :type git :host github :repo "Ladicle/hydra-posframe")
+;  :hook (after-init . hydra-posframe-enable))
+
 
 ;; simple hydra for resizing windows
 (defhydra hydra-window (:hint nil)
@@ -1799,10 +1835,25 @@ _j_   zoom-out
 
 ;; dired
 (use-package dired
-  :straight nil
+  :straight (:type built-in)
   :general
-  (:keymaps 'dired-mode-map
+  (:keymaps 'dired-mode-map :states 'normal ;; FIXME does this work? or does it break dired
+    "H" 'dired-up-directory
     "c" 'find-file))
+
+;; WIP I always forget dired hotkeys, this hydra should be useful to mitigate this
+(defhydra hydra-dired (:hint nil :foreign-keys run)
+  "
+Dired
+----------------
+_R_ dired-do-rename
+_H_ dired-up-directory
+_q_ quit
+"
+  ("R" dired-do-rename)
+  ("H" dired-up-directory)
+  ("q" nil :exit t))
+
 
 ;----
 
