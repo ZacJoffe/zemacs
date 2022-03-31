@@ -1701,9 +1701,9 @@ _j_   zoom-out
   ;(corfu-preselect-first nil)    ;; Disable candidate preselection
   ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
   ;; (corfu-echo-documentation nil) ;; Disable documentation in the echo area
-  ;; (corfu-scroll-margin 5)        ;; Use scroll margin
-  (corfu-min-width 40)
-  (corfu-max-width corfu-min-width)
+  ; (corfu-scroll-margin 5)        ;; Use scroll margin
+  ;(corfu-min-width 40)
+  ;(corfu-max-width corfu-min-width)
   (corfu-count 14)
   (corfu-echo-documentation t)
 
@@ -1738,6 +1738,16 @@ _j_   zoom-out
   (interactive)
   (corfu-complete)
   (corfu-quit))
+
+;; icons for corfu
+(use-package kind-icon
+  :ensure t
+  :after corfu
+  :custom
+  (kind-icon-default-face 'corfu-default) ; to compute blended backgrounds correctly
+  :config
+  (setq kind-icon-use-icons nil) ;; text based icons
+  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
 ;; https://kristofferbalintona.me/posts/corfu-kind-icon-and-corfu-doc/
 ;; (use-package corfu-doc
