@@ -497,6 +497,17 @@
   (interactive)
   (consult-ripgrep org-directory))
 
+;; allow me to use `evil-ex-search-next' and `evil-ex-search-previous' on result from `consult-line'
+(defun +consult-line ()
+  "Wrapper around `consult-line' that populates evil search history."
+  (interactive)
+  (consult-line)
+  (let ((search-pattern (car consult--line-history)))
+    ;; HACK manually set the search pattern and evil ex highlighting
+    (setq evil-ex-search-pattern (evil-ex-make-search-pattern search-pattern))
+    (evil-ex-search-activate-highlight evil-ex-search-pattern)))
+
+
 ;; embark
 (use-package embark
   :general
@@ -1279,7 +1290,7 @@ _j_   zoom-out
     ":" '(execute-extended-command :which-key "M-x")
     "x" '(open-scratch-buffer :which-key "Open scratch buffer")
     "<" '(consult-buffer :which-key "consult-buffer")
-    "d" '(dired :which-key "dired")
+    "d" '(dired-jump :which-key "dired-jump")
     "/" '(+consult/ripgrep :which-key "+consult/ripgrep")
     "[" '(persp-prev :which-key "persp-prev")
     "]" '(persp-next :which-key "persp-next")
@@ -1343,6 +1354,7 @@ _j_   zoom-out
     "t" '(:ignore t :which-key "Toggles")
     "ta" '(corfu-mode :which-key "corfu-mode") ;; 'a' for autocomplete
     "ts" '(flyspell-mode :which-key "flyspell-mode")
+    "tf" '(flyspell-mode :which-key "flyspell-mode")
     "tc" '(flycheck-mode :which-key "flycheck-mode")
     "tm" '(minimap-mode :which-key "minimap-mode")
     "tg" '(evil-goggles-mode :which-key "evil-goggles")
@@ -1433,7 +1445,7 @@ _j_   zoom-out
   ;; motion mode hotkeys, inherited by normal/visual
   (general-define-key
     :states 'motion
-    "?" 'consult-line
+    "?" '+consult-line
 
     ;; window management
     "C-w C-u" 'winner-undo
