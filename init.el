@@ -98,10 +98,20 @@
 ;; relative line numbers
 (setq display-line-numbers-type 'relative)
 
+;; scrolling config
+(setq scroll-step            1 ;; smooth scroll
+      scroll-conservatively  10000
 
-;; line-by-line smooth scrolling
-(setq scroll-step            1
-      scroll-conservatively  10000)
+      ;; https://github.com/hlissner/doom-emacs/blob/master/core/core-ui.el#L150
+      hscroll-margin 2
+      hscroll-step 1
+      scroll-margin 0
+      scroll-preserve-screen-position t
+      ;; Reduce cursor lag by a tiny bit by not auto-adjusting `window-vscroll'
+      ;; for tall lines.
+      auto-window-vscroll nil)
+
+;; smoother scrolling (especially for trackpad) via emacs 29
 (pixel-scroll-precision-mode 1)
 
 ;; disable bells (distracting)
