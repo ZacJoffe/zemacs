@@ -565,9 +565,6 @@
 (use-package treemacs-projectile
   :after (treemacs projectile))
 
-(use-package treemacs-icons-dired
-  :hook (dired-mode . treemacs-icons-dired-enable-once))
-
 (use-package treemacs-magit
   :after (treemacs magit))
 ;;----
@@ -1859,7 +1856,29 @@ _j_   zoom-out
   :general
   (:keymaps 'dired-mode-map :states 'normal ;; FIXME does this work? or does it break dired
     "H" 'dired-up-directory
-    "c" 'find-file))
+    "c" 'find-file)
+  :config
+  ;; https://github.com/hlissner/doom-emacs/blob/master/modules/emacs/dired/config.el#L3
+  (setq dired-auto-revert-buffer t  ; don't prompt to revert; just do it
+        dired-dwim-target t  ; suggest a target for moving/copying intelligently
+        dired-hide-details-hide-symlink-targets nil
+        ;; Always copy/delete recursively
+        dired-recursive-copies  'always
+        dired-recursive-deletes 'top
+        ;; Ask whether destination dirs should get created when copying/removing files.
+        dired-create-destination-dirs 'ask
+        ;; Where to store image caches
+        ;image-dired-dir (concat doom-cache-dir "image-dired/") ;; FIXME
+        image-dired-db-file (concat image-dired-dir "db.el")
+        image-dired-gallery-dir (concat image-dired-dir "gallery/")
+        image-dired-temp-image-file (concat image-dired-dir "temp-image")
+        image-dired-temp-rotate-image-file (concat image-dired-dir "temp-rotate-image")
+        ;; Screens are larger nowadays, we can afford slightly larger thumbnails
+        image-dired-thumb-size 150)
+  )
+
+(use-package diredfl
+  :hook (dired-mode . diredfl-mode))
 
 ;; WIP I always forget dired hotkeys, this hydra should be useful to mitigate this
 (defhydra hydra-dired (:hint nil :foreign-keys run)
@@ -1868,10 +1887,12 @@ Dired
 ----------------
 _R_ dired-do-rename
 _H_ dired-up-directory
+_o_ dired-omit-mode
 _q_ quit
 "
   ("R" dired-do-rename)
   ("H" dired-up-directory)
+  ("o" dired-omit-mode)
   ("q" nil :exit t))
 
 
