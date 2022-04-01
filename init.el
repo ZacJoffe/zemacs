@@ -1856,7 +1856,8 @@ _j_   zoom-out
   :general
   (:keymaps 'dired-mode-map :states 'normal ;; FIXME does this work? or does it break dired
     "H" 'dired-up-directory
-    "c" 'find-file)
+    "c" 'find-file
+    "?" 'hydra-dired/body)
   :config
   ;; https://github.com/hlissner/doom-emacs/blob/master/modules/emacs/dired/config.el#L3
   (setq dired-auto-revert-buffer t  ; don't prompt to revert; just do it
@@ -1877,6 +1878,7 @@ _j_   zoom-out
         image-dired-thumb-size 150)
   )
 
+;; colorful dired
 (use-package diredfl
   :hook (dired-mode . diredfl-mode))
 
@@ -1888,12 +1890,19 @@ Dired
 _R_ dired-do-rename
 _H_ dired-up-directory
 _o_ dired-omit-mode
+_+_ dired-create-directory
+_c_ find-file (create file)
+_-_ dired-up-directory
 _q_ quit
 "
   ("R" dired-do-rename)
   ("H" dired-up-directory)
   ("o" dired-omit-mode)
-  ("q" nil :exit t))
+  ("+" dired-create-directory)
+  ("c" find-file)
+  ("-" dired-up-directory)
+  ("q" nil :exit t)
+  ("<escape>" nil :exit t))
 
 
 ;----
