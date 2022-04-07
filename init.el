@@ -9,9 +9,15 @@
 (setq-default indent-tabs-mode nil ;; indent with spaces
               tab-width 4          ;; 1 tab <=> 4 spaces
               c-basic-offset 4     ;; indentation for cc modes
+              c-default-style "linux" ;; https://en.wikipedia.org/wiki/Indentation_style
               fill-column 80       ;; wrap at 80 characters for auto-fill-mode
               word-wrap t          ;; do not wrap characters in the middle of words
               truncate-lines t)    ;; do not wrap by default
+
+;; properly indent ')' https://stackoverflow.com/q/58844859
+;(add-to-list 'c-offsets-alist '(arglist-close . c-lineup-close-paren))
+(c-set-offset 'arglist-close 'c-lineup-close-paren)
+
 
 ;; save buffers on close (sessioning)
 (setq desktop-path '("~/"))
@@ -245,6 +251,21 @@
   "Open *scractch* buffer."
   (interactive)
   (switch-to-buffer "*scratch*"))
+
+;; TODO FIXME proper indentation in text mode
+;; https://stackoverflow.com/a/22109370
+(defun newline-dwim ()
+  (interactive)
+  (let ((break-open-pair (or (and (looking-back "{") (looking-at "}"))
+                             (and (looking-back ">") (looking-at "<"))
+                             (and (looking-back "(") (looking-at ")"))
+                             (and (looking-back "\\[") (looking-at "\\]")))))
+    (newline)
+    (when break-open-pair
+      (save-excursion
+        (newline)
+        (indent-for-tab-command)))
+    (indent-for-tab-command)))
 ;;----
 
 
