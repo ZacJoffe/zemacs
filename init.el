@@ -90,6 +90,11 @@
 ;; setup line numbers
 ;; do not dynamically resize line number column when a digit needs to be added
 (setq display-line-numbers-width-start t)
+
+;; HACK prevent M-x from shrinking line number width
+;; https://github.com/abo-abo/swiper/issues/1940#issuecomment-465374308
+(setq display-line-numbers-width 3)
+
 ;; I don't want line numbers in help files, dired, etc.
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 (add-hook 'text-mode-hook 'display-line-numbers-mode)
@@ -563,8 +568,10 @@
 (use-package embark
   :general
   ("C-l" 'embark-act)
+  ("<mouse-3>" 'embark-act) ;; right click
   (:keymaps 'evil-normal-state-map
-   "C-." 'embark-act)
+   "C-." 'embark-act
+   "<mouse-3>" 'embark-act)
   :init
   ;; let "C-h" after a prefix command bring up a completion search using consult
   ;; https://www.reddit.com/r/emacs/comments/otjn19/comment/h6vyx9q/?utm_source=share&utm_medium=web2x&context=3
@@ -1130,6 +1137,7 @@ Git gutter:
   :config
   ;; sane configs
   (setq ediff-diff-options "-w" ; turn off whitespace checking
+        ediff-highlight-all-diffs nil
         ediff-split-window-function #'split-window-horizontally
         ediff-window-setup-function #'ediff-setup-windows-plain)
 
@@ -1704,6 +1712,14 @@ _j_   zoom-out
 
 ;; thrift
 (use-package thrift)
+
+;; hex editing
+;; TODO
+(use-package nhexl-mode
+  :hook (nhexl-mode . (lambda () display-line-numbers-mode -1)))
+
+;; json
+(use-package json-mode)
 
 ;;----
 
