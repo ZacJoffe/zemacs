@@ -123,18 +123,6 @@
 ;; disable bells (distracting)
 (setq ring-bell-function 'ignore)
 
-;; delimeter pairing
-(electric-pair-mode 1)
-(setq electric-pair-delete-adjacent-pairs t)
-;; TODO
-(setq electric-pair-pairs '((?\" . ?\")
-                            (?\{ . ?\})
-                            ))
-
-;; prevent electric pair mode from being enabled in the mini buffer (for things like consult)
-;; https://emacs.stackexchange.com/a/29342
-(setq electric-pair-inhibit-predicate (lambda (char) (minibufferp)))
-
 ;; use aspell backend
 (if (eq system-type 'darwin)
   (setq ispell-program-name "/opt/homebrew/bin/aspell" ; mac specific
@@ -416,6 +404,38 @@
 (use-package editorconfig
   :config
   (editorconfig-mode 1))
+
+
+;; hungry delete
+;; TODO broken
+;(use-package hungry-delete
+;  :general
+;  (:keymaps 'hungry-delete-mode-map
+;    "<backspace>" 'backward-delete-char-untabify
+;    "M-<backspace>" 'hungry-delete-backward)
+;  :init
+;  (global-hungry-delete-mode 1))
+
+
+(use-package electric
+  :straight (:type built-in)
+  :init
+  ;; delimeter pairing
+  (setq electric-pair-delete-adjacent-pairs t)
+  ;; TODO
+  (setq electric-pair-pairs '((?\" . ?\")
+                              (?\{ . ?\})))
+  ;(setq-default electric-indent-chars '(?\n ?\^?))
+
+  ;; prevent electric pair mode from being enabled in the mini buffer (for things like consult)
+  ;; https://emacs.stackexchange.com/a/29342
+  (setq electric-pair-inhibit-predicate (lambda (char) (minibufferp)))
+  (electric-pair-mode 1))
+
+;(use-package aggressive-indent
+;  :config
+;(global-aggressive-indent-mode 1)
+;(add-to-list 'aggressive-indent-excluded-modes 'html-mode))
 ;;----
 
 
