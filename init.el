@@ -1942,22 +1942,34 @@ _j_   zoom-out
 ;; WIP I always forget dired hotkeys, this hydra should be useful to mitigate this
 (defhydra hydra-dired (:hint nil :foreign-keys run)
   "
-Dired
-----------------
-_R_ dired-do-rename
-_H_ dired-up-directory
-_o_ dired-omit-mode
-_+_ dired-create-directory
-_c_ find-file (create file)
-_-_ dired-up-directory
-_q_ quit
+Movement
+-----------------------------
+_H_: dired-up-directory
+_-_: dired-up-directory
+
+Toggles
+-----------------------------
+_o_: dired-omit-mode
+
+Modify
+-----------------------------
+_+_: dired-create-directory
+_c_: find-file (create file)
+_R_: dired-do-rename
+_d_: dired-flag-file-deletion
+_u_: dired-unmark
+_x_: dired-do-flagged-delete
+_q_: quit
 "
-  ("R" dired-do-rename)
   ("H" dired-up-directory)
+  ("-" dired-up-directory)
   ("o" dired-omit-mode)
   ("+" dired-create-directory)
   ("c" find-file)
-  ("-" dired-up-directory)
+  ("R" dired-do-rename)
+  ("d" dired-flag-file-deletion)
+  ("u" dired-unmark)
+  ("x" dired-do-flagged-delete)
   ("q" nil :exit t)
   ("<escape>" nil :exit t))
 
