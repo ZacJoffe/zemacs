@@ -19,6 +19,11 @@
 (c-set-offset 'arglist-close 'c-lineup-close-paren)
 
 
+;; set source directory to view source code of functions defined in C
+;; https://github.com/raxod502/radian/blob/develop/emacs/radian.el#L3951
+(setq find-function-C-source-directory (expand-file-name "src" source-directory))
+
+
 ;; save buffers on close (sessioning)
 (setq desktop-path '("~/"))
 
@@ -273,6 +278,25 @@
 
 (advice-add 'indent-for-tab-command :around #'+tab--jump-out)
 (advice-add 'org-cycle :around #'+tab--jump-out)
+
+;; automatically clone the emacs source repo if needed (in source directory)
+;; https://github.com/raxod502/radian/blob/develop/emacs/radian.el#L3954
+(defun +clone-emacs-source (&rest _)
+  "Prompt user to clone Emacs source repository if needed."
+  (when (and (not (file-directory-p source-directory))
+             (not (get-buffer "*clone-emacs-src*"))
+             (yes-or-no-p "Clone Emacs source repository? "))
+    (make-directory (file-name-directory source-directory) 'parents)
+    (let ((compilation-buffer-name-function
+           (lambda (&rest _)
+             "*clone-emacs-src*")))
+      (save-current-buffer
+        (compile
+         (format
+          "git clone https://github.com/emacs-mirror/emacs.git %s"
+          (shell-quote-argument source-directory)))))))
+
+(advice-add 'find-function-C-source :before #'+clone-emacs-source)
 ;;----
 
 
