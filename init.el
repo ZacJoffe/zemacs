@@ -1710,6 +1710,19 @@ _R_   reset frame zoom
 (use-package consult-lsp)
 
 
+;; dumb jump (indexless code navigation)
+;; TODO configure with lsp
+(use-package dumb-jump
+  :config
+  (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
+  (setq xref-show-definitions-function #'xref-show-definitions-completing-read ;; use vertico to handle ambiguous cases
+        dumb-jump-force-searcher 'rg) ;; force dumb jupm to use ripgrep (NOTE still defaults to git-grep if file is in git project)
+
+  ;; preserve jump list in evil https://skeptric.com/dumbjump/
+  (defun evil-set-jump-args (&rest ns) (evil-set-jump))
+  (advice-add 'dumb-jump-goto-file-line :before #'evil-set-jump-args))
+
+
 ;; flycheck
 (use-package flycheck
   :init
