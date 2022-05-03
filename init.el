@@ -6,13 +6,13 @@
 (setq initial-major-mode 'text-mode)
 
 ;; some editor settings
-(setq-default indent-tabs-mode nil ;; indent with spaces
-              tab-width 4          ;; 1 tab <=> 4 spaces
-              c-basic-offset 4     ;; indentation for cc modes
+(setq-default indent-tabs-mode nil    ;; indent with spaces
+              tab-width 4             ;; 1 tab <=> 4 spaces
+              c-basic-offset 4        ;; indentation for cc modes
               c-default-style "linux" ;; https://en.wikipedia.org/wiki/Indentation_style
-              fill-column 80       ;; wrap at 80 characters for auto-fill-mode
-              word-wrap t          ;; do not wrap characters in the middle of words
-              truncate-lines t)    ;; do not wrap by default
+              fill-column 80          ;; wrap at 80 characters for auto-fill-mode
+              word-wrap t             ;; do not wrap characters in the middle of words
+              truncate-lines t)       ;; do not wrap by default
 
 ;; properly indent ')' https://stackoverflow.com/q/58844859
 ;(add-to-list 'c-offsets-alist '(arglist-close . c-lineup-close-paren))
@@ -27,7 +27,7 @@
 ;; save buffers on close (sessioning)
 (setq desktop-path '("~/"))
 
-;; do not display empty cursor in other windows (which is especially discracting with hydras)
+;; do not display empty cursor in other windows (especially discracting with hydras)
 (setq-default cursor-in-non-selected-windows nil)
 
 ;; remember window configuration changes
@@ -36,11 +36,14 @@
 ;; automatically refresh buffers
 (global-auto-revert-mode 1)
 
-(scroll-bar-mode -1)        ; Disable visible scrollbar
-(tool-bar-mode -1)          ; Disable the toolbar
-(tooltip-mode -1)           ; Disable tooltips
-(menu-bar-mode -1)          ; Disable the menu bar
-(setq sentence-end-double-space nil) ; sentences should end with 1 space
+;; some sane defaults
+(scroll-bar-mode -1) ;; disable visible scrollbar
+(tool-bar-mode -1)   ;; disable the toolbar
+(tooltip-mode -1)    ;; disable tooltips
+(menu-bar-mode -1)   ;; disable the menu bar
+
+;; sentences should end with 1 space
+(setq sentence-end-double-space nil)
 
 ;; fringe setup (left . right)
 (set-fringe-mode '(4 . 4))
@@ -252,7 +255,7 @@
 
 ;; TODO FIXME proper indentation in text mode
 ;; https://stackoverflow.com/a/22109370
-(defun newline-dwim ()
+(defun new-line-dwim ()
   (interactive)
   (let ((break-open-pair (or (and (looking-back "{") (looking-at "}"))
                              (and (looking-back ">") (looking-at "<"))
@@ -534,7 +537,7 @@
     "M-A" 'marginalia-cycle)
   :init
   ;; Must be in the :init section of use-package such that the mode gets
-  ;; enabled right away. Note that this forces loading the package.
+  ;; enabled right away. NOTE that this forces loading the package.
   (marginalia-mode))
 
 ;; consult
@@ -804,10 +807,13 @@
   ""
   (mapcar #'+persp--consult-buffer-sources (remove (persp-current-name) (persp-names))))
 
-;; note that the consult--multi expects to read in a list, even if there is only 1 source
+;; NOTE consult--multi expects to read in a list, even if there is only 1 source
 (defun +persp--consult-buffer-soruces-curr-persp ()
   ""
   (list (+persp--consult-buffer-sources (persp-current-name))))
+
+;; TODO FIXME this seems to be built into persp mode https://github.com/nex3/perspective-el#buffer-switchers
+;; also see https://github.com/minad/consult/wiki#perspective
 
 ;; this function is essentially a copy of consult-buffer
 (defun +persp/consult-buffer ()
@@ -941,6 +947,7 @@
   (doom-themes-org-config))
 
 
+;; TODO FIXME shows misc info (persps) in dired
 ;; modeline
 (use-package doom-modeline
   :hook (after-init . doom-modeline-mode)
@@ -1001,7 +1008,6 @@
         hl-todo-keyword-faces
         `(;; For things that need to be done, just not today.
           ("TODO" warning bold)
-          ("TODOPRIO" error bold)
           ;; For problems that will become bigger problems later if not
           ;; fixed ASAP.
           ("FIXME" error bold)
@@ -1213,6 +1219,7 @@ Git gutter:
   (setq org-appear-autolinks nil)
   (setq org-appear-autosubmarkers t)) ;; Enable on subscript and superscript
 
+;; FIXME I am essentially trying to create a consult interface for previewing files in a directory
 ;; TODO preview org dailies with consult
 ;(defun +org--consult-dailies-sources ()
 ;  ""
@@ -1269,8 +1276,6 @@ Git gutter:
     (s-trim (s-join "\n" relevant-lines))))
 
 
-;; TODO checkout hercules as hydra replacement
-;(use-package hercules)
 
 ;; HYDRA
 (use-package hydra)
@@ -1395,7 +1400,7 @@ _j_   zoom-out
   (general-override-mode) ;; https://github.com/noctuid/general.el/issues/99#issuecomment-360914335
   ;; doomesque hotkeys using spacebar as prefix
   (my-leader-def
-    :states '(motion normal visual treemacs) ;; note the treemacs state
+    :states '(motion normal visual treemacs) ;; NOTE the treemacs state
     :keymaps 'override ;; https://github.com/noctuid/general.el/issues/99#issuecomment-360914335
 
     ;; map universal argument to SPC-u
@@ -1593,7 +1598,7 @@ _j_   zoom-out
   ;; key bindings for evil search ('/')
   ;; there could be a better way to do this, but this works so whatever
   (general-define-key
-    ;; note that evil-ex-map is different from evil-ex-search-keymap
+    ;; NOTE evil-ex-map is different from evil-ex-search-keymap
     :keymaps 'evil-ex-search-keymap
     ;; C-v should paste clipboard contents
     "C-v" 'yank)
