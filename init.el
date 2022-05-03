@@ -267,6 +267,12 @@
         (newline)
         (indent-for-tab-command)))
     (indent-for-tab-command)))
+
+;; useful for emacs daemon
+(defun +reload-config ()
+  "Reload `init.el' without closing Emacs."
+  (interactive)
+  (load-file user-init-file))
 ;;----
 
 
