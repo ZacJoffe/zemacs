@@ -1349,21 +1349,29 @@ _l_ →       _L_ X→
 ;; buffer/frame zoom hydra
 (defhydra hydra-zoom (:hint nil)
   "
-Zoom
------------------------
+Buffer Zoom
+-------------------------
 _=_   text-scale-increase
 _-_   text-scale-decrease
+_r_   reset text scale
+
+Frame Zoom
+-------------------------
 _M-=_ zoom-in
 _M--_ zoom-out
 _k_   zoom-in
 _j_   zoom-out
+_R_   reset frame zoom
 "
   ("=" text-scale-increase)
   ("-" text-scale-decrease)
+  ("r" (lambda () (interactive) (text-scale-adjust 0)))
+
   ("M-=" zoom-in)
   ("M--" zoom-out)
   ("k" zoom-in)
-  ("j" zoom-out))
+  ("j" zoom-out)
+  ("R" (lambda () (interactive) (zoom-in/out 0))))
 
 
 ;; use hydra to quickly load themes
@@ -1993,6 +2001,7 @@ Modify
 -----------------------------
 _+_: dired-create-directory
 _c_: find-file (create file)
+_C_: dired-do-copy (copy file)
 _R_: dired-do-rename
 _d_: dired-flag-file-deletion
 _u_: dired-unmark
@@ -2001,9 +2010,12 @@ _q_: quit
 "
   ("H" dired-up-directory)
   ("-" dired-up-directory)
+
   ("o" dired-omit-mode)
+
   ("+" dired-create-directory)
   ("c" find-file)
+  ("C" dired-do-copy)
   ("R" dired-do-rename)
   ("d" dired-flag-file-deletion)
   ("u" dired-unmark)
