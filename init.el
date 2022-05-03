@@ -1208,9 +1208,12 @@ Git gutter:
   :config
   (org-roam-db-autosync-mode))
 
-(use-package org-roam-protocol
-  :straight nil
-  :after org-protocol)
+(defvar +org-roam-dailies-directory (concat org-roam-directory "/daily"))
+
+;; TODO FIXME broken?
+;(use-package org-roam-protocol
+;  :straight nil
+;  :after org-protocol)
 
 ;; prettier headings
 (use-package org-superstar)
