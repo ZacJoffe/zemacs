@@ -926,6 +926,30 @@
         (persp-rename new-name)
         (+persp-message (format "Renamed '%s'->'%s'" curr-name new-name) 'success)))))
 
+
+;; TODO this is all broken, I think I can fix it with some hacks though
+;; https://github.com/nex3/perspective-el/issues/63#issuecomment-322579522
+(defun +persp/get-buffers-list ()
+  "Get filtered list of buffers, sorted alphabetically."
+  (sort
+   (cl-remove-if '(lambda (b) (if (stringp b) (string-match "^\[* \]" b) t))
+                 (mapcar 'buffer-name (persp-buffers (persp-curr))))
+   'string<))
+
+(defun +persp/next-buffer ()
+  "Perspective aware `next-buffer'. Don't show internal buffers."
+  (interactive)
+  (let ((buffername (buffer-name (current-buffer)))
+        (bufferlist (+persp/get-buffers-list)))
+    (switch-to-buffer (or (cadr (member buffername bufferlist)) (car bufferlist)))))
+
+(defun +persp/previous-buffer ()
+  "Perspective aware `previous-buffer'. Don't show internal buffers."
+  (interactive)
+  (let ((buffername (buffer-name (current-buffer)))
+        (bufferlist (reverse (+persp/get-buffers-list))))
+    (switch-to-buffer (or (cadr (member buffername bufferlist)) (car bufferlist)))))
+
 ;; TODO M-RET open file in new persp in find-file
 ;;----
 
@@ -1659,8 +1683,10 @@ _R_   reset frame zoom
     "C-v" 'yank
 
     ;; buffer management
-    "C-a" 'bury-buffer
-    "C-S-a" 'unbury-buffer
+    ;"C-a" 'bury-buffer
+    ;"C-S-a" 'unbury-buffer
+    "C-a" '+persp/previous-buffer
+    "C-S-a" '+persp/next-buffer
     "C-z" 'consult-buffer
 
     ;; persp cycling
