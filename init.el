@@ -2042,11 +2042,13 @@ Modify
 _+_: dired-create-directory
 _c_: find-file (create file)
 _C_: dired-do-copy (copy file)
-_R_: dired-do-rename
+_R_: dired-do-rename (rename or mv)
 _d_: dired-flag-file-deletion
+_m_: dired-mark
 _u_: dired-unmark
 _x_: dired-do-flagged-delete
 _q_: quit
+_?_: quit
 "
   ("H" dired-up-directory)
   ("-" dired-up-directory)
@@ -2058,9 +2060,11 @@ _q_: quit
   ("C" dired-do-copy)
   ("R" dired-do-rename)
   ("d" dired-flag-file-deletion)
+  ("m" dired-mark)
   ("u" dired-unmark)
   ("x" dired-do-flagged-delete)
   ("q" nil :exit t)
+  ("?" nil :exit t)
   ("<escape>" nil :exit t))
 
 
