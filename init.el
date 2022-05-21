@@ -5,6 +5,12 @@
 ;; scratch buffer defaults
 (setq initial-major-mode 'text-mode)
 
+;; performance stuff
+;; increase amount of data which emacs can read from processes (mainly for LSP mode https://emacs-lsp.github.io/lsp-mode/page/performance/)
+(setq read-process-output-max (* 1024 1024) ;; 1mb
+      ;; increase the gc threshold
+      gc-cons-threshold 100000000)
+
 ;; some editor settings
 (setq-default indent-tabs-mode nil    ;; indent with spaces
               tab-width 4             ;; 1 tab <=> 4 spaces
