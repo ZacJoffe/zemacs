@@ -92,8 +92,8 @@
     (set-face-attribute 'default nil :font "Iosevka Fixed" :height 240 :weight 'regular)
   (set-face-attribute 'default nil :font "Iosevka Fixed" :height 170 :weight 'light))
 ;; float height value (1.0) makes fixed-pitch take height 1.0 * height of default
-(set-face-attribute 'fixed-pitch nil :font "Iosevka Fixed" :height 1.0 :weight 'light)
-(set-face-attribute 'variable-pitch nil :font "Iosevka" :height 1.0 :weight 'light)
+(set-face-attribute 'fixed-pitch nil :font "Iosevka Fixed" :height 1.0 :weight 'regular)
+(set-face-attribute 'variable-pitch nil :font "Iosevka" :height 1.0 :weight 'regular)
 
 ;; setup line numbers
 ;; do not dynamically resize line number column when a digit needs to be added
