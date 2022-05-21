@@ -1810,6 +1810,32 @@ _R_   reset frame zoom
   (setq rustic-lsp-client nil))
 
 
+;; python
+(use-package lsp-pyright
+  :ensure t
+  :hook (python-mode . (lambda ()
+                          (require 'lsp-pyright)
+                          (lsp))))  ; or lsp-deferred
+
+;; emacs-ipython-notebook (jupyter)
+(use-package ein)
+
+;; julia
+(use-package julia-mode)
+(use-package julia-repl)
+
+
+;; scala
+(use-package scala-mode)
+(use-package lsp-metals
+  :custom
+  ;; Metals claims to support range formatting by default but it supports range
+  ;; formatting of multiline strings only. You might want to disable it so that
+  ;; emacs can use indentation provided by scala-mode.
+  (lsp-metals-server-args '("-J-Dmetals.allow-multiline-string-formatting=off"))
+  :hook (scala-mode . lsp))
+
+
 ;; latex
 (use-package auctex
   :hook (LaTeX-mode . visual-line-mode)
@@ -1864,6 +1890,9 @@ _R_   reset frame zoom
 ;; json
 (use-package json-mode)
 
+
+;; yaml
+(use-package yaml-mode)
 ;;----
 
 ;; AUTOCOMPLETE
