@@ -1053,9 +1053,7 @@
 
 ;; highlight numbers
 (use-package highlight-numbers
-  :hook ((prog-mode . highlight-numbers-mode)
-         (markdown-mode . highlight-numbers-mode)
-         (org-mode . highlight-numbers-mode)))
+  :hook ((prog-mode . highlight-numbers-mode)))
 
 
 ;; undo-tree - undo history represented as a tree, with evil integration
@@ -1195,17 +1193,40 @@ Git gutter:
   ;; HACK (?) prevents needed `org-reload' to fix org agenda (which seems to break org mode)
   ;; https://www.reddit.com/r/emacs/comments/rr203h/using_straightel_and_usepackage_to_configure_org/hqdzpc5/
   :straight (:type built-in)
-  ;; indent hook
-  :hook (org-mode . org-indent-mode)
-  :hook (org-mode . visual-line-mode)
+  ;:hook (org-mode . org-indent-mode)  ;; indent org stuff
+  :hook (org-mode . visual-line-mode) ;; wrap lines
+  :hook (org-mode . flyspell-mode)    ;; spelling
   :config
   (setq org-agenda-span 10 ; https://stackoverflow.com/a/32426234
         org-agenda-start-on-weekday nil
         org-todo-keywords '((sequence "TODO(t)" "EXAM(e)" "WAIT(w)" "|" "DONE(d)" "KILL(k)" "SKIPPED(s)" "LATE(s)"))
         org-return-follows-link t
         org-directory "~/Documents/Google/org"
-        org-agenda-files '("~/Documents/Google/org/roam/agenda")) ; https://stackoverflow.com/a/11384907
-  )
+        org-agenda-files '("~/Documents/Google/org/roam/agenda") ;; https://stackoverflow.com/a/11384907
+        org-src-tab-acts-natively t ;; https://stackoverflow.com/a/27236621/11312409
+        org-src-preserve-indentation t
+        org-edit-src-content-indentation 0 ;; https://www.reddit.com/r/orgmode/comments/mobien/org_mode_code_block_indentation/gu3jjkg/
+        org-fontify-whole-heading-line t
+        org-fontify-quote-and-verse-blocks t)
+
+  ;; use minted to handle code listings https://emacs.stackexchange.com/a/27984
+  (setq org-latex-listings 'minted
+    org-latex-packages-alist '(("" "minted"))
+    org-latex-pdf-process
+    '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+      "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
+)
+
+;; small snippet that I use often in org
+(defun +org-insert-source-block ()
+  "Insert code block, force insert mode."
+  (interactive)
+  (insert "#+BEGIN_SRC
+
+#+END_SRC")
+  (forward-line -1)
+  (goto-char (line-end-position))
+  (evil-insert 0))
 
 ;; org-roam 2
 (use-package org-roam
