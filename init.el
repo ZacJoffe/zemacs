@@ -1842,13 +1842,24 @@ _R_   reset frame zoom
   :hook (LaTeX-mode . evil-tex-mode))
 
 
+;; edit files from browser in emacs
+(use-package atomic-chrome
+  :init
+  (atomic-chrome-start-server)
+  :config
+  (setq atomic-chrome-url-major-mode-alist
+    '(("overleaf\\.com" . LaTeX-mode))))
+
+
 ;; thrift
 (use-package thrift)
+
 
 ;; hex editing
 ;; TODO
 (use-package nhexl-mode
   :hook (nhexl-mode . (lambda () display-line-numbers-mode -1)))
+
 
 ;; json
 (use-package json-mode)
