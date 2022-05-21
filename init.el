@@ -1813,11 +1813,31 @@ _R_   reset frame zoom
 ;; latex
 (use-package auctex
   :hook (LaTeX-mode . visual-line-mode)
-  ;; electric pair mode for '$' https://tex.stackexchange.com/a/75884
+  :hook (LaTeX-mode . flyspell-mode)
+  ;; electric pair mode for `$' https://tex.stackexchange.com/a/75884
   ;; TODO refactor with general
   :hook (LaTeX-mode . (lambda ()
-                       (define-key LaTeX-mode-map (kbd "$") 'self-insert-command))))
-(use-package latex-preview-pane)
+                        (define-key LaTeX-mode-map (kbd "$") 'self-insert-command)))
+  :init
+  ;; turn off subscripting and superscripting being rendered explicitly
+  (setq tex-fontify-script nil
+        font-latex-fontify-script nil))
+
+(use-package latex-preview-pane
+  :config
+  (setq latex-preview-pane-multifile-mode 'auctex))
+
+;; TODO implement so that frame doesn't get killed
+;(defadvice! +latex--dont-reopen-preview-pane-a (fn &rest args)
+;    "Once the preview pane has been closed it should not be reopened."
+;    :around #'latex-preview-pane-update
+;    (letf! (defun init-latex-preview-pane (&rest _)
+;             ;; HACK Avoid the function because it tries to delete the current
+;             ;;      window, but it's already gone, so it ends up deleting the
+;             ;;      wrong window.
+;             (setq-local latex-preview-pane-mode nil))
+;      (apply fn args)))
+
 (use-package evil-tex
   :hook (LaTeX-mode . evil-tex-mode))
 
@@ -1896,6 +1916,10 @@ _R_   reset frame zoom
             "<escape>" '+corfu-quit) ;; NOTE also sets functionality of "C-["
   :init
   (corfu-global-mode)
+  (defun +lsp-mode-setup-completion ()
+    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+          '(orderless))) ;; Configure orderless
+  :hook (lsp-completion-mode . +lsp-mode-setup-completion)
   :config
   ;; HACK evil keymaps seem to take precedence over corfu's map, use advice to fix
   ;; https://github.com/minad/corfu/issues/12#issuecomment-881961510
@@ -1999,15 +2023,18 @@ _R_   reset frame zoom
 ;; PDF
 (use-package pdf-tools
   :hook (TeX-after-compilation-finished-functions . TeX-revert-document-buffer)
+  :hook (pdf-view-mode . auto-revert-mode) ;; TODO this may be redundant
   :hook (pdf-view-mode . pdf-view-midnight-minor-mode)
+  ;; prevent blinking on selection https://github.com/politza/pdf-tools/issues/201#issuecomment-210989952
+  :hook (pdf-view-mode . (lambda () (set (make-local-variable 'evil-emacs-state-cursor) (list nil))))
   :config
   (pdf-tools-install)
   ; HiDPI support
   (setq pdf-view-use-scaling t
-        pdf-view-use-imagemagick nil)
-  (setq TeX-view-program-selection '((output-pdf "PDF Tools"))
-	TeX-view-program-list '(("PDF Tools" TeX-pdf-tools-sync-view))
-	TeX-source-correlate-start-server t)
+        pdf-view-use-imagemagick nil
+        TeX-view-program-selection '((output-pdf "PDF Tools"))
+        TeX-view-program-list '(("PDF Tools" TeX-pdf-tools-sync-view))
+        TeX-source-correlate-start-server t)
 
   ;; https://www.reddit.com/r/emacs/comments/dgywoo/issue_with_pdfview_midnight_mode/f3hdhf2/
   ;; disable cursor in pdf-view, otherwise there is a distracting border on the pdf
