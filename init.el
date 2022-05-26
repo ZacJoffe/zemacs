@@ -1211,6 +1211,13 @@ Git gutter:
   :hook (ediff-quit . (lambda () (when (window-configuration-p ediff--saved-wconf)
                          (set-window-configuration ediff--saved-wconf)))))
 
+;; markdown
+(use-package markdown-mode
+  :straight nil
+  :config
+  ;; syntax highlighting in code blocks
+  (setq markdown-fontify-code-blocks-natively t))
+
 
 ;; ORG
 (use-package org
