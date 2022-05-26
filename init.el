@@ -1938,6 +1938,16 @@ _R_   reset frame zoom
 
 ;; yaml
 (use-package yaml-mode)
+
+
+;; mermaid graphs
+(use-package mermaid-mode
+  :hook (mermaid-mode . (lambda () (electric-indent-local-mode -1))))
+
+
+;; alloy
+(use-package alloy-mode
+  :straight (alloy-mode :type git :host github :repo "dwwmmn/alloy-mode"))
 ;;----
 
 ;; AUTOCOMPLETE
