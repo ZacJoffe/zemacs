@@ -1231,10 +1231,11 @@ Git gutter:
   :config
   (setq org-agenda-span 10 ; https://stackoverflow.com/a/32426234
         org-agenda-start-on-weekday nil
+        org-agenda-files '("~/Documents/Google/org/roam/agenda") ;; https://stackoverflow.com/a/11384907
+        org-agenda-window-setup 'current-window ;; open agenda in current window
         org-todo-keywords '((sequence "TODO(t)" "EXAM(e)" "WAIT(w)" "|" "DONE(d)" "KILL(k)" "SKIPPED(s)" "LATE(s)"))
         org-return-follows-link t
         org-directory "~/Documents/Google/org"
-        org-agenda-files '("~/Documents/Google/org/roam/agenda") ;; https://stackoverflow.com/a/11384907
         org-src-tab-acts-natively t ;; https://stackoverflow.com/a/27236621/11312409
         org-src-preserve-indentation t
         org-edit-src-content-indentation 0 ;; https://www.reddit.com/r/orgmode/comments/mobien/org_mode_code_block_indentation/gu3jjkg/
