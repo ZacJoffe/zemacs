@@ -2144,6 +2144,7 @@ _R_   reset frame zoom
 ;; dired
 (use-package dired
   :straight (:type built-in)
+  :hook (dired-mode . auto-revert-mode)
   :general
   (:keymaps 'dired-mode-map :states 'normal ;; FIXME does this work? or does it break dired
     "H" 'dired-up-directory
@@ -2214,8 +2215,6 @@ _?_: quit
   ("q" nil :exit t)
   ("?" nil :exit t)
   ("<escape>" nil :exit t))
-
-
 ;----
 
 
