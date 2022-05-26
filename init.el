@@ -1227,6 +1227,7 @@ Git gutter:
   ;:hook (org-mode . org-indent-mode)  ;; indent org stuff
   :hook (org-mode . visual-line-mode) ;; wrap lines
   :hook (org-mode . flyspell-mode)    ;; spelling
+  :hook (org-tab-first-hook . +org-indent-maybe-h) ;; doom's TAB key behaviour
   :config
   (setq org-agenda-span 10 ; https://stackoverflow.com/a/32426234
         org-agenda-start-on-weekday nil
@@ -1259,11 +1260,48 @@ Git gutter:
   (goto-char (line-end-position))
   (evil-insert 0))
 
+
+;; https://github.com/doomemacs/doomemacs/blob/master/modules/lang/org/autoload/org.el#L402
+(defun +org-indent-maybe-h ()
+  "Indent the current item (header or item), if possible.
+Made for `org-tab-first-hook' in evil-mode."
+  (interactive)
+  (cond ((not (and (bound-and-true-p evil-local-mode)
+                   (evil-insert-state-p)))
+         nil)
+        ((and (bound-and-true-p org-cdlatex-mode)
+              (or (org-inside-LaTeX-fragment-p)
+                  (org-inside-latex-macro-p)))
+         nil)
+        ((org-at-item-p)
+         (if (eq this-command 'org-shifttab)
+             (org-outdent-item-tree)
+           (org-indent-item-tree))
+         t)
+        ((org-at-heading-p)
+         (ignore-errors
+           (if (eq this-command 'org-shifttab)
+               (org-promote)
+             (org-demote)))
+         t)
+        ((org-in-src-block-p t)
+         (save-window-excursion
+           (org-babel-do-in-edit-buffer
+            (call-interactively #'indent-for-tab-command)))
+         t)
+        ((and (save-excursion
+                (skip-chars-backward " \t")
+                (bolp))
+              (org-in-subtree-not-table-p))
+         (call-interactively #'tab-to-tab-stop)
+         t)))
+
 ;; org-roam 2
 (use-package org-roam
   :custom
   (org-roam-directory (file-truename "~/Documents/Google/org/roam"))
   :config
+  (setq org-roam-completion-everywhere t)
   (org-roam-db-autosync-mode))
 
 (defvar +org-roam-dailies-directory (concat org-roam-directory "/daily"))
