@@ -369,11 +369,12 @@
         evil-want-integration t
         evil-want-keybinding nil
         evil-normal-state-cursor 'box
-        evil-search-module 'evil-search)
+        evil-search-module 'evil-search
+        evil-respect-visual-line-mode t)
   :general
   ;; j and k should operate line-by-line with text wrapping
-  ([remap evil-next-line] 'evil-next-visual-line
-   [remap evil-previous-line] 'evil-previous-visual-line
+  (;[remap evil-next-line] 'evil-next-visual-line
+   ;[remap evil-previous-line] 'evil-previous-visual-line
    ;; inverse of evil jump backward
    "C-S-o" 'evil-jump-forward)
   :config
