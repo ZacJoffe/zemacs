@@ -785,103 +785,9 @@
     (+persp-message (format "Invalid persp index %d" (1+ index)) 'error)))
 
 
-;; TODO needs work
-;(defun +persp--consult-buffer-sources ()
-;  ""
-;  (list `(:name ,(persp-current-name)
-;    :narrow ?b
-;    :category buffer
-;    :state    ,#'consult--buffer-state
-;    :items ,(lambda ()
-;              (consult--buffer-query
-;               :sort 'visibility
-;               :as #'buffer-name
-;               :predicate (lambda (buf)
-;                            (member buf (persp-get-buffers))))))))
-
-(defun +persp--consult-buffer-sources (persp)
-  ""
-  `(:name     ,persp
-    :narrow   ?b
-    :category buffer
-    :state    ,#'consult--buffer-state
-    :items    (lambda () ;; TODO lexical scope, also remove ,`
-                  (consult--buffer-query
-                   :sort      'visibility
-                   :as        #'buffer-name
-                   :predicate (lambda (buf)
-                                 (member buf (persp-get-buffers ,persp)))))))
-
-;; TODO combine functions with arg (opt exclude)
-(defun +persp--consult-buffer-sources-all-persps ()
-  ""
-  (mapcar #'+persp--consult-buffer-sources (persp-names)))
-(defun +persp--consult-buffer-sources-all-persps-but-current ()
-  ""
-  (mapcar #'+persp--consult-buffer-sources (remove (persp-current-name) (persp-names))))
-
-;; NOTE consult--multi expects to read in a list, even if there is only 1 source
-(defun +persp--consult-buffer-soruces-curr-persp ()
-  ""
-  (list (+persp--consult-buffer-sources (persp-current-name))))
-
-;; TODO FIXME this seems to be built into persp mode https://github.com/nex3/perspective-el#buffer-switchers
-;; also see https://github.com/minad/consult/wiki#perspective
-
-;; this function is essentially a copy of consult-buffer
-(defun +persp/consult-buffer ()
-  "Switch to buffer in current persp."
-  (interactive)
-  (when-let (buffer (consult--multi (+persp--consult-buffer-soruces-curr-persp)
-                                    :require-match
-                                    (confirm-nonexistent-file-or-buffer)
-                                    :prompt "Switch to: "
-                                    :history 'consult--buffer-history
-                                    :sort nil))
-    ;; When the buffer does not belong to a source,
-    ;; create a new buffer with the name.
-    (unless (cdr buffer)
-      (consult--buffer-action (car buffer)))))
-
-;; TODO FIXME going through this list adds the buffers into the current persp
-;; I could hack this by creating a new temp persp, and adding the buffer to the current persp after selection
-;; switching to the current persp is trivial with `+persp--last-accessed'
-(defun +persp/consult-buffer-global ()
-  "Switch to buffer, organized by persps."
-  (interactive)
-  (when-let (buffer (consult--multi (+persp--consult-buffer-sources-all-persps)
-                                    :require-match
-                                    (confirm-nonexistent-file-or-buffer)
-                                    :prompt "Switch to: "
-                                    :history 'consult--buffer-history
-                                    :sort nil))
-    ;; When the buffer does not belong to a source,
-    ;; create a new buffer with the name.
-    (unless (cdr buffer)
-      (consult--buffer-action (car buffer)))))
-
-;; FIXME delete new persp on abort
-;; maybe create hidden persp for this? define wrapper for `persp-names' that removes hidden persp
-(defun +persp/consult-add-buffer ()
-  ""
-  (interactive)
-  (+persp--add-new)
-  (when-let (buffer (consult--multi (+persp--consult-buffer-sources-all-persps-but-current)
-                                    :require-match
-                                    (confirm-nonexistent-file-or-buffer)
-                                    :prompt "Add buffer:"
-                                    :history 'consult--buffer-history
-                                    :sort nil))
-    ;; When the buffer does not belong to a source,
-    ;; create a new buffer with the name.
-    (unless (cdr buffer)
-      (consult--buffer-action (car buffer))))
-  (let ((persp (persp-current-name))
-        (new-buff (current-buffer)))
-    (persp-switch (+persp--last-accessed))
-    (persp-add-buffer new-buff)
-    (persp-switch-to-buffer* new-buff)
-    (persp-kill persp)))
+;; perspective aware consult-buffer https://github.com/nex3/perspective-el#buffer-switchers
+(consult-customize consult--source-buffer :hidden t :default nil)
+(add-to-list 'consult-buffer-sources 'persp-consult-source)
 
 ;; TODO how does doom handle the bury buffer with persp-mode?
 
@@ -1524,10 +1430,9 @@ _R_   reset frame zoom
     "SPC" '(projectile-find-file :which-key "Projectile find file")
     ;"SPC" '(+consult/find-file :which-key "+consult/find-file")
     "." '(find-file :which-key "Find file")
-    "," '(+persp/consult-buffer :which-key "+persp/consult-buffer")
+    "," '(consult-buffer :which-key "consult-buffer")
     ":" '(execute-extended-command :which-key "M-x")
     "x" '(open-scratch-buffer :which-key "Open scratch buffer")
-    "<" '(consult-buffer :which-key "consult-buffer")
     "d" '(dired-jump :which-key "dired-jump")
     "/" '(+consult/ripgrep :which-key "+consult/ripgrep")
     "[" '(persp-prev :which-key "persp-prev")
@@ -1544,8 +1449,7 @@ _R_   reset frame zoom
     ;; buffer
     ;"TAB" '(switch-to-prev-buffer :which-key "Prev buffer")
     "b" '(:ignore t :which-key "Buffer")
-    "bb" '(+persp/consult-buffer :which-key "+persp/consult-buffer")
-    "bB" '(consult-buffer :which-key "consult-buffer")
+    "bb" '(consult-buffer :which-key "consult-buffer")
     "b[" '(previous-buffer :which-key "Previous buffer")
     "b]" '(next-buffer :which-key "Next buffer")
     "bd" '(kill-current-buffer :which-key "Kill buffer")
@@ -1734,7 +1638,7 @@ _R_   reset frame zoom
     ;"C-S-a" 'unbury-buffer
     "C-a" '+persp/previous-buffer
     "C-S-a" '+persp/next-buffer
-    "C-z" 'consult-buffer
+    ;"C-z" 'consult-buffer
 
     ;; persp cycling
     "C-<tab>" 'persp-next
