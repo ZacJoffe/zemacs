@@ -659,7 +659,6 @@
 
 
 ;; WORKSPACES/PERSPECTIVES
-;; WIP perspective-el migration
 ;; TODO buffers
 ;; TODO save persps?
 ;; TODO emacs server integration
@@ -667,8 +666,9 @@
 
 (use-package perspective
   :config
-  (setq persp-initial-frame-name "main") ;; "main" perspective
-  (setq persp-sort 'created) ;; do not reorder perspectives (renaming persp sorts list by default)
+  (setq persp-initial-frame-name "main" ;; "main" perspective
+        persp-sort 'created             ;; do not reorder perspectives (renaming persp sorts list by default)
+        persp-suppress-no-prefix-key-warning t)
   ;; HACK the ordering is from most-least recent, which doesn't make much sense - reverse it to fix display
   ;; while not breaking persp functions (like 'persp-prev' and 'persp-next')
   (advice-add #'persp-names :filter-return (lambda (persps) (reverse persps)))
@@ -691,18 +691,18 @@
      " ")))
 
 (defun +persp--message (msg &optional face-type)
-  ""
+  "Build string containig persp tabline and custom message MSG with optional face type FACE-TYPE."
   (concat (+persp--tabline)
           (propertize " | " 'face 'font-lock-comment-face)
           (propertize (format "%s" msg)
                       'face face-type))) ;; TODO check for face-type
 
 (defun +persp-message (msg &optional face-type)
-  ""
+  "Display persp tabline and custom message MSG with optional face type FACE-TYPE."
   (message "%s" (+persp--message msg face-type)))
 
 (defun +persp/display ()
-  ""
+  "Display persp tabline at the bottom of the screen."
   (interactive)
   (message "%s" (+persp--tabline)))
 
@@ -750,7 +750,7 @@
 ;; NOTE you can kill default perspective, but I don't see a reason to do that
 ;; so for now I am going to prevent that through these wrappers
 (defun +persp/kill-current ()
-  ""
+  "Kill the current persp."
   (interactive)
   (let ((curr (persp-current-name)))
     (if (string= curr persp-initial-frame-name)
@@ -763,7 +763,7 @@
 ;; TODO refactor to explicitly switch to (car (persp-names))
 ;; TODO reset name of default
 (defun +persp/kill-all-except-default ()
-  ""
+  "Kill all persps other than the default persp."
   (interactive)
   (if (eq (length (persp-names)) 1)
       (+persp-message "No persps to kill!" 'warning)
