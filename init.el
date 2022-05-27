@@ -1696,18 +1696,20 @@ _R_   reset frame zoom
 ;;; LANGUAGES
 ;; lsp
 (use-package lsp-mode
+  :custom
+  (lsp-completion-provider :none) ;; we use Corfu!
   :init
-  ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
-  (setq lsp-keymap-prefix "C-c l")
+  (defun +lsp-mode-setup-completion ()
+    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+          '(orderless))) ;; Configure orderless
   :hook ((lsp-mode . lsp-enable-which-key-integration)
-         (rustic-mode . lsp)
-         ;; for some reason headerline is enabled by default, add a hook to disable it
-         ;; TODO look into fixing this in lsp-mode
-         ;; https://emacs.stackexchange.com/a/64988
-         (lsp-mode . lsp-headerline-breadcrumb-mode))
+         (lsp-mode . lsp-ui-mode)
+         (rustic-mode . lsp))
+         (lsp-completion-mode . +lsp-mode-setup-completion)
   :commands lsp
   :config
-  (setq lsp-headerline-breadcrumb-enable nil))
+  (setq lsp-headerline-breadcrumb-enable nil
+        lsp-enable-snippet nil)) ;; TODO this is broken
 
 (use-package lsp-ui :commands lsp-ui-mode)
 (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
@@ -1903,20 +1905,21 @@ _R_   reset frame zoom
   ;(corfu-max-width corfu-min-width)
   (corfu-count 14)
   (corfu-echo-documentation t)
+  (lsp-completion-provider :none)
 
   ;; You may want to enable Corfu only for certain modes.
   :hook (prog-mode . corfu-mode)
   :general
   (:keymaps 'corfu-map
-            "C-n" 'corfu-next
-            "C-j" 'corfu-next
-            "C-p" 'corfu-previous
-            "C-k" 'corfu-previous
-            "C-SPC" 'corfu-insert-separator
-            "<tab>" '+corfu-complete-quit
-            "<escape>" '+corfu-quit) ;; NOTE also sets functionality of "C-["
+   "C-n" 'corfu-next
+   "C-j" 'corfu-next
+   "C-p" 'corfu-previous
+   "C-k" 'corfu-previous
+   "C-SPC" 'corfu-insert-separator
+   "<tab>" '+corfu-complete-quit
+   "<escape>" '+corfu-quit) ;; NOTE also sets functionality of "C-["
   :init
-  (corfu-global-mode)
+  (global-corfu-mode)
   (defun +lsp-mode-setup-completion ()
     (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
           '(orderless))) ;; Configure orderless
@@ -1996,6 +1999,7 @@ _R_   reset frame zoom
   (add-to-list 'completion-at-point-functions #'cape-tex)
   (add-to-list 'completion-at-point-functions #'cape-dabbrev)
   (add-to-list 'completion-at-point-functions #'cape-keyword)
+  (add-to-list 'completion-at-point-functions #'cape-tex)
   ;;(add-to-list 'completion-at-point-functions #'cape-sgml)
   ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345)
   ;;(add-to-list 'completion-at-point-functions #'cape-abbrev)
