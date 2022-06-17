@@ -117,7 +117,9 @@
 
 ;; I use chemacs2 on my desktop, slightly ugly hack to open the correct file in open-init-file
 (when (eq computer 'linux-desktop)
-  (setq user-init-file "~/.zemacs/init.el"))
+  (if (file-exists-p "~/.zemacs/init.el")
+      (setq user-init-file "~/.zemacs/init.el")
+    (setq user-init-file "~/.emacs.d/init.el")))
 
 
 ;; relative line numbers
