@@ -954,6 +954,27 @@
 ;;----
 
 
+(use-package tab-bar
+  :straight (:type built-in)
+  ;:custom
+  ;(tab-bar-show nil)
+  )
+
+(defun +tab-bar/switch-by-index (index)
+  "Switch to tab at index INDEX, if it exists."
+  (interactive "P")
+  (tab-bar-select-tab index))
+
+;; TODO display
+(defun +tab-bar/add-new ()
+  "Create a new tab at the end of the list, open a scratch buffer."
+  (interactive)
+  (let ((index (length (tab-bar-tabs))))
+    (tab-bar-select-tab index)
+    (tab-bar-new-tab)
+    (open-scratch-buffer)))
+
+
 ;; ace window
 (use-package ace-window)
 
