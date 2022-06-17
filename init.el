@@ -1531,8 +1531,8 @@ _R_   reset frame zoom
     "d" '(dired-jump :which-key "dired-jump")
     "/" '(+consult/ripgrep :which-key "+consult/ripgrep")
     "?" '(consult-ripgrep :which-key "consult-ripgrep")
-    ;"[" '(persp-prev :which-key "persp-prev")
-    ;"]" '(persp-next :which-key "persp-next")
+    ;"[" '(tab-bar-switch-to-prev-tab :which-key "tab-bar-switch-to-prev-tab")
+    ;"]" '(tab-bar-switch-to-next-tab :which-key "tab-bar-switch-to-next-tab")
     "v" '(vterm-toggle :which-key "vterm-toggle")
     "a" '(ace-window :which-key "ace-window")
     "l" '(ace-window :which-key "ace-window")
@@ -1627,27 +1627,33 @@ _R_   reset frame zoom
 
     ;; persps
     "TAB" '(:ignore t :which-key "Perspective")
-    "TAB TAB" '(persp-switch :which-key "persp-switch")
-    "TAB [" '(persp-prev :which-key "persp-prev")
-    "TAB ]" '(persp-next :which-key "persp-next")
-    "TAB n" '(+persp/add-new :which-key "+persp/add-new")
+    ;"TAB TAB" '(persp-switch :which-key "persp-switch")
+    "TAB TAB" '(tab-bar-switch-to-tab :which-key "tab-bar-switch-to-tab")
+    ;"TAB [" '(persp-prev :which-key "persp-prev")
+    "TAB [" '(tab-bar-switch-to-prev-tab :which-key "tab-bar-switch-to-prev-tab")
+    ;"TAB ]" '(persp-next :which-key "persp-next")
+    "TAB [" '(tab-bar-switch-to-next-tab :which-key "tab-bar-switch-to-next-tab")
+    ;"TAB n" '(+persp/add-new :which-key "+persp/add-new")
+    "TAB n" '(+tab-bar/add-new :which-key "+tab-bar/add-new")
     "TAB N" '(+persp/add-new-import-buffer :which-key "+persp/add-new-import-buffer")
-    "TAB k" '(+persp/kill-current :which-key "+persp/kill-current")
-    "TAB d" '(+persp/kill-current :which-key "+persp/kill-current")
+    ;"TAB k" '(+persp/kill-current :which-key "+persp/kill-current")
+    "TAB k" '(tab-bar-close-tab :which-key "tab-bar-close-tab")
+    ;"TAB d" '(+persp/kill-current :which-key "+persp/kill-current")
+    "TAB d" '(tab-bar-close-tab :which-key "tab-bar-close-tab")
     "TAB K" '(+persp/kill-all-except-default :which-key "+persp/kill-all-except-default")
     "TAB r" '(+persp/rename :which-key "+persp/rename")
     "TAB a" '(+persp/add-buffer-switch :which-key "+persp/add-buffer-switch")
 
     ;; quick persp switching
-    "1" '((lambda () (interactive) (+persp/switch-by-index 0)) :which-key "Persp 1")
-    "2" '((lambda () (interactive) (+persp/switch-by-index 1)) :which-key "Persp 2")
-    "3" '((lambda () (interactive) (+persp/switch-by-index 2)) :which-key "Persp 3")
-    "4" '((lambda () (interactive) (+persp/switch-by-index 3)) :which-key "Persp 4")
-    "5" '((lambda () (interactive) (+persp/switch-by-index 4)) :which-key "Persp 5")
-    "6" '((lambda () (interactive) (+persp/switch-by-index 5)) :which-key "Persp 6")
-    "7" '((lambda () (interactive) (+persp/switch-by-index 6)) :which-key "Persp 7")
-    "8" '((lambda () (interactive) (+persp/switch-by-index 7)) :which-key "Persp 8")
-    "9" '((lambda () (interactive) (+persp/switch-by-index 8)) :which-key "Persp 9")
+    "1" '((lambda () (interactive) (+tab-bar/switch-by-index 1)) :which-key nil)
+    "2" '((lambda () (interactive) (+tab-bar/switch-by-index 2)) :which-key nil)
+    "3" '((lambda () (interactive) (+tab-bar/switch-by-index 3)) :which-key nil)
+    "4" '((lambda () (interactive) (+tab-bar/switch-by-index 4)) :which-key nil)
+    "5" '((lambda () (interactive) (+tab-bar/switch-by-index 5)) :which-key nil)
+    "6" '((lambda () (interactive) (+tab-bar/switch-by-index 6)) :which-key nil)
+    "7" '((lambda () (interactive) (+tab-bar/switch-by-index 7)) :which-key nil)
+    "8" '((lambda () (interactive) (+tab-bar/switch-by-index 8)) :which-key nil)
+    "9" '((lambda () (interactive) (+tab-bar/switch-by-index 9)) :which-key nil)
 
     ;; git
     "g" '(:ignore t :which-key "Git") ; prefix
@@ -1756,28 +1762,29 @@ _R_   reset frame zoom
     "C-v" 'yank
 
     ;; buffer management
-    ;"C-a" 'bury-buffer
-    ;"C-S-a" 'unbury-buffer
-    "C-a" '+persp/previous-buffer
-    "C-S-a" '+persp/next-buffer
-    "C-z" 'persp-ibuffer
+    "C-a" 'bury-buffer
+    "C-S-a" 'unbury-buffer
+    ;"C-a" '+persp/previous-buffer
+    ;"C-S-a" '+persp/next-buffer
+    ;"C-z" 'consult-buffer
 
     ;; persp cycling
-    "C-<tab>" 'persp-next
-    "C-<iso-lefttab>" 'persp-prev
-    "C-S-<tab>" 'persp-prev
-    "<backtab>" '+persp/switch-to-last-accessed
+    "C-<tab>" 'tab-bar-switch-to-next-tab
+    "C-<iso-lefttab>" 'tab-bar-switch-to-prev-tab
+    "C-S-<tab>" 'tab-bar-switch-to-prev-tab
+    "<backtab>" 'tab-bar-switch-to-recent-tab
+    ;"<backtab>" '+persp/switch-to-last-accessed
 
     ;; quick persp switching
-    "M-1" (lambda () (interactive) (+persp/switch-by-index 0))
-    "M-2" (lambda () (interactive) (+persp/switch-by-index 1))
-    "M-3" (lambda () (interactive) (+persp/switch-by-index 2))
-    "M-4" (lambda () (interactive) (+persp/switch-by-index 3))
-    "M-5" (lambda () (interactive) (+persp/switch-by-index 4))
-    "M-6" (lambda () (interactive) (+persp/switch-by-index 5))
-    "M-7" (lambda () (interactive) (+persp/switch-by-index 6))
-    "M-8" (lambda () (interactive) (+persp/switch-by-index 7))
-    "M-9" (lambda () (interactive) (+persp/switch-by-index 8)))
+    "M-1" (lambda () (interactive) (+tab-bar/switch-by-index 1))
+    "M-2" (lambda () (interactive) (+tab-bar/switch-by-index 2))
+    "M-3" (lambda () (interactive) (+tab-bar/switch-by-index 3))
+    "M-4" (lambda () (interactive) (+tab-bar/switch-by-index 4))
+    "M-5" (lambda () (interactive) (+tab-bar/switch-by-index 5))
+    "M-6" (lambda () (interactive) (+tab-bar/switch-by-index 6))
+    "M-7" (lambda () (interactive) (+tab-bar/switch-by-index 7))
+    "M-8" (lambda () (interactive) (+tab-bar/switch-by-index 8))
+    "M-9" (lambda () (interactive) (+tab-bar/switch-by-index 9)))
 
   ;; magit
   (general-define-key
@@ -1794,15 +1801,15 @@ _R_   reset frame zoom
     "q" '+magit/quit
 
     ;; persp switching within magit
-    "M-1" (lambda () (interactive) (+persp/switch-by-index 0))
-    "M-2" (lambda () (interactive) (+persp/switch-by-index 1))
-    "M-3" (lambda () (interactive) (+persp/switch-by-index 2))
-    "M-4" (lambda () (interactive) (+persp/switch-by-index 3))
-    "M-5" (lambda () (interactive) (+persp/switch-by-index 4))
-    "M-6" (lambda () (interactive) (+persp/switch-by-index 5))
-    "M-7" (lambda () (interactive) (+persp/switch-by-index 6))
-    "M-8" (lambda () (interactive) (+persp/switch-by-index 7))
-    "M-9" (lambda () (interactive) (+persp/switch-by-index 8)))
+    "M-1" (lambda () (interactive) (+tab-bar/switch-by-index 1))
+    "M-2" (lambda () (interactive) (+tab-bar/switch-by-index 2))
+    "M-3" (lambda () (interactive) (+tab-bar/switch-by-index 3))
+    "M-4" (lambda () (interactive) (+tab-bar/switch-by-index 4))
+    "M-5" (lambda () (interactive) (+tab-bar/switch-by-index 5))
+    "M-6" (lambda () (interactive) (+tab-bar/switch-by-index 6))
+    "M-7" (lambda () (interactive) (+tab-bar/switch-by-index 7))
+    "M-8" (lambda () (interactive) (+tab-bar/switch-by-index 8))
+    "M-9" (lambda () (interactive) (+tab-bar/switch-by-index 9)))
 
   ;; org mode specific evil binding
   ;; unbind the return (enter) key so it becomes org-return
