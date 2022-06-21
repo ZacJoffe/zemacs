@@ -985,6 +985,17 @@
 
 ;(message (tab-bar-tab-name-all))
 
+(defun +tab-bar--message (msg &optional face-type)
+  "Build string containig persp tabline and custom message MSG with optional face type FACE-TYPE."
+  (concat (+tab-bar--tabline)
+          (propertize " | " 'face 'font-lock-comment-face)
+          (propertize (format "%s" msg)
+                      'face face-type))) ;; TODO check for face-type
+
+(defun +tab-bar-message (msg &optional face-type)
+  "Display persp tabline and custom message MSG with optional face type FACE-TYPE."
+  (message "%s" (+tab-bar--message msg face-type)))
+
 (defun +tab-bar/display ()
   "Display persp tabline at the bottom of the screen."
   (interactive)
