@@ -1007,14 +1007,30 @@
   (interactive "P")
   (tab-bar-select-tab index))
 
-;; TODO display
 (defun +tab-bar/add-new ()
   "Create a new tab at the end of the list, open a scratch buffer."
   (interactive)
   (let ((index (length (tab-bar-tabs))))
-    (tab-bar-select-tab index)
+
     (tab-bar-new-tab)
-    (open-scratch-buffer)))
+    (open-scratch-buffer)
+    (+tab-bar/display)))
+
+(defun +tab-bar/close-tab ()
+  "Close current tab and display tabline."
+  (interactive)
+  (let ((curr-index (tab-bar--current-tab-index))
+        (num-tabs (length (tab-bar-tabs))))
+    (if (eq num-tabs 1)
+        (+tab-bar-message (format "Cannot kill last tab [%s]" (1+ curr-index)) 'error)
+      (tab-bar-close-tab)
+      (+tab-bar-message (format "Killed tab [%s]" (1+ curr-index)) 'success))))
+
+;; TODO figure out how to switch to last tab in list to insert new tab
+;(tab-bar-switch-to-tab (car (tab-bar-tabs)))
+
+;(message (car (tab-bar-tabs)))
+
 
 
 ;; ace window
@@ -1679,9 +1695,9 @@ _R_   reset frame zoom
     "TAB n" '(+tab-bar/add-new :which-key "+tab-bar/add-new")
     "TAB N" '(+persp/add-new-import-buffer :which-key "+persp/add-new-import-buffer")
     ;"TAB k" '(+persp/kill-current :which-key "+persp/kill-current")
-    "TAB k" '(tab-bar-close-tab :which-key "tab-bar-close-tab")
+    "TAB k" '(+tab-bar/close-tab :which-key "+tab-bar/close-tab")
     ;"TAB d" '(+persp/kill-current :which-key "+persp/kill-current")
-    "TAB d" '(tab-bar-close-tab :which-key "tab-bar-close-tab")
+    "TAB d" '(+tab-bar/close-tab :which-key "+tab-bar/close-tab")
     "TAB K" '(+persp/kill-all-except-default :which-key "+persp/kill-all-except-default")
     "TAB r" '(+persp/rename :which-key "+persp/rename")
     "TAB a" '(+persp/add-buffer-switch :which-key "+persp/add-buffer-switch")
