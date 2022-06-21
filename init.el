@@ -960,6 +960,37 @@
   ;(tab-bar-show nil)
   )
 
+(defun +tab-bar--tab-names-all ()
+  "Return list of names of all tabs in current frame."
+  (let ((tabs (tab-bar-tabs)))
+    (mapcar (lambda (tab)
+              (alist-get 'name tab))
+            tabs)))
+
+;(tab-bar-select-tab 5)
+(defun +tab-bar--tabline ()
+  "Build string containing persp list, with the current persp highlighted."
+  (let ((num-tabs (length (tab-bar-tabs)))
+        (curr-index (tab-bar--current-tab-index))
+        (tab-names (+tab-bar--tab-names-all)))
+    (mapconcat
+     #'identity
+     (cl-loop for index from 0 to (1- num-tabs)
+              collect
+              (propertize (format " [%d] %s " (1+ index) (nth index tab-names))
+                          'face (if (= curr-index index)
+                                    'highlight
+                                  'default)))
+     " ")))
+
+;(message (tab-bar-tab-name-all))
+
+(defun +tab-bar/display ()
+  "Display persp tabline at the bottom of the screen."
+  (interactive)
+  (message "%s" (+tab-bar--tabline)))
+
+
 (defun +tab-bar/switch-by-index (index)
   "Switch to tab at index INDEX, if it exists."
   (interactive "P")
