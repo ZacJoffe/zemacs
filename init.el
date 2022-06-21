@@ -1005,7 +1005,15 @@
 (defun +tab-bar/switch-by-index (index)
   "Switch to tab at index INDEX, if it exists."
   (interactive "P")
-  (tab-bar-select-tab index))
+  (let ((curr-index (tab-bar--current-tab-index))
+        (num-tabs (length (tab-bar-tabs))))
+    (if (>= index num-tabs)
+        (+tab-bar-message (format "Invalid tab index %d" (1+ index)) 'error)
+      (if (eq index curr-index)
+          (+tab-bar-message (format "Already in tab %d" (1+ index)) 'warning)
+        (tab-bar-select-tab (1+ index)) ;; NOTE this index starts at 1 for this function
+        (+tab-bar/display)))))
+
 
 (defun +tab-bar/add-new ()
   "Create a new tab at the end of the list, open a scratch buffer."
@@ -1703,15 +1711,15 @@ _R_   reset frame zoom
     "TAB a" '(+persp/add-buffer-switch :which-key "+persp/add-buffer-switch")
 
     ;; quick persp switching
-    "1" '((lambda () (interactive) (+tab-bar/switch-by-index 1)) :which-key nil)
-    "2" '((lambda () (interactive) (+tab-bar/switch-by-index 2)) :which-key nil)
-    "3" '((lambda () (interactive) (+tab-bar/switch-by-index 3)) :which-key nil)
-    "4" '((lambda () (interactive) (+tab-bar/switch-by-index 4)) :which-key nil)
-    "5" '((lambda () (interactive) (+tab-bar/switch-by-index 5)) :which-key nil)
-    "6" '((lambda () (interactive) (+tab-bar/switch-by-index 6)) :which-key nil)
-    "7" '((lambda () (interactive) (+tab-bar/switch-by-index 7)) :which-key nil)
-    "8" '((lambda () (interactive) (+tab-bar/switch-by-index 8)) :which-key nil)
-    "9" '((lambda () (interactive) (+tab-bar/switch-by-index 9)) :which-key nil)
+    "1" '((lambda () (interactive) (+tab-bar/switch-by-index 0)) :which-key nil)
+    "2" '((lambda () (interactive) (+tab-bar/switch-by-index 1)) :which-key nil)
+    "3" '((lambda () (interactive) (+tab-bar/switch-by-index 2)) :which-key nil)
+    "4" '((lambda () (interactive) (+tab-bar/switch-by-index 3)) :which-key nil)
+    "5" '((lambda () (interactive) (+tab-bar/switch-by-index 4)) :which-key nil)
+    "6" '((lambda () (interactive) (+tab-bar/switch-by-index 5)) :which-key nil)
+    "7" '((lambda () (interactive) (+tab-bar/switch-by-index 6)) :which-key nil)
+    "8" '((lambda () (interactive) (+tab-bar/switch-by-index 7)) :which-key nil)
+    "9" '((lambda () (interactive) (+tab-bar/switch-by-index 8)) :which-key nil)
 
     ;; git
     "g" '(:ignore t :which-key "Git") ; prefix
@@ -1834,15 +1842,15 @@ _R_   reset frame zoom
     ;"<backtab>" '+persp/switch-to-last-accessed
 
     ;; quick persp switching
-    "M-1" (lambda () (interactive) (+tab-bar/switch-by-index 1))
-    "M-2" (lambda () (interactive) (+tab-bar/switch-by-index 2))
-    "M-3" (lambda () (interactive) (+tab-bar/switch-by-index 3))
-    "M-4" (lambda () (interactive) (+tab-bar/switch-by-index 4))
-    "M-5" (lambda () (interactive) (+tab-bar/switch-by-index 5))
-    "M-6" (lambda () (interactive) (+tab-bar/switch-by-index 6))
-    "M-7" (lambda () (interactive) (+tab-bar/switch-by-index 7))
-    "M-8" (lambda () (interactive) (+tab-bar/switch-by-index 8))
-    "M-9" (lambda () (interactive) (+tab-bar/switch-by-index 9)))
+    "M-1" (lambda () (interactive) (+tab-bar/switch-by-index 0))
+    "M-2" (lambda () (interactive) (+tab-bar/switch-by-index 1))
+    "M-3" (lambda () (interactive) (+tab-bar/switch-by-index 2))
+    "M-4" (lambda () (interactive) (+tab-bar/switch-by-index 3))
+    "M-5" (lambda () (interactive) (+tab-bar/switch-by-index 4))
+    "M-6" (lambda () (interactive) (+tab-bar/switch-by-index 5))
+    "M-7" (lambda () (interactive) (+tab-bar/switch-by-index 6))
+    "M-8" (lambda () (interactive) (+tab-bar/switch-by-index 7))
+    "M-9" (lambda () (interactive) (+tab-bar/switch-by-index 8)))
 
   ;; magit
   (general-define-key
@@ -1859,15 +1867,15 @@ _R_   reset frame zoom
     "q" '+magit/quit
 
     ;; persp switching within magit
-    "M-1" (lambda () (interactive) (+tab-bar/switch-by-index 1))
-    "M-2" (lambda () (interactive) (+tab-bar/switch-by-index 2))
-    "M-3" (lambda () (interactive) (+tab-bar/switch-by-index 3))
-    "M-4" (lambda () (interactive) (+tab-bar/switch-by-index 4))
-    "M-5" (lambda () (interactive) (+tab-bar/switch-by-index 5))
-    "M-6" (lambda () (interactive) (+tab-bar/switch-by-index 6))
-    "M-7" (lambda () (interactive) (+tab-bar/switch-by-index 7))
-    "M-8" (lambda () (interactive) (+tab-bar/switch-by-index 8))
-    "M-9" (lambda () (interactive) (+tab-bar/switch-by-index 9)))
+    "M-1" (lambda () (interactive) (+tab-bar/switch-by-index 0))
+    "M-2" (lambda () (interactive) (+tab-bar/switch-by-index 1))
+    "M-3" (lambda () (interactive) (+tab-bar/switch-by-index 2))
+    "M-4" (lambda () (interactive) (+tab-bar/switch-by-index 3))
+    "M-5" (lambda () (interactive) (+tab-bar/switch-by-index 4))
+    "M-6" (lambda () (interactive) (+tab-bar/switch-by-index 5))
+    "M-7" (lambda () (interactive) (+tab-bar/switch-by-index 6))
+    "M-8" (lambda () (interactive) (+tab-bar/switch-by-index 7))
+    "M-9" (lambda () (interactive) (+tab-bar/switch-by-index 8)))
 
   ;; org mode specific evil binding
   ;; unbind the return (enter) key so it becomes org-return
