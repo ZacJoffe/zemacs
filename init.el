@@ -11,6 +11,14 @@
       ;; increase the gc threshold
       gc-cons-threshold 100000000)
 
+
+;; turn off ad-redef warnings https://andrewjamesjohnson.com/suppressing-ad-handle-definition-warnings-in-emacs/
+(setq ad-redefinition-action 'accept)
+
+
+;; empty scratch buffer text
+(setq initial-scratch-message "")
+
 ;; some editor settings
 (setq-default indent-tabs-mode nil    ;; indent with spaces
               tab-width 4             ;; 1 tab <=> 4 spaces
@@ -54,9 +62,22 @@
 ;; fringe setup (left . right)
 (set-fringe-mode '(4 . 4))
 
+
+;; custom file setup https://diamondbond.neocities.org/emacs.html#orge163cd3
+(setq-default custom-file (expand-file-name "custom.el" user-emacs-directory))
+
+;; Write to it if it does not exist
+(unless (file-exists-p custom-file)
+  (write-region "" nil custom-file))
+
+;; Load custom file. Don't hide errors. Hide success message
+(load custom-file nil t)
+
+
 ;; setup variable to determine computer specific actions
 ;; inpsired by https://github.com/jakebox/jake-emacs#custom-variables-registers
 (defvar computer nil "Which computer I am on.")
+
 (let ((sys (system-name)))
   (if (string= sys "arch")
       (setq computer 'linux-desktop)
