@@ -1778,9 +1778,10 @@ _R_   reset frame zoom
   (define-fringe-bitmap 'flycheck-fringe-bitmap-double-arrow
       [16 48 112 240 112 48 16] nil nil 'center))
 
-;; flycheck-popup-tip
-(use-package flycheck-popup-tip
-  :hook (flycheck-mode . flycheck-popup-tip-mode))
+;; flycheck posframe
+(use-package flycheck-posframe
+  :after flycheck
+  :hook (flycheck-mode . flycheck-posframe-mode))
 
 
 ;; tree sitter
