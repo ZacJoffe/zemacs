@@ -162,8 +162,10 @@
 ;; smoother scrolling (especially for trackpad) via emacs 29
 (pixel-scroll-precision-mode 1)
 
+
 ;; disable bells (distracting)
 (setq ring-bell-function 'ignore)
+
 
 ;; use aspell backend
 (if (eq system-type 'darwin)
@@ -173,6 +175,7 @@
 (if (eq system-type 'gnu/linux)
   (setq ispell-program-name "/usr/bin/aspell"
         ispell-dictionary "english"))
+
 
 ;;;; DEFUNS
 ;; revert buffer without confirmation
@@ -492,13 +495,19 @@
   (setq electric-pair-delete-adjacent-pairs t)
   ;; TODO
   (setq electric-pair-pairs '((?\" . ?\")
+                              (?\( . ?\))
+                              (?\[ . ?\])
                               (?\{ . ?\})))
   ;(setq-default electric-indent-chars '(?\n ?\^?))
+
+  ;; no delay for showing matching parens
+  (setq show-paren-delay 0)
 
   ;; prevent electric pair mode from being enabled in the mini buffer (for things like consult)
   ;; https://emacs.stackexchange.com/a/29342
   (setq electric-pair-inhibit-predicate (lambda (char) (minibufferp)))
   (electric-pair-mode 1))
+
 
 ;(use-package aggressive-indent
 ;  :config
