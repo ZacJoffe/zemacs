@@ -1246,14 +1246,14 @@ Made for `org-tab-first-hook' in evil-mode."
 (use-package org-superstar)
 
 ;; better rendering of things like italics
-(use-package org-appear
-  :commands (org-appear-mode)
-  :hook (org-mode . org-appear-mode)
-  :init
-  (setq org-hide-emphasis-markers t)  ;; A default setting that needs to be t for org-appear
-  (setq org-appear-autoemphasis t)    ;; Enable org-appear on emphasis (bold, italics, etc)
-  (setq org-appear-autolinks nil)
-  (setq org-appear-autosubmarkers t)) ;; Enable on subscript and superscript
+;(use-package org-appear
+;  :commands (org-appear-mode)
+;  :hook (org-mode . org-appear-mode)
+;  :init
+;  (setq org-hide-emphasis-markers t)  ;; A default setting that needs to be t for org-appear
+;  (setq org-appear-autoemphasis t)    ;; Enable org-appear on emphasis (bold, italics, etc)
+;  (setq org-appear-autolinks nil)
+;  (setq org-appear-autosubmarkers t)) ;; Enable on subscript and superscript
 
 ;; FIXME I am essentially trying to create a consult interface for previewing files in a directory
 ;; TODO preview org dailies with consult
