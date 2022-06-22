@@ -1143,7 +1143,7 @@ Git gutter:
 
 ;; markdown
 (use-package markdown-mode
-  :straight nil
+  ;:straight nil
   :config
   ;; syntax highlighting in code blocks
   (setq markdown-fontify-code-blocks-natively t))
