@@ -51,7 +51,9 @@
 (setq-default cursor-in-non-selected-windows nil)
 
 ;; remember window configuration changes
-(winner-mode 1)
+;(winner-mode 1)
+(tab-bar-history-mode 1)
+
 
 ;; automatically refresh buffers
 (global-auto-revert-mode 1)
@@ -763,7 +765,8 @@
   ;; HACK the ordering is from most-least recent, which doesn't make much sense - reverse it to fix display
   ;; while not breaking persp functions (like 'persp-prev' and 'persp-next')
   (advice-add #'persp-names :filter-return (lambda (persps) (reverse persps)))
-  (persp-mode))
+  ;(persp-mode)
+  )
 
 ;; https://github.com/hlissner/doom-emacs/blob/master/modules/ui/workspaces/autoload/workspaces.el#L442-L454
 (defun +persp--tabline ()
@@ -1019,11 +1022,11 @@
   "Create a new tab at the end of the list, open a scratch buffer."
   (interactive)
   (let ((index (length (tab-bar-tabs))))
-
     (tab-bar-new-tab)
     (open-scratch-buffer)
     (+tab-bar/display)))
 
+;; TODO key bindings
 (defun +tab-bar/close-tab ()
   "Close current tab and display tabline."
   (interactive)
@@ -1782,8 +1785,10 @@ _R_   reset frame zoom
     "?" '+consult-line
 
     ;; window management
-    "C-w C-u" 'winner-undo
-    "C-w u" 'winner-undo
+    ;"C-w C-u" 'winner-undo
+    ;"C-w u" 'winner-undo
+    "C-w C-u" 'tab-bar-history-back
+    "C-w u" 'tab-bar-history-back
 
     "C-w a" 'ace-window
     "C-w C-w" 'ace-window
