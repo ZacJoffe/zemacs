@@ -1896,6 +1896,23 @@ _R_   reset frame zoom
 ;; alloy
 (use-package alloy-mode
   :straight (alloy-mode :type git :host github :repo "dwwmmn/alloy-mode"))
+
+
+;; multiple major modes (needed for jekyll)
+;(use-package poly-markdown)
+
+;; jekyll (markdown and html modes)
+;(use-package jekyll-modes) ;; DELETEME
+
+;; html/css/js
+(use-package web-mode
+  :mode "\\.html\\'")
+
+
+;; octave mode for matlab files
+(use-package octave-mode
+  :straight (:type built-in)
+  :mode "\\.m\\'")
 ;;----
 
 ;; AUTOCOMPLETE
