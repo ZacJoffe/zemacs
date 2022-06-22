@@ -870,10 +870,12 @@
 ;; https://github.com/nex3/perspective-el/issues/63#issuecomment-322579522
 (defun +persp/get-buffers-list ()
   "Get filtered list of buffers, sorted alphabetically."
-  (sort
-   (cl-remove-if '(lambda (b) (if (stringp b) (string-match "^\[* \]" b) t))
-                 (mapcar 'buffer-name (persp-buffers (persp-curr))))
-   'string<))
+  (cl-remove-if '(lambda (b) (if (stringp b) (string-match "^\[* \]" b) t))
+                 (mapcar 'buffer-name (persp-buffers (persp-curr)))))
+;  (sort
+;   (cl-remove-if '(lambda (b) (if (stringp b) (string-match "^\[* \]" b) t))
+;                 (mapcar 'buffer-name (persp-buffers (persp-curr))))
+;   'string<))
 
 (defun +persp/next-buffer ()
   "Perspective aware `next-buffer'. Don't show internal buffers."
