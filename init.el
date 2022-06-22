@@ -880,8 +880,8 @@
 
 
 ;; perspective aware consult-buffer https://github.com/nex3/perspective-el#buffer-switchers
-(consult-customize consult--source-buffer :hidden t :default nil)
-(add-to-list 'consult-buffer-sources 'persp-consult-source)
+;(consult-customize consult--source-buffer :hidden t :default nil)
+;(add-to-list 'consult-buffer-sources 'persp-consult-source)
 
 ;; TODO how does doom handle the bury buffer with persp-mode?
 
