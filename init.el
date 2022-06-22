@@ -1582,12 +1582,15 @@ _R_   reset frame zoom
     "g=" 'evil-numbers/inc-at-pt
     "g-" 'evil-numbers/dec-at-pt
 
+    ;; go to references
+    "gD" 'xref-find-references
+
     ;; flyspell correct
     "z=" 'flyspell-correct-wrapper
     "C-;" 'flyspell-correct-wrapper
 
     ;; movement
-    "C-n" 'evil-next-visual-line ;; TODO should be in motion? doesn't seem to go down to these states?
+    "C-n" 'evil-next-visual-line ;; TODO should be in motion? doesn't seem to go down to these states? DELETEME
     "C-p" 'evil-previous-visual-line
     "s" 'avy-goto-char)
 
@@ -1605,7 +1608,9 @@ _R_   reset frame zoom
     "C-a" 'evil-beginning-of-visual-line
     "C-e" 'evil-end-of-visual-line
     "C-n" 'evil-next-visual-line
-    "C-p" 'evil-previous-visual-line)
+    "C-p" 'evil-previous-visual-line
+    "C-k" 'kill-whole-line
+    )
 
   ;; motion mode hotkeys, inherited by normal/visual
   (general-define-key
@@ -1661,7 +1666,7 @@ _R_   reset frame zoom
     ;"C-S-a" 'unbury-buffer
     "C-a" '+persp/previous-buffer
     "C-S-a" '+persp/next-buffer
-    ;"C-z" 'consult-buffer
+    "C-z" 'persp-ibuffer
 
     ;; persp cycling
     "C-<tab>" 'persp-next
@@ -1940,6 +1945,7 @@ _R_   reset frame zoom
    "C-k" 'corfu-previous
    "C-SPC" 'corfu-insert-separator
    "<tab>" '+corfu-complete-quit
+   ;"C-f" '+corfu-complete-quit
    "<escape>" '+corfu-quit) ;; NOTE also sets functionality of "C-["
   :init
   (global-corfu-mode)
