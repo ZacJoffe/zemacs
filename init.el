@@ -1746,26 +1746,37 @@ _R_   reset frame zoom
 
 
 ;;; LANGUAGES
-;; lsp
-(use-package lsp-mode
-  :custom
-  (lsp-completion-provider :none) ;; we use Corfu!
-  :init
-  (defun +lsp-mode-setup-completion ()
-    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-          '(orderless))) ;; Configure orderless
-  :hook ((lsp-mode . lsp-enable-which-key-integration)
-         (lsp-mode . lsp-ui-mode)
-         (rustic-mode . lsp))
-         (lsp-completion-mode . +lsp-mode-setup-completion)
-  :commands lsp
+;; TODO trying out eglot
+(use-package eglot
+  ;; https://github.com/minad/corfu/wiki
+  :init (setq completion-category-overrides '((eglot (styles orderless))))
   :config
-  (setq lsp-headerline-breadcrumb-enable nil
-        lsp-enable-snippet nil)) ;; TODO this is broken
+  (setq completion-category-defaults nil))
 
-(use-package lsp-ui :commands lsp-ui-mode)
-(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
-(use-package consult-lsp)
+(use-package consult-eglot)
+(use-package eldoc-box)
+
+
+;; lsp
+;(use-package lsp-mode
+;  :custom
+;  (lsp-completion-provider :none) ;; we use Corfu!
+;  :init
+;  (defun +lsp-mode-setup-completion ()
+;    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+;          '(orderless))) ;; Configure orderless
+;  :hook ((lsp-mode . lsp-enable-which-key-integration)
+;         (lsp-mode . lsp-ui-mode)
+;         (rustic-mode . lsp))
+;         (lsp-completion-mode . +lsp-mode-setup-completion)
+;  :commands lsp
+;  :config
+;  (setq lsp-headerline-breadcrumb-enable nil
+;        lsp-enable-snippet nil)) ;; TODO this is broken
+;
+;(use-package lsp-ui :commands lsp-ui-mode)
+;(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+;(use-package consult-lsp)
 
 
 ;; dumb jump (indexless code navigation)
@@ -1810,18 +1821,15 @@ _R_   reset frame zoom
 
 
 ;; rust
-(use-package rustic
-  :config
-  ;; disable lsp support for now TODO
-  (setq rustic-lsp-client nil))
+(use-package rustic)
 
 
 ;; python
-(use-package lsp-pyright
-  :ensure t
-  :hook (python-mode . (lambda ()
-                          (require 'lsp-pyright)
-                          (lsp))))  ; or lsp-deferred
+;(use-package lsp-pyright
+;  :ensure t
+;  :hook (python-mode . (lambda ()
+;                          (require 'lsp-pyright)
+;                          (lsp))))  ; or lsp-deferred
 
 ;; emacs-ipython-notebook (jupyter)
 (use-package ein)
@@ -1833,13 +1841,13 @@ _R_   reset frame zoom
 
 ;; scala
 (use-package scala-mode)
-(use-package lsp-metals
-  :custom
-  ;; Metals claims to support range formatting by default but it supports range
-  ;; formatting of multiline strings only. You might want to disable it so that
-  ;; emacs can use indentation provided by scala-mode.
-  (lsp-metals-server-args '("-J-Dmetals.allow-multiline-string-formatting=off"))
-  :hook (scala-mode . lsp))
+;(use-package lsp-metals
+;  :custom
+;  ;; Metals claims to support range formatting by default but it supports range
+;  ;; formatting of multiline strings only. You might want to disable it so that
+;  ;; emacs can use indentation provided by scala-mode.
+;  (lsp-metals-server-args '("-J-Dmetals.allow-multiline-string-formatting=off"))
+;  :hook (scala-mode . lsp))
 
 
 ;; latex
@@ -1975,7 +1983,7 @@ _R_   reset frame zoom
   ;(corfu-max-width corfu-min-width)
   (corfu-count 14)
   (corfu-echo-documentation t)
-  (lsp-completion-provider :none)
+  ;(lsp-completion-provider :none)
 
   ;; You may want to enable Corfu only for certain modes.
   :hook (prog-mode . corfu-mode)
@@ -1991,10 +1999,10 @@ _R_   reset frame zoom
    "<escape>" '+corfu-quit) ;; NOTE also sets functionality of "C-["
   :init
   (global-corfu-mode)
-  (defun +lsp-mode-setup-completion ()
-    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-          '(orderless))) ;; Configure orderless
-  :hook (lsp-completion-mode . +lsp-mode-setup-completion)
+  ;(defun +lsp-mode-setup-completion ()
+  ;  (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+  ;        '(orderless))) ;; Configure orderless
+  ;:hook (lsp-completion-mode . +lsp-mode-setup-completion)
   :config
   ;; HACK evil keymaps seem to take precedence over corfu's map, use advice to fix
   ;; https://github.com/minad/corfu/issues/12#issuecomment-881961510
