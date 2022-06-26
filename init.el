@@ -508,6 +508,19 @@
   (setq electric-pair-inhibit-predicate (lambda (char) (minibufferp)))
   (electric-pair-mode 1))
 
+;; TODO trying smartparens
+(use-package smartparens
+  :config
+  ;; https://github.com/doomemacs/doomemacs/blob/a570ffe16c24aaaf6b4f8f1761bb037c992de877/modules/config/default/config.el#L108-L120
+  ;; Expand {|} => { | }
+  ;; Expand {|} => {
+  ;;   |
+  ;; }
+  (dolist (brace '("(" "{" "["))
+    (sp-pair brace nil
+             :post-handlers '(("||\n[i]" "RET") ("| " "SPC"))
+             :unless '(sp-point-before-word-p sp-point-before-same-p)))
+  )
 
 ;(use-package aggressive-indent
 ;  :config
