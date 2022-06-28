@@ -1827,9 +1827,10 @@ _R_   reset frame zoom
       [16 48 112 240 112 48 16] nil nil 'center))
 
 ;; flycheck posframe
-(use-package flycheck-posframe
-  :after flycheck
-  :hook (flycheck-mode . flycheck-posframe-mode))
+;(use-package flycheck-posframe
+;  :after flycheck
+;  :hook (flycheck-mode . flycheck-posframe-mode))
+
 
 
 ;; tree sitter
