@@ -1693,6 +1693,8 @@ _R_   reset frame zoom
     "C-M-=" 'zoom-in
     "C-M--" 'zoom-out
 
+    "C-M-SPC" 'eldoc-box-eglot-help-at-point ;; show documentation for function at point
+
      ;; C-v to paste (or "yank" in emacs jargon) from clipboard, useful for minibuffers (such as query-replace and M-x)
     "C-v" 'yank
 
@@ -1762,10 +1764,19 @@ _R_   reset frame zoom
   ;; https://github.com/minad/corfu/wiki
   :init (setq completion-category-overrides '((eglot (styles orderless))))
   :config
+  ;; do not show eldoc in minibuffer
+  (add-to-list 'eglot-ignored-server-capabilites :hoverProvider)
   (setq completion-category-defaults nil))
 
 (use-package consult-eglot)
-(use-package eldoc-box)
+
+;; don't show the doc in the minibuffer (I find it distracting)
+(use-package eldoc-box
+  :hook (eglot-mode . eldoc-box-hover-mode)
+  ;; TODO doesn't work, using hover mode for now
+  ;; hide eglot's eldoc in the minibuffer
+  ;:hook (eglot-mode . eldoc-box-quit-frame)
+  )
 
 
 ;; lsp
