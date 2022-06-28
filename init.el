@@ -463,13 +463,30 @@
 
 ;;; UNDO TREE
 ;; undo-tree with evil mode https://www.reddit.com/r/emacs/comments/n1pibp/installed_evil_on_emacs_for_windows_redo_not/gwei7fw/
-(use-package undo-tree
-  :after evil
-  :diminish
-  :config
-  (evil-set-undo-system 'undo-tree)
-  (global-undo-tree-mode 1))
+;(use-package undo-tree
+;  :after evil
+;  :diminish
+;  :config
+;  (evil-set-undo-system 'undo-tree)
+;  (global-undo-tree-mode 1))
 
+;; TODO try out undo-fu/vundo stack
+(use-package undo-fu
+  :after evil
+  :config
+  (evil-set-undo-system 'undo-fu))
+
+(use-package undo-fu-session
+  :after undu-fu
+  :init
+  (global-undo-fu-session-mode)
+  :config
+  (setq undo-fu-session-incompatible-files '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'")))
+
+(use-package vundo
+  :straight (vundo :type git :host github :repo "casouri/vundo")
+  :config
+  (setq vundo-compact-display t))
 
 ;; editor config
 (use-package editorconfig
@@ -1034,14 +1051,6 @@
   :hook ((prog-mode . highlight-numbers-mode)))
 
 
-;; undo-tree - undo history represented as a tree, with evil integration
-(use-package undo-tree
-  :diminish
-  :config
-  (evil-set-undo-system 'undo-tree)
-  (global-undo-tree-mode 1))
-
-
 ;; anzu - show number of matches of search in modeline
 (use-package evil-anzu
   ;:after-call evil-ex-start-search evil-ex-start-word-search evil-ex-search-activate-highlight
@@ -1488,7 +1497,8 @@ _R_   reset frame zoom
 
     ;; editor
     "e" '(:ignore t :which-key "Editor")
-    "eu" '(undo-tree-visualize :which-key "undo-tree-visualize")
+    ;"eu" '(undo-tree-visualize :which-key "undo-tree-visualize")
+    "eu" '(vundu :which-key "vundu")
     "et" '(hydra-theme/body :which-key "hydra-theme") ; not sure if this is the best place for this, perhaps toggles would be more appropriate?
     "er" '(query-replace :which-key "query-replace")
     "ec" '(consult-theme :which-key "consult-theme")
