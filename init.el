@@ -1847,6 +1847,10 @@ _R_   reset frame zoom
 (use-package rustic)
 
 
+;; go
+(use-package go-mode)
+
+
 ;; python
 ;(use-package lsp-pyright
 ;  :ensure t
@@ -1948,9 +1952,20 @@ _R_   reset frame zoom
 ;; jekyll (markdown and html modes)
 ;(use-package jekyll-modes) ;; DELETEME
 
-;; html/css/js
+;; html/css
 (use-package web-mode
   :mode "\\.html\\'")
+
+
+;; javascript
+(use-package js2-mode
+  :mode "\\.js\\'"
+  ;; indent with spaces https://stackoverflow.com/a/7957258/11312409
+  :hook (js2-mode . (lambda () (set-variable 'indent-tabs-mode nil))))
+
+;; typscript
+(use-package typescript-mode
+  :mode "\\.ts\\'")
 
 
 ;; octave mode for matlab files
