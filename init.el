@@ -523,7 +523,8 @@
   ;; prevent electric pair mode from being enabled in the mini buffer (for things like consult)
   ;; https://emacs.stackexchange.com/a/29342
   (setq electric-pair-inhibit-predicate (lambda (char) (minibufferp)))
-  (electric-pair-mode 1))
+  ;(electric-pair-mode 1)
+  )
 
 ;; TODO trying smartparens
 (use-package smartparens
@@ -537,7 +538,7 @@
     (sp-pair brace nil
              :post-handlers '(("||\n[i]" "RET") ("| " "SPC"))
              :unless '(sp-point-before-word-p sp-point-before-same-p)))
-  )
+  (smartparens-global-mode))
 
 ;(use-package aggressive-indent
 ;  :config
