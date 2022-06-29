@@ -11,6 +11,14 @@
       ;; increase the gc threshold
       gc-cons-threshold 100000000)
 
+
+;; turn off ad-redef warnings https://andrewjamesjohnson.com/suppressing-ad-handle-definition-warnings-in-emacs/
+(setq ad-redefinition-action 'accept)
+
+
+;; empty scratch buffer text
+(setq initial-scratch-message "")
+
 ;; some editor settings
 (setq-default indent-tabs-mode nil    ;; indent with spaces
               tab-width 4             ;; 1 tab <=> 4 spaces
@@ -56,9 +64,22 @@
 ;; fringe setup (left . right)
 (set-fringe-mode '(4 . 4))
 
+
+;; custom file setup https://diamondbond.neocities.org/emacs.html#orge163cd3
+(setq-default custom-file (expand-file-name "custom.el" user-emacs-directory))
+
+;; Write to it if it does not exist
+(unless (file-exists-p custom-file)
+  (write-region "" nil custom-file))
+
+;; Load custom file. Don't hide errors. Hide success message
+(load custom-file nil t)
+
+
 ;; setup variable to determine computer specific actions
 ;; inpsired by https://github.com/jakebox/jake-emacs#custom-variables-registers
 (defvar computer nil "Which computer I am on.")
+
 (let ((sys (system-name)))
   (if (string= sys "arch")
       (setq computer 'linux-desktop)
@@ -143,8 +164,10 @@
 ;; smoother scrolling (especially for trackpad) via emacs 29
 (pixel-scroll-precision-mode 1)
 
+
 ;; disable bells (distracting)
 (setq ring-bell-function 'ignore)
+
 
 ;; use aspell backend
 (if (eq system-type 'darwin)
@@ -154,6 +177,7 @@
 (if (eq system-type 'gnu/linux)
   (setq ispell-program-name "/usr/bin/aspell"
         ispell-dictionary "english"))
+
 
 ;;;; DEFUNS
 ;; revert buffer without confirmation
@@ -236,26 +260,26 @@
   (interactive)
   (if (= (count-windows) 2)
       (let* ((this-win-buffer (window-buffer))
-	     (next-win-buffer (window-buffer (next-window)))
-	     (this-win-edges (window-edges (selected-window)))
-	     (next-win-edges (window-edges (next-window)))
-	     (this-win-2nd (not (and (<= (car this-win-edges)
-					 (car next-win-edges))
-				     (<= (cadr this-win-edges)
-					 (cadr next-win-edges)))))
-	     (splitter
-	      (if (= (car this-win-edges)
-		     (car (window-edges (next-window))))
-		  'split-window-horizontally
-		'split-window-vertically)))
-	(delete-other-windows)
-	(let ((first-win (selected-window)))
-	  (funcall splitter)
-	  (if this-win-2nd (other-window 1))
-	  (set-window-buffer (selected-window) this-win-buffer)
-	  (set-window-buffer (next-window) next-win-buffer)
-	  (select-window first-win)
-	  (if this-win-2nd (other-window 1))))))
+             (next-win-buffer (window-buffer (next-window)))
+             (this-win-edges (window-edges (selected-window)))
+             (next-win-edges (window-edges (next-window)))
+             (this-win-2nd (not (and (<= (car this-win-edges)
+                                         (car next-win-edges))
+                                     (<= (cadr this-win-edges)
+                                         (cadr next-win-edges)))))
+             (splitter
+              (if (= (car this-win-edges)
+                     (car (window-edges (next-window))))
+                  'split-window-horizontally
+                'split-window-vertically)))
+        (delete-other-windows)
+        (let ((first-win (selected-window)))
+          (funcall splitter)
+          (if this-win-2nd (other-window 1))
+          (set-window-buffer (selected-window) this-win-buffer)
+          (set-window-buffer (next-window) next-win-buffer)
+          (select-window first-win)
+          (if this-win-2nd (other-window 1))))))
 
 ;; useful to have on an easily accessible key, also used a bunch with persp mode hacks
 (defun open-scratch-buffer ()
@@ -441,13 +465,30 @@
 
 ;;; UNDO TREE
 ;; undo-tree with evil mode https://www.reddit.com/r/emacs/comments/n1pibp/installed_evil_on_emacs_for_windows_redo_not/gwei7fw/
-(use-package undo-tree
-  :after evil
-  :diminish
-  :config
-  (evil-set-undo-system 'undo-tree)
-  (global-undo-tree-mode 1))
+;(use-package undo-tree
+;  :after evil
+;  :diminish
+;  :config
+;  (evil-set-undo-system 'undo-tree)
+;  (global-undo-tree-mode 1))
 
+;; TODO try out undo-fu/vundo stack
+(use-package undo-fu
+  :after evil
+  :config
+  (evil-set-undo-system 'undo-fu))
+
+(use-package undo-fu-session
+  :after undu-fu
+  :init
+  (global-undo-fu-session-mode)
+  :config
+  (setq undo-fu-session-incompatible-files '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'")))
+
+(use-package vundo
+  :straight (vundo :type git :host github :repo "casouri/vundo")
+  :config
+  (setq vundo-compact-display t))
 
 ;; editor config
 (use-package editorconfig
@@ -473,13 +514,33 @@
   (setq electric-pair-delete-adjacent-pairs t)
   ;; TODO
   (setq electric-pair-pairs '((?\" . ?\")
+                              (?\( . ?\))
+                              (?\[ . ?\])
                               (?\{ . ?\})))
   ;(setq-default electric-indent-chars '(?\n ?\^?))
+
+  ;; no delay for showing matching parens
+  (setq show-paren-delay 0)
 
   ;; prevent electric pair mode from being enabled in the mini buffer (for things like consult)
   ;; https://emacs.stackexchange.com/a/29342
   (setq electric-pair-inhibit-predicate (lambda (char) (minibufferp)))
-  (electric-pair-mode 1))
+  ;(electric-pair-mode 1)
+  )
+
+;; TODO trying smartparens
+(use-package smartparens
+  :config
+  ;; https://github.com/doomemacs/doomemacs/blob/a570ffe16c24aaaf6b4f8f1761bb037c992de877/modules/config/default/config.el#L108-L120
+  ;; Expand {|} => { | }
+  ;; Expand {|} => {
+  ;;   |
+  ;; }
+  (dolist (brace '("(" "{" "["))
+    (sp-pair brace nil
+             :post-handlers '(("||\n[i]" "RET") ("| " "SPC"))
+             :unless '(sp-point-before-word-p sp-point-before-same-p)))
+  (smartparens-global-mode))
 
 ;(use-package aggressive-indent
 ;  :config
@@ -843,10 +904,12 @@
 ;; https://github.com/nex3/perspective-el/issues/63#issuecomment-322579522
 (defun +persp/get-buffers-list ()
   "Get filtered list of buffers, sorted alphabetically."
-  (sort
-   (cl-remove-if '(lambda (b) (if (stringp b) (string-match "^\[* \]" b) t))
-                 (mapcar 'buffer-name (persp-buffers (persp-curr))))
-   'string<))
+  (cl-remove-if '(lambda (b) (if (stringp b) (string-match "^\[* \]" b) t))
+                 (mapcar 'buffer-name (persp-buffers (persp-curr)))))
+;  (sort
+;   (cl-remove-if '(lambda (b) (if (stringp b) (string-match "^\[* \]" b) t))
+;                 (mapcar 'buffer-name (persp-buffers (persp-curr))))
+;   'string<))
 
 (defun +persp/next-buffer ()
   "Perspective aware `next-buffer'. Don't show internal buffers."
@@ -1079,14 +1142,6 @@
   :hook ((prog-mode . highlight-numbers-mode)))
 
 
-;; undo-tree - undo history represented as a tree, with evil integration
-(use-package undo-tree
-  :diminish
-  :config
-  (evil-set-undo-system 'undo-tree)
-  (global-undo-tree-mode 1))
-
-
 ;; anzu - show number of matches of search in modeline
 (use-package evil-anzu
   ;:after-call evil-ex-start-search evil-ex-start-word-search evil-ex-search-activate-highlight
@@ -1212,7 +1267,7 @@ Git gutter:
 
 ;; markdown
 (use-package markdown-mode
-  :straight nil
+  ;:straight nil
   :config
   ;; syntax highlighting in code blocks
   (setq markdown-fontify-code-blocks-natively t))
@@ -1315,14 +1370,14 @@ Made for `org-tab-first-hook' in evil-mode."
 (use-package org-superstar)
 
 ;; better rendering of things like italics
-(use-package org-appear
-  :commands (org-appear-mode)
-  :hook (org-mode . org-appear-mode)
-  :init
-  (setq org-hide-emphasis-markers t)  ;; A default setting that needs to be t for org-appear
-  (setq org-appear-autoemphasis t)    ;; Enable org-appear on emphasis (bold, italics, etc)
-  (setq org-appear-autolinks nil)
-  (setq org-appear-autosubmarkers t)) ;; Enable on subscript and superscript
+;(use-package org-appear
+;  :commands (org-appear-mode)
+;  :hook (org-mode . org-appear-mode)
+;  :init
+;  (setq org-hide-emphasis-markers t)  ;; A default setting that needs to be t for org-appear
+;  (setq org-appear-autoemphasis t)    ;; Enable org-appear on emphasis (bold, italics, etc)
+;  (setq org-appear-autolinks nil)
+;  (setq org-appear-autosubmarkers t)) ;; Enable on subscript and superscript
 
 ;; FIXME I am essentially trying to create a consult interface for previewing files in a directory
 ;; TODO preview org dailies with consult
@@ -1533,7 +1588,8 @@ _R_   reset frame zoom
 
     ;; editor
     "e" '(:ignore t :which-key "Editor")
-    "eu" '(undo-tree-visualize :which-key "undo-tree-visualize")
+    ;"eu" '(undo-tree-visualize :which-key "undo-tree-visualize")
+    "eu" '(vundu :which-key "vundu")
     "et" '(hydra-theme/body :which-key "hydra-theme") ; not sure if this is the best place for this, perhaps toggles would be more appropriate?
     "er" '(query-replace :which-key "query-replace")
     "ec" '(consult-theme :which-key "consult-theme")
@@ -1657,12 +1713,15 @@ _R_   reset frame zoom
     "g=" 'evil-numbers/inc-at-pt
     "g-" 'evil-numbers/dec-at-pt
 
+    ;; go to references
+    "gD" 'xref-find-references
+
     ;; flyspell correct
     "z=" 'flyspell-correct-wrapper
     "C-;" 'flyspell-correct-wrapper
 
     ;; movement
-    "C-n" 'evil-next-visual-line ;; TODO should be in motion? doesn't seem to go down to these states?
+    "C-n" 'evil-next-visual-line ;; TODO should be in motion? doesn't seem to go down to these states? DELETEME
     "C-p" 'evil-previous-visual-line
     "s" 'avy-goto-char)
 
@@ -1680,7 +1739,9 @@ _R_   reset frame zoom
     "C-a" 'evil-beginning-of-visual-line
     "C-e" 'evil-end-of-visual-line
     "C-n" 'evil-next-visual-line
-    "C-p" 'evil-previous-visual-line)
+    "C-p" 'evil-previous-visual-line
+    "C-k" 'kill-whole-line
+    )
 
   ;; motion mode hotkeys, inherited by normal/visual
   (general-define-key
@@ -1729,6 +1790,8 @@ _R_   reset frame zoom
     "C--" 'text-scale-decrease
     "C-M-=" 'zoom-in
     "C-M--" 'zoom-out
+
+    "C-M-SPC" 'eldoc-box-eglot-help-at-point ;; show documentation for function at point
 
      ;; C-v to paste (or "yank" in emacs jargon) from clipboard, useful for minibuffers (such as query-replace and M-x)
     "C-v" 'yank
@@ -1795,26 +1858,46 @@ _R_   reset frame zoom
 
 
 ;;; LANGUAGES
-;; lsp
-(use-package lsp-mode
-  :custom
-  (lsp-completion-provider :none) ;; we use Corfu!
-  :init
-  (defun +lsp-mode-setup-completion ()
-    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-          '(orderless))) ;; Configure orderless
-  :hook ((lsp-mode . lsp-enable-which-key-integration)
-         (lsp-mode . lsp-ui-mode)
-         (rustic-mode . lsp))
-         (lsp-completion-mode . +lsp-mode-setup-completion)
-  :commands lsp
+;; TODO trying out eglot
+(use-package eglot
+  ;; https://github.com/minad/corfu/wiki
+  :init (setq completion-category-overrides '((eglot (styles orderless))))
   :config
-  (setq lsp-headerline-breadcrumb-enable nil
-        lsp-enable-snippet nil)) ;; TODO this is broken
+  ;; do not show eldoc in minibuffer
+  (add-to-list 'eglot-ignored-server-capabilites :hoverProvider)
+  (setq completion-category-defaults nil))
 
-(use-package lsp-ui :commands lsp-ui-mode)
-(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
-(use-package consult-lsp)
+(use-package consult-eglot)
+
+;; don't show the doc in the minibuffer (I find it distracting)
+(use-package eldoc-box
+  :hook (eglot-mode . eldoc-box-hover-mode)
+  ;; TODO doesn't work, using hover mode for now
+  ;; hide eglot's eldoc in the minibuffer
+  ;:hook (eglot-mode . eldoc-box-quit-frame)
+  )
+
+
+;; lsp
+;(use-package lsp-mode
+;  :custom
+;  (lsp-completion-provider :none) ;; we use Corfu!
+;  :init
+;  (defun +lsp-mode-setup-completion ()
+;    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+;          '(orderless))) ;; Configure orderless
+;  :hook ((lsp-mode . lsp-enable-which-key-integration)
+;         (lsp-mode . lsp-ui-mode)
+;         (rustic-mode . lsp))
+;         (lsp-completion-mode . +lsp-mode-setup-completion)
+;  :commands lsp
+;  :config
+;  (setq lsp-headerline-breadcrumb-enable nil
+;        lsp-enable-snippet nil)) ;; TODO this is broken
+;
+;(use-package lsp-ui :commands lsp-ui-mode)
+;(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+;(use-package consult-lsp)
 
 
 ;; dumb jump (indexless code navigation)
@@ -1842,9 +1925,11 @@ _R_   reset frame zoom
   (define-fringe-bitmap 'flycheck-fringe-bitmap-double-arrow
       [16 48 112 240 112 48 16] nil nil 'center))
 
-;; flycheck-popup-tip
-(use-package flycheck-popup-tip
-  :hook (flycheck-mode . flycheck-popup-tip-mode))
+;; flycheck posframe
+;(use-package flycheck-posframe
+;  :after flycheck
+;  :hook (flycheck-mode . flycheck-posframe-mode))
+
 
 
 ;; tree sitter
@@ -1858,18 +1943,19 @@ _R_   reset frame zoom
 
 
 ;; rust
-(use-package rustic
-  :config
-  ;; disable lsp support for now TODO
-  (setq rustic-lsp-client nil))
+(use-package rustic)
+
+
+;; go
+(use-package go-mode)
 
 
 ;; python
-(use-package lsp-pyright
-  :ensure t
-  :hook (python-mode . (lambda ()
-                          (require 'lsp-pyright)
-                          (lsp))))  ; or lsp-deferred
+;(use-package lsp-pyright
+;  :ensure t
+;  :hook (python-mode . (lambda ()
+;                          (require 'lsp-pyright)
+;                          (lsp))))  ; or lsp-deferred
 
 ;; emacs-ipython-notebook (jupyter)
 (use-package ein)
@@ -1881,13 +1967,13 @@ _R_   reset frame zoom
 
 ;; scala
 (use-package scala-mode)
-(use-package lsp-metals
-  :custom
-  ;; Metals claims to support range formatting by default but it supports range
-  ;; formatting of multiline strings only. You might want to disable it so that
-  ;; emacs can use indentation provided by scala-mode.
-  (lsp-metals-server-args '("-J-Dmetals.allow-multiline-string-formatting=off"))
-  :hook (scala-mode . lsp))
+;(use-package lsp-metals
+;  :custom
+;  ;; Metals claims to support range formatting by default but it supports range
+;  ;; formatting of multiline strings only. You might want to disable it so that
+;  ;; emacs can use indentation provided by scala-mode.
+;  (lsp-metals-server-args '("-J-Dmetals.allow-multiline-string-formatting=off"))
+;  :hook (scala-mode . lsp))
 
 
 ;; latex
@@ -1957,6 +2043,34 @@ _R_   reset frame zoom
 ;; alloy
 (use-package alloy-mode
   :straight (alloy-mode :type git :host github :repo "dwwmmn/alloy-mode"))
+
+
+;; multiple major modes (needed for jekyll)
+;(use-package poly-markdown)
+
+;; jekyll (markdown and html modes)
+;(use-package jekyll-modes) ;; DELETEME
+
+;; html/css
+(use-package web-mode
+  :mode "\\.html\\'")
+
+
+;; javascript
+(use-package js2-mode
+  :mode "\\.js\\'"
+  ;; indent with spaces https://stackoverflow.com/a/7957258/11312409
+  :hook (js2-mode . (lambda () (set-variable 'indent-tabs-mode nil))))
+
+;; typscript
+(use-package typescript-mode
+  :mode "\\.ts\\'")
+
+
+;; octave mode for matlab files
+(use-package octave-mode
+  :straight (:type built-in)
+  :mode "\\.m\\'")
 ;;----
 
 ;; AUTOCOMPLETE
@@ -2006,7 +2120,7 @@ _R_   reset frame zoom
   ;(corfu-max-width corfu-min-width)
   (corfu-count 14)
   (corfu-echo-documentation t)
-  (lsp-completion-provider :none)
+  ;(lsp-completion-provider :none)
 
   ;; You may want to enable Corfu only for certain modes.
   :hook (prog-mode . corfu-mode)
@@ -2018,13 +2132,14 @@ _R_   reset frame zoom
    "C-k" 'corfu-previous
    "C-SPC" 'corfu-insert-separator
    "<tab>" '+corfu-complete-quit
+   ;"C-f" '+corfu-complete-quit
    "<escape>" '+corfu-quit) ;; NOTE also sets functionality of "C-["
   :init
   (global-corfu-mode)
-  (defun +lsp-mode-setup-completion ()
-    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-          '(orderless))) ;; Configure orderless
-  :hook (lsp-completion-mode . +lsp-mode-setup-completion)
+  ;(defun +lsp-mode-setup-completion ()
+  ;  (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+  ;        '(orderless))) ;; Configure orderless
+  ;:hook (lsp-completion-mode . +lsp-mode-setup-completion)
   :config
   ;; HACK evil keymaps seem to take precedence over corfu's map, use advice to fix
   ;; https://github.com/minad/corfu/issues/12#issuecomment-881961510
