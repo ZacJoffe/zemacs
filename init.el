@@ -1037,6 +1037,19 @@
       (tab-bar-close-tab)
       (+tab-bar-message (format "Killed tab [%s]" (1+ curr-index)) 'success))))
 
+(defun +tab-bar/close-all-tabs-except-current ()
+  ""
+  (interactive)
+  (let ((curr-index (tab-bar--current-tab-index))
+        (num-tabs (length (tab-bar-tabs))))
+    (mapc (lambda
+            (index)
+            (unless (eq index (1+ curr-index))
+              (tab-bar-close-tab index)))
+          ;; reverse list because going from first to last tab breaks indexing
+          (reverse (number-sequence 1 num-tabs)))
+    (+tab-bar-message (format "Killed all tabs other than [%s]" (1+ curr-index)) 'success)))
+
 ;; TODO figure out how to switch to last tab in list to insert new tab
 ;(tab-bar-switch-to-tab (car (tab-bar-tabs)))
 
@@ -1725,7 +1738,8 @@ _R_   reset frame zoom
     "TAB k" '(+tab-bar/close-tab :which-key "+tab-bar/close-tab")
     ;"TAB d" '(+persp/kill-current :which-key "+persp/kill-current")
     "TAB d" '(+tab-bar/close-tab :which-key "+tab-bar/close-tab")
-    "TAB K" '(+persp/kill-all-except-default :which-key "+persp/kill-all-except-default")
+    ;"TAB K" '(+persp/kill-all-except-default :which-key "+persp/kill-all-except-default")
+    "TAB K" '(+tab-bar/close-all-tabs-except-current :which-key "+tab-bar/close-all-tabs-except-current")
     "TAB r" '(+persp/rename :which-key "+persp/rename")
     "TAB a" '(+persp/add-buffer-switch :which-key "+persp/add-buffer-switch")
 
