@@ -1022,7 +1022,7 @@
   "Create a new tab at the end of the list, open a scratch buffer."
   (interactive)
   (let ((index (length (tab-bar-tabs))))
-    (tab-bar-new-tab)
+    (tab-bar-new-tab index)
     (open-scratch-buffer)
     (+tab-bar/display)))
 
