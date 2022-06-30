@@ -1108,6 +1108,21 @@ kill all magit buffers for this repo."
 ;; show todos in magit status
 (use-package magit-todos)
 
+
+;; WIP hydra for smerge mode
+(defhydra hydra-smerge (:hint nil :foreign-keys run)
+  "
+_j_: smerge-next
+_k_: smerge-prev
+_c_: smerge-keep-current
+"
+  ("j" smerge-next)
+  ("k" smerge-prev)
+  ("c" smerge-keep-current)
+  ("q" nil :exit t)
+  ("?" nil :exit t)
+  ("<escape>" nil :exit t))
+
 (use-package git-gutter
   :init
   (global-git-gutter-mode 1))
