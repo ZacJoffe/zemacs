@@ -1550,6 +1550,7 @@ _R_   reset frame zoom
     "hm" '(describe-mode :which-key "describe-mode")
     "hF" '(describe-face :which-key "describe-face")
     "hw" '(where-is :which-key "where-is")
+    "h." '(display-local-help :which-key "display-local-help")
 
     ;; zoom
     ;; the hydra is nice but the rest is kind of jank, need to pla around with this more
@@ -1847,6 +1848,17 @@ _R_   reset frame zoom
 ;  :after flycheck
 ;  :hook (flycheck-mode . flycheck-posframe-mode))
 
+
+
+(use-package flymake
+  :straight nil
+  :config
+  ;; automatically show linting issues in the minibuffer (`display-local-help' does this manually)
+  ;; TODO not working?
+  (setq help-at-pt-display-when-idle t))
+
+(use-package flymake-collection
+  :hook (after-init . flymake-collection-hook-setup))
 
 
 ;; tree sitter
