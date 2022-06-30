@@ -1009,7 +1009,8 @@
 (use-package hl-todo
   :hook ((prog-mode . hl-todo-mode)
          (markdown-mode . hl-todo-mode)
-         (org-mode . hl-todo-mode))
+         (org-mode . hl-todo-mode)
+         (LaTeX-mode . hl-todo-mode))
   :config
   ; https://github.com/hlissner/doom-emacs/blob/develop/modules/ui/hl-todo/config.el
   (setq hl-todo-highlight-punctuation ":"
