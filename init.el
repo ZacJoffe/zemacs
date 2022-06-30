@@ -1042,7 +1042,23 @@
 
 ;(message (car (tab-bar-tabs)))
 
+(defun +tab-bar/switch-to-next-tab ()
+  ""
+  (interactive)
+  (tab-bar-switch-to-next-tab)
+  (+tab-bar/display))
 
+(defun +tab-bar/switch-to-prev-tab ()
+  ""
+  (interactive)
+  (tab-bar-switch-to-prev-tab)
+  (+tab-bar/display))
+
+(defun +tab-bar/switch-to-recent-tab ()
+  ""
+  (interactive)
+  (tab-bar-switch-to-recent-tab)
+  (+tab-bar/display))
 
 ;; ace window
 (use-package ace-window)
@@ -1600,8 +1616,8 @@ _R_   reset frame zoom
     "d" '(dired-jump :which-key "dired-jump")
     "/" '(+consult/ripgrep :which-key "+consult/ripgrep")
     "?" '(consult-ripgrep :which-key "consult-ripgrep")
-    ;"[" '(tab-bar-switch-to-prev-tab :which-key "tab-bar-switch-to-prev-tab")
-    ;"]" '(tab-bar-switch-to-next-tab :which-key "tab-bar-switch-to-next-tab")
+    ;"[" '(+tab-bar/switch-to-prev-tab :which-key "+tab-bar/switch-to-prev-tab")
+    ;"]" '(+tab-bar/switch-to-next-tab :which-key "+tab-bar/switch-to-next-tab")
     "v" '(vterm-toggle :which-key "vterm-toggle")
     "a" '(ace-window :which-key "ace-window")
     "l" '(ace-window :which-key "ace-window")
@@ -1699,9 +1715,9 @@ _R_   reset frame zoom
     ;"TAB TAB" '(persp-switch :which-key "persp-switch")
     "TAB TAB" '(tab-bar-switch-to-tab :which-key "tab-bar-switch-to-tab")
     ;"TAB [" '(persp-prev :which-key "persp-prev")
-    "TAB [" '(tab-bar-switch-to-prev-tab :which-key "tab-bar-switch-to-prev-tab")
+    "TAB [" '(+tab-bar/switch-to-prev-tab :which-key "+tab-bar/switch-to-prev-tab")
     ;"TAB ]" '(persp-next :which-key "persp-next")
-    "TAB [" '(tab-bar-switch-to-next-tab :which-key "tab-bar-switch-to-next-tab")
+    "TAB ]" '(t+ab-bar/switch-to-next-tab :which-key "+tab-bar/switch-to-next-tab")
     ;"TAB n" '(+persp/add-new :which-key "+persp/add-new")
     "TAB n" '(+tab-bar/add-new :which-key "+tab-bar/add-new")
     "TAB N" '(+persp/add-new-import-buffer :which-key "+persp/add-new-import-buffer")
@@ -1840,10 +1856,10 @@ _R_   reset frame zoom
     ;"C-z" 'consult-buffer
 
     ;; persp cycling
-    "C-<tab>" 'tab-bar-switch-to-next-tab
-    "C-<iso-lefttab>" 'tab-bar-switch-to-prev-tab
-    "C-S-<tab>" 'tab-bar-switch-to-prev-tab
-    "<backtab>" 'tab-bar-switch-to-recent-tab
+    "C-<tab>" '+tab-bar/switch-to-next-tab
+    "C-<iso-lefttab>" '+tab-bar/switch-to-prev-tab
+    "C-S-<tab>" '+tab-bar/switch-to-prev-tab
+    "<backtab>" '+tab-bar/switch-to-recent-tab
     ;"<backtab>" '+persp/switch-to-last-accessed
 
     ;; quick persp switching
