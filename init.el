@@ -1176,6 +1176,7 @@ Git gutter:
 (use-package vterm
   ;; disable hl line mode in terminal
   :hook (vterm-mode . (lambda () (setq-local global-hl-line-mode nil)))
+  :hook (vterm-mode . 'evil-emacs-state)
   :config
   ;; do not allow backspace on terminal prompt
   (setq comint-prompt-read-only t))
