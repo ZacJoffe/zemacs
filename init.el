@@ -477,7 +477,7 @@
   (evil-set-undo-system 'undo-fu))
 
 (use-package undo-fu-session
-  :after undu-fu
+  :after undo-fu
   :init
   (global-undo-fu-session-mode)
   :config
