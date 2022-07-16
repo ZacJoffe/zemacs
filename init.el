@@ -1085,7 +1085,10 @@
   ;; display magit status in current buffer (no popup) https://stackoverflow.com/a/58554387/11312409
   (setq magit-display-buffer-function 'magit-display-buffer-same-window-except-diff-v1
         magit-auto-revert-mode t
-        git-commit-summary-max-length 50))
+        ;; highlight commit message after 50 characters
+        git-commit-summary-max-length 50
+        ;; NOTE this is apparently DEPRECATED but it seems to do exactly what I want (autowrap commmit body at 72 chars)
+        git-commit-fill-column 72))
 
 ;; magit functions
 ;; inpsired by https://www.manueluberti.eu/emacs/2018/02/17/magit-bury-buffer/
