@@ -1061,6 +1061,12 @@
   (global-anzu-mode +1))
 
 
+;; better isearch
+(use-package ctrlf
+  :config
+  (ctrlf-mode +1))
+
+
 ;; solaire mode - distinguish minibuffers from "real" buffers
 (use-package solaire-mode
   :config
