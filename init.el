@@ -1528,7 +1528,14 @@ _R_   reset frame zoom
     "eu" '(vundu :which-key "vundu")
     "et" '(hydra-theme/body :which-key "hydra-theme") ; not sure if this is the best place for this, perhaps toggles would be more appropriate?
     "er" '(query-replace :which-key "query-replace")
-    "ec" '(consult-theme :which-key "consult-theme")
+    ;"ec" '(consult-theme :which-key "consult-theme")
+    "ep" '(point-to-register :which-key "point-to-register")
+    "es" '(consult-register-store :which-key "consult-register-store")
+    "ej" '(jump-to-register :which-key "jump-to-register")
+    "ef" '(:ignore t :which-key "Fold")
+    "efh" '(hs-hide-block :which-key "hs-hide-block")
+    "efs" '(hs-show-block :which-key "hs-show-block")
+    "efa" '(hs-show-all :which-key "hs-show-all")
 
     ;; buffer
     ;"TAB" '(switch-to-prev-buffer :which-key "Prev buffer")
@@ -1573,6 +1580,7 @@ _R_   reset frame zoom
 
     ;; window
     "w" '(:ignore t :which-key "Window")
+    "ww" '(ace-window :which-key "ace-window")
     "wt" '(toggle-window-split :which-key "toggle-window-split")
     "wa" '(ace-window :which-key "ace-window")
     "wr" '(hydra-window/body :which-key "hydra-window")
@@ -1610,15 +1618,15 @@ _R_   reset frame zoom
     "TAB a" '(+persp/add-buffer-switch :which-key "+persp/add-buffer-switch")
 
     ;; quick persp switching
-    "1" '((lambda () (interactive) (+persp/switch-by-index 0)) :which-key nil)
-    "2" '((lambda () (interactive) (+persp/switch-by-index 1)) :which-key nil)
-    "3" '((lambda () (interactive) (+persp/switch-by-index 2)) :which-key nil)
-    "4" '((lambda () (interactive) (+persp/switch-by-index 3)) :which-key nil)
-    "5" '((lambda () (interactive) (+persp/switch-by-index 4)) :which-key nil)
-    "6" '((lambda () (interactive) (+persp/switch-by-index 5)) :which-key nil)
-    "7" '((lambda () (interactive) (+persp/switch-by-index 6)) :which-key nil)
-    "8" '((lambda () (interactive) (+persp/switch-by-index 7)) :which-key nil)
-    "9" '((lambda () (interactive) (+persp/switch-by-index 8)) :which-key nil)
+    "1" '((lambda () (interactive) (+persp/switch-by-index 0)) :which-key "Persp 1")
+    "2" '((lambda () (interactive) (+persp/switch-by-index 1)) :which-key "Persp 2")
+    "3" '((lambda () (interactive) (+persp/switch-by-index 2)) :which-key "Persp 3")
+    "4" '((lambda () (interactive) (+persp/switch-by-index 3)) :which-key "Persp 4")
+    "5" '((lambda () (interactive) (+persp/switch-by-index 4)) :which-key "Persp 5")
+    "6" '((lambda () (interactive) (+persp/switch-by-index 5)) :which-key "Persp 6")
+    "7" '((lambda () (interactive) (+persp/switch-by-index 6)) :which-key "Persp 7")
+    "8" '((lambda () (interactive) (+persp/switch-by-index 7)) :which-key "Persp 8")
+    "9" '((lambda () (interactive) (+persp/switch-by-index 8)) :which-key "Persp 9")
 
     ;; git
     "g" '(:ignore t :which-key "Git") ; prefix
@@ -1645,6 +1653,7 @@ _R_   reset frame zoom
     "g-" 'evil-numbers/dec-at-pt
 
     ;; go to references
+    "gr" 'xref-find-references
     "gD" 'xref-find-references
 
     ;; flyspell correct
