@@ -177,6 +177,10 @@
         ispell-dictionary "english"))
 
 
+;; instantly show the `jump-to-register' list
+(setq register-preview-delay 0)
+
+
 ;;;; DEFUNS
 ;; revert buffer without confirmation
 ;; http://www.emacswiki.org/emacs-en/download/misc-cmds.el
