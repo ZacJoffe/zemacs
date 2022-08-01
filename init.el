@@ -2063,11 +2063,6 @@ _R_   reset frame zoom
         company-dabbrev-ignore-case nil
         company-dabbrev-downcase nil))
 
-;; fuzzy autocomplete for company
-(use-package company-flx
-  :after company
-  :hook (company-mode . company-flx-mode))
-
 ;; TODO cleanup comments
 (use-package corfu
   :custom
@@ -2132,28 +2127,6 @@ _R_   reset frame zoom
   :config
   (setq kind-icon-use-icons nil) ;; text based icons
   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
-
-;; https://kristofferbalintona.me/posts/corfu-kind-icon-and-corfu-doc/
-;; (use-package corfu-doc
-;;   ;; NOTE 2022-02-05: At the time of writing, `corfu-doc' is not yet on melpa
-;;   :straight (corfu-doc :type git :host github :repo "galeo/corfu-doc")
-;;   :after corfu
-;;   :hook (corfu-mode . corfu-doc-mode)
-;;   :general (:keymaps 'corfu-map
-;;                      ;; This is a manual toggle for the documentation popup.
-;;                      [remap corfu-show-documentation] #'corfu-doc-toggle ; Remap the default doc command
-;;                      ;; Scroll in the documentation window
-;;                      "M-n" #'corfu-doc-scroll-up
-;;                      "M-p" #'corfu-doc-scroll-down)
-;;   :custom
-;;   (corfu-doc-delay corfu-auto-delay)
-;;   (corfu-doc-max-width 70)
-;;   (corfu-doc-max-height 20)
-
-;;   ;; NOTE 2022-02-05: I've also set this in the `corfu' use-package to be
-;;   ;; extra-safe that this is set when corfu-doc is loaded. I do not want
-;;   ;; documentation shown in both the echo area and in the `corfu-doc' popup.
-;;   (corfu-echo-documentation nil))
 
 ;; TODO configure
 (use-package cape
@@ -2317,15 +2290,4 @@ _?_: quit
   (use-package exec-path-from-shell
     :config
     (exec-path-from-shell-initialize)))
-
-;; TODO
-;; projectile default
-;; evil hotkeys
-;; lang support (look into differences with elisp syntax for doom)
-;; org link follow
-;; flycheck things
-;; workspaces https://github.com/hlissner/doom-emacs/tree/master/modules/ui/workspaces
-;; left fringe prettify (I think doom disables it and renders errors in the line using a popup, get that working)
-;; solve errors
-
 
