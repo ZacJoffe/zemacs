@@ -400,6 +400,7 @@
         evil-want-keybinding nil
         evil-normal-state-cursor 'box
         evil-search-module 'evil-search
+        evil-undo-system 'undo-fu
         evil-respect-visual-line-mode t)
   :general
   ;; j and k should operate line-by-line with text wrapping
@@ -478,7 +479,12 @@
 (use-package undo-fu
   :after evil
   :config
-  (evil-set-undo-system 'undo-fu))
+  ;; increase history limits
+  ;; https://github.com/emacsmirror/undo-fu#undo-limits
+  (setq undo-limit 6710886400 ;; 64mb.
+        undo-strong-limit 100663296 ;; 96mb.
+        undo-outer-limit 1006632960) ;; 960mb.
+  )
 
 (use-package undo-fu-session
   :after undo-fu
