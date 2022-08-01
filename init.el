@@ -696,6 +696,9 @@
 ;;----
 
 
+(use-package deadgrep)
+
+
 ;; spelling
 (use-package flyspell
   ;; turn on flyspell for magit commit
