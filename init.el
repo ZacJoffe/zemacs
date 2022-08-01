@@ -1197,6 +1197,8 @@ Git gutter:
   ;; do not allow backspace on terminal prompt
   (setq comint-prompt-read-only t))
 
+;; toggle terminal in buffer
+(use-package vterm-toggle)
 
 ;; ediff
 (use-package ediff
@@ -1533,6 +1535,7 @@ _R_   reset frame zoom
     "/" '(+consult/ripgrep :which-key "+consult/ripgrep")
     "[" '(persp-prev :which-key "persp-prev")
     "]" '(persp-next :which-key "persp-next")
+    "v" '(vterm-toggle :which-key "vterm-toggle")
 
 
     ;; editor
