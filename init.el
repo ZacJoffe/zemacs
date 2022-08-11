@@ -1378,6 +1378,7 @@ Made for `org-tab-first-hook' in evil-mode."
   :general ;; global
   ("C-h f" 'helpful-callable)
   ("C-h v" 'helpful-variable)
+  ("C-h o" 'helpful-symbol)
   ("C-h k" 'helpful-key))
 
 ;; HACK for emacs 29
@@ -1553,7 +1554,8 @@ _R_   reset frame zoom
     ;; editor
     "e" '(:ignore t :which-key "Editor")
     ;"eu" '(undo-tree-visualize :which-key "undo-tree-visualize")
-    "eu" '(vundu :which-key "vundu")
+    "eu" '(vundo :which-key "vundo")
+    "ev" '(vundo :which-key "vundo")
     "et" '(hydra-theme/body :which-key "hydra-theme") ; not sure if this is the best place for this, perhaps toggles would be more appropriate?
     "er" '(query-replace :which-key "query-replace")
     ;"ec" '(consult-theme :which-key "consult-theme")
@@ -1592,6 +1594,7 @@ _R_   reset frame zoom
     "hf" '(helpful-callable :which-key "describe-function")
     "hk" '(helpful-key :which-key "describe-key")
     "hv" '(helpful-variable :which-key "describe-variable")
+    "ho" '(helpful-symbol :which-key "describe-symbol")
     "hm" '(describe-mode :which-key "describe-mode")
     "hF" '(describe-face :which-key "describe-face")
     "hw" '(where-is :which-key "where-is")
