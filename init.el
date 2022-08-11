@@ -539,6 +539,8 @@
 ;; TODO trying smartparens
 (use-package smartparens
   :config
+  (require 'smartparens-config)
+  (sp-local-pair 'LaTeX-mode "$" "$")
   ;; https://github.com/doomemacs/doomemacs/blob/a570ffe16c24aaaf6b4f8f1761bb037c992de877/modules/config/default/config.el#L108-L120
   ;; Expand {|} => { | }
   ;; Expand {|} => {
