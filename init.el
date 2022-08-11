@@ -7,7 +7,7 @@
 
 ;; performance stuff
 ;; increase amount of data which emacs can read from processes (mainly for LSP mode https://emacs-lsp.github.io/lsp-mode/page/performance/)
-(setq read-process-output-max (* 1024 1024) ;; 1mb
+(setq read-process-output-max (* 1024 1024) ;; 1 MB
       ;; increase the gc threshold
       gc-cons-threshold 100000000)
 
@@ -695,8 +695,8 @@
   ("C-l" 'embark-act)
   ("<mouse-3>" 'embark-act) ;; right click
   (:keymaps 'evil-normal-state-map
-   "C-." 'embark-act
-   "<mouse-3>" 'embark-act)
+    "C-." 'embark-act
+    "<mouse-3>" 'embark-act)
   :init
   ;; let "C-h" after a prefix command bring up a completion search using consult
   ;; https://www.reddit.com/r/emacs/comments/otjn19/comment/h6vyx9q/?utm_source=share&utm_medium=web2x&context=3
@@ -1267,7 +1267,7 @@ Git gutter:
       "pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
 )
 
-;; small snippet that I use often in org
+;; small snippet that I often use in org
 (defun +org-insert-source-block ()
   "Insert code block, force insert mode."
   (interactive)
@@ -1549,7 +1549,6 @@ _R_   reset frame zoom
     "[" '(persp-prev :which-key "persp-prev")
     "]" '(persp-next :which-key "persp-next")
     "v" '(vterm-toggle :which-key "vterm-toggle")
-
 
     ;; editor
     "e" '(:ignore t :which-key "Editor")
@@ -2015,20 +2014,9 @@ _R_   reset frame zoom
 
 
 ;; mermaid graphs
-(use-package mermaid-mode
-  :hook (mermaid-mode . (lambda () (electric-indent-local-mode -1))))
+;(use-package mermaid-mode
+;  :hook (mermaid-mode . (lambda () (electric-indent-local-mode -1))))
 
-
-;; alloy
-(use-package alloy-mode
-  :straight (alloy-mode :type git :host github :repo "dwwmmn/alloy-mode"))
-
-
-;; multiple major modes (needed for jekyll)
-;(use-package poly-markdown)
-
-;; jekyll (markdown and html modes)
-;(use-package jekyll-modes) ;; DELETEME
 
 ;; html/css
 (use-package web-mode
