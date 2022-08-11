@@ -725,9 +725,14 @@
 ;; projectile
 (use-package projectile
   :init
-  (projectile-mode +1)
+  ;; some configs that doom uses https://github.com/doomemacs/doomemacs/blob/bc32e2ec4c51c04da13db3523b19141bcb5883ba/core/core-projects.el#L29
+  (setq projectile-auto-discover nil ;; too slow to discover projects automatically, use `projectile-discover-projects-in-search-path' instead
+        projectile-enable-caching t  ;; big performance boost, especially for `projectile-find-file'
+        projectile-globally-ignored-files '(".DS_Store" "TAGS")
+        projectile-globally-ignored-file-suffixes '(".elc" ".pyc" ".o")
+        projectile-project-search-path '("~/Documents/Code"))
   :config
-  (setq projectile-project-search-path '("~/Documents/Code")))
+  (projectile-mode +1))
 
 
 ;; treemacs
