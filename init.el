@@ -15,6 +15,8 @@
 ;; turn off ad-redef warnings https://andrewjamesjohnson.com/suppressing-ad-handle-definition-warnings-in-emacs/
 (setq ad-redefinition-action 'accept)
 
+;; do not prompt minibuffer with "You can run command with ..." after running a command with M-x that has a hotkey
+(setq suggest-key-bindings nil)
 
 ;; empty scratch buffer text
 (setq initial-scratch-message "")
@@ -149,6 +151,7 @@
 ;; scrolling config
 (setq scroll-step            1 ;; smooth scroll
       scroll-conservatively  10000
+      fast-but-imprecise-scrolling t
 
       ;; https://github.com/hlissner/doom-emacs/blob/master/core/core-ui.el#L150
       hscroll-margin 2
@@ -962,10 +965,11 @@
 
 ;; icons
 (use-package all-the-icons
-  :config
+  ;:config
   ;; needed for getting the right side of doom-modeline to render on the screen properly
   ;; https://github.com/hlissner/doom-emacs/blob/develop/modules/ui/modeline/README.org#the-right-side-of-the-modeline-is-cut-off
-  (setq all-the-icons-scale-factor 1.1))
+  ;(setq all-the-icons-scale-factor 1.1)
+  )
 
 
 ;; themes
@@ -974,7 +978,7 @@
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-dracula t)
+  (load-theme 'doom-one t)
 
   ;; Enable custom treemacs theme (all-the-icons must be installed!)
   (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
@@ -988,6 +992,7 @@
 ;; TODO FIXME shows misc info (persps) in dired
 ;; modeline
 (use-package doom-modeline
+  :after all-the-icons
   :hook (after-init . doom-modeline-mode)
   :hook (doom-modeline-mode . size-indication-mode) ; filesize in modeline
   :hook (doom-modeline-mode . column-number-mode)   ; cursor column in modeline
@@ -1007,6 +1012,10 @@
         doom-modeline-major-mode-icon nil
         doom-modeline-buffer-file-name-style 'truncate-nil
         doom-modeline-indent-info nil
+
+        ;; HACK disable icons since it makes first buffer load very slow
+        ;doom-modeline-icon nil
+
         ;; Only show file encoding if it's non-UTF-8 and different line endings
         ;; than the current OSes preference
         doom-modeline-buffer-encoding 'nondefault
@@ -1016,6 +1025,8 @@
   :config
   ;; display symlink file paths https://github.com/seagle0128/doom-modeline#faq
   (setq find-file-visit-truename t)
+  ;; Don’t compact font caches during GC.
+  (setq inhibit-compacting-font-caches t)
 
   ;; HACK perspective list is shown in global-mode-string, and the misc-info segment only displays this
   ;; on the active window. This segment is the same as misc-info, without the check for the active window
@@ -1029,10 +1040,16 @@
   ;; as far as I can tell you can't change the ordering of segments without redefining the modeline entirely (segments can be toggled though)
   ;;
   ;; this is a bit messy since I already set a bunch of toggles, TODO need to work on this
-  (doom-modeline-def-modeline 'main
+  (doom-modeline-def-modeline 'my-line
     '(bar modals matches buffer-info buffer-position selection-info)
     ;'(buffer-encoding lsp major-mode process vcs checker " " +my/misc-info "  ")))
-    '(buffer-encoding lsp major-mode process vcs checker " ")))
+    '(buffer-encoding lsp major-mode process vcs checker "  "))
+
+  ;; Add to `doom-modeline-mode-hook` or other hooks
+  (defun setup-custom-doom-modeline ()
+     (doom-modeline-set-modeline 'my-line 'default))
+  (add-hook 'doom-modeline-mode-hook 'setup-custom-doom-modeline)
+  )
 
 
 ;; highlight todos
