@@ -88,13 +88,21 @@
 
 ;; mac specific titlebar stuff
 ;; https://emacs.stackexchange.com/a/40777
-(if (eq system-type 'darwin)
-    (progn
-      (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
-      (add-to-list 'default-frame-alist '(ns-appearance . dark))
-      (add-to-list 'default-frame-alist '(fullscreen . maximized)) ;; start maximized
-      (setq ns-use-proxy-icon nil)
-      (setq frame-title-format nil)))
+(when (eq system-type 'darwin)
+  (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+  (add-to-list 'default-frame-alist '(ns-appearance . dark))
+  (add-to-list 'default-frame-alist '(fullscreen . maximized)) ;; start maximized
+  (setq ns-use-proxy-icon nil
+        frame-title-format nil))
+
+;; windows specific stuff
+(when (eq system-type 'windows-nt)
+  ;; start fullscreen https://www.gnu.org/software/emacs/manual/html_node/efaq/Fullscreen-mode-on-MS_002dWindows.html
+  (add-hook 'emacs-startup-hook 'toggle-frame-maximized))
+
+(if (eq system-type 'windows-nt)
+    (setq +org-google-dir "~/My Drive/org")
+  (setq +org-google-dir "~/Documents/Google/org"))
 
 
 ;; show trailing whitespace
@@ -1222,17 +1230,19 @@ Git gutter:
 ;;----
 
 
-;; terminal emulator
-(use-package vterm
-  ;; disable hl line mode in terminal
-  :hook (vterm-mode . (lambda () (setq-local global-hl-line-mode nil)))
-  :hook (vterm-mode . 'evil-emacs-state)
-  :config
-  ;; do not allow backspace on terminal prompt
-  (setq comint-prompt-read-only t))
+;; terminal emulator (does not work on windows)
+(unless (eq system-type 'windows-nt)
+  (use-package vterm
+    ;; disable hl line mode in terminal
+    :hook (vterm-mode . (lambda () (setq-local global-hl-line-mode nil)))
+    :hook (vterm-mode . 'evil-emacs-state)
+    :config
+    ;; do not allow backspace on terminal prompt
+    (setq comint-prompt-read-only t))
 
-;; toggle terminal in buffer
-(use-package vterm-toggle)
+  ;; toggle terminal in buffer
+  (use-package vterm-toggle))
+
 
 ;; ediff
 (use-package ediff
@@ -1270,11 +1280,11 @@ Git gutter:
   :config
   (setq org-agenda-span 10 ; https://stackoverflow.com/a/32426234
         org-agenda-start-on-weekday nil
-        org-agenda-files '("~/Documents/Google/org/roam/agenda") ;; https://stackoverflow.com/a/11384907
+        org-agenda-files (list (format "%s/roam/agenda" +org-google-dir)) ;; https://stackoverflow.com/a/11384907
         org-agenda-window-setup 'current-window ;; open agenda in current window
         org-todo-keywords '((sequence "TODO(t)" "EXAM(e)" "WAIT(w)" "|" "DONE(d)" "KILL(k)" "SKIPPED(s)" "LATE(s)"))
         org-return-follows-link t
-        org-directory "~/Documents/Google/org"
+        org-directory +org-google-dir
         org-src-tab-acts-natively t ;; https://stackoverflow.com/a/27236621/11312409
         org-src-preserve-indentation t
         org-edit-src-content-indentation 0 ;; https://www.reddit.com/r/orgmode/comments/mobien/org_mode_code_block_indentation/gu3jjkg/
@@ -1339,12 +1349,12 @@ Made for `org-tab-first-hook' in evil-mode."
 ;; org-roam 2
 (use-package org-roam
   :custom
-  (org-roam-directory (file-truename "~/Documents/Google/org/roam"))
+  (org-roam-directory (file-truename (format "%s/roam" +org-google-dir)))
   :config
   (setq org-roam-completion-everywhere t)
   (org-roam-db-autosync-mode))
 
-(defvar +org-roam-dailies-directory (concat org-roam-directory "/daily"))
+;(defvar +org-roam-dailies-directory (concat org-roam-directory "/daily"))
 
 ;; TODO FIXME broken?
 ;(use-package org-roam-protocol
