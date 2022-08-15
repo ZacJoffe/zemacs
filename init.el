@@ -178,14 +178,14 @@
 (setq ring-bell-function 'ignore)
 
 
-;; use aspell backend
-(if (eq system-type 'darwin)
-  (setq ispell-program-name "/opt/homebrew/bin/aspell" ; mac specific
-        ispell-dictionary "english"))
+;; aspell setup
+(setq ispell-dictionary "english"
+      ;; force English dictionary, support camelCase
+      ispell-extra-args '("--sug-mode=ultra" "--lang=en_US" "--run-together"))
 
-(if (eq system-type 'gnu/linux)
-  (setq ispell-program-name "/usr/bin/aspell"
-        ispell-dictionary "english"))
+(cond ((eq system-type 'darwin) (setq ispell-program-name "/opt/homebrew/bin/aspell"))
+      ((eq system-type 'windows-nt) (setq ispell-program-name "C:/msys64/mingw64/bin/aspell.exe"))
+      ((eq system-type 'gnu/linux) (setq ispell-program-name "/usr/bin/aspell")))
 
 
 ;; instantly show the `jump-to-register' list
