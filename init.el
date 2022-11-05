@@ -1578,6 +1578,7 @@ _R_   reset frame zoom
     "x" '(open-scratch-buffer :which-key "Open scratch buffer")
     "d" '(dired-jump :which-key "dired-jump")
     "/" '(+consult/ripgrep :which-key "+consult/ripgrep")
+    "?" '(consult-ripgrep :which-key "consult-ripgrep")
     "[" '(persp-prev :which-key "persp-prev")
     "]" '(persp-next :which-key "persp-next")
     "v" '(vterm-toggle :which-key "vterm-toggle")
@@ -1619,6 +1620,7 @@ _R_   reset frame zoom
     ;; project
     "p" '(:ignore t :which-key "Project")
     "pp" '(projectile-switch-project :which-key "Switch Project")
+    "po" '(projectile-find-other-file :which-key "projectile-find-other-file")
 
     ;; help
     "h" '(:ignore t :which-key "Help")
