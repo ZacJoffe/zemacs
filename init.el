@@ -1519,27 +1519,6 @@ _R_   reset frame zoom
   ("k" zoom-in)
   ("j" zoom-out)
   ("R" (lambda () (interactive) (zoom-in/out 0))))
-
-
-;; use hydra to quickly load themes
-;; https://github.com/jakebox/jake-emacs/blob/main/jake-emacs/init.org#hydra
-(defhydra hydra-theme (:hint nil)
-  "Switch theme"
-  ("1" (my-load-theme 'doom-one) "doom-one")
-  ("2" (my-load-theme 'doom-dracula) "doom-dracula")
-  ("3" (my-load-theme 'doom-nord) "doom-nord")
-  ("4" (my-load-theme 'doom-peacock) "doom-peacock")
-  ("5" (my-load-theme 'doom-gruvbox) "doom-gruvbox")
-  ("6" (my-load-theme 'doom-material) "doom-material")
-  ("7" (my-load-theme 'doom-palenight) "doom-palenight")
-  ("8" (my-load-theme 'doom-spacegrey) "doom-spacegrey")
-  ("9" (my-load-theme 'doom-molokai) "doom-molokai"))
-
-;; functions for hydra-theme
-(defun my-load-theme (theme)
-  "Disable enabled themes, then load THEME."
-  (mapc #'disable-theme custom-enabled-themes)
-  (load-theme theme t))
 ;;----
 
 
@@ -1588,7 +1567,6 @@ _R_   reset frame zoom
     ;"eu" '(undo-tree-visualize :which-key "undo-tree-visualize")
     "eu" '(vundo :which-key "vundo")
     "ev" '(vundo :which-key "vundo")
-    "et" '(hydra-theme/body :which-key "hydra-theme") ; not sure if this is the best place for this, perhaps toggles would be more appropriate?
     "er" '(query-replace :which-key "query-replace")
     ;"ec" '(consult-theme :which-key "consult-theme")
     "ep" '(point-to-register :which-key "point-to-register")
