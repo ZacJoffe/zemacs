@@ -12,6 +12,10 @@
       gc-cons-threshold 100000000)
 
 
+;; suppress native comp warnings
+;; https://www.reddit.com/r/emacs/comments/l42oep/suppress_nativecomp_warnings_buffer/gkmnh3y/
+(setq native-comp-async-report-warnings-errors 'silent)
+
 ;; turn off ad-redef warnings https://andrewjamesjohnson.com/suppressing-ad-handle-definition-warnings-in-emacs/
 (setq ad-redefinition-action 'accept)
 
