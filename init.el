@@ -571,12 +571,6 @@
              :unless '(sp-point-before-word-p sp-point-before-same-p)))
   (smartparens-global-mode))
 
-;(use-package aggressive-indent
-;  :config
-;(global-aggressive-indent-mode 1)
-;(add-to-list 'aggressive-indent-excluded-modes 'html-mode))
-;;----
-
 
 ;;; VERTICO
 ;; vertico - completion engine
@@ -648,14 +642,7 @@
   (marginalia-mode))
 
 ;; consult
-(use-package consult
-  :config
-  ;; TODO consult-line working with evil-ex-search-forward
-  ;; https://github.com/abo-abo/swiper/issues/2344#issuecomment-561454647
-  ;(dolist (variable '(evil-ex-search-history consult--line-history evil-search-forward-history evil-search-backward-history))
-  ;  (defvaralias variable 'regexp-search-ring))
-  ;(defvaralias 'consult--line-history 'evil-search-forward-history)
-  )
+(use-package consult)
 
 ;; integration with flycheck
 (use-package consult-flycheck
@@ -684,14 +671,6 @@
   ;(let ((consult-ripgrep-args "rg --null --multiline --max-columns=1000 --path-separator /\ --smart-case --no-heading --line-number .")))
   (consult-ripgrep DIR))
 
-;; FIXME broken
-(defun +consult/search-project ()
-  ""
-  (interactive)
-  (if-let ((dir (projectile-project-root)))
-      (+consult/ripgrep dir)
-    (call-interactively (+consult/ripgrep))))
-
 (defun +consult/org-roam-ripgrep ()
   "Ripgrep org-directory."
   (interactive)
@@ -714,7 +693,7 @@
   ("C-l" 'embark-act)
   ("<mouse-3>" 'embark-act) ;; right click
   (:keymaps 'evil-normal-state-map
-    "C-." 'embark-act
+    "C-l" 'embark-act
     "<mouse-3>" 'embark-act)
   :init
   ;; let "C-h" after a prefix command bring up a completion search using consult
@@ -1372,15 +1351,6 @@ Made for `org-tab-first-hook' in evil-mode."
 ;; prettier headings
 (use-package org-superstar)
 
-;; better rendering of things like italics
-;(use-package org-appear
-;  :commands (org-appear-mode)
-;  :hook (org-mode . org-appear-mode)
-;  :init
-;  (setq org-hide-emphasis-markers t)  ;; A default setting that needs to be t for org-appear
-;  (setq org-appear-autoemphasis t)    ;; Enable org-appear on emphasis (bold, italics, etc)
-;  (setq org-appear-autolinks nil)
-;  (setq org-appear-autosubmarkers t)) ;; Enable on subscript and superscript
 
 ;; FIXME I am essentially trying to create a consult interface for previewing files in a directory
 ;; TODO preview org dailies with consult
@@ -1560,7 +1530,6 @@ _R_   reset frame zoom
     "SPC" '(projectile-find-file :which-key "Projectile find file")
     "C-SPC" '(projectile-find-file-other-frame :which-key "Projectile find file (new frame)")
     "S-SPC" '(projectile-find-file-other-frame :which-key "Projectile find file (new frame)")
-    ;"SPC" '(+consult/find-file :which-key "+consult/find-file")
     "." '(find-file :which-key "Find file")
     ">" '(find-file-other-frame :which-key "Find file (new frame)")
     "," '(consult-buffer :which-key "consult-buffer")
@@ -1623,7 +1592,7 @@ _R_   reset frame zoom
     "h." '(display-local-help :which-key "display-local-help")
 
     ;; zoom
-    ;; the hydra is nice but the rest is kind of jank, need to pla around with this more
+    ;; the hydra is nice but the rest is kind of janky, need to play around with this more
     "=" '(text-scale-increase :which-key "text-scale-increase")
     "-" '(text-scale-decrease :which-key "text-scale-decrease")
     "z" '(:ignore t :which-key "zoom")
