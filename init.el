@@ -958,15 +958,6 @@
 (use-package ace-window)
 
 
-;; icons
-(use-package all-the-icons
-  ;:config
-  ;; needed for getting the right side of doom-modeline to render on the screen properly
-  ;; https://github.com/hlissner/doom-emacs/blob/develop/modules/ui/modeline/README.org#the-right-side-of-the-modeline-is-cut-off
-  ;(setq all-the-icons-scale-factor 1.1)
-  )
-
-
 ;; themes
 (use-package doom-themes
   :config
@@ -984,10 +975,8 @@
   (doom-themes-org-config))
 
 
-;; TODO FIXME shows misc info (persps) in dired
 ;; modeline
 (use-package doom-modeline
-  :after all-the-icons
   :hook (after-init . doom-modeline-mode)
   :hook (doom-modeline-mode . size-indication-mode) ; filesize in modeline
   :hook (doom-modeline-mode . column-number-mode)   ; cursor column in modeline
@@ -996,20 +985,15 @@
   (unless after-init-time
     ;; prevent flash of unstyled modeline at startup
     (setq-default mode-line-format nil))
-  ;; We display project info in the modeline ourselves
-  (setq projectile-dynamic-mode-line nil)
-  ;; Set these early so they don't trigger variable watchers
-  (setq doom-modeline-bar-width 3
-        doom-modeline-github nil
-        doom-modeline-mu4e nil
-        doom-modeline-persp-name nil
-        doom-modeline-minor-modes nil
-        doom-modeline-major-mode-icon nil
-        doom-modeline-buffer-file-name-style 'truncate-nil
-        doom-modeline-indent-info nil
 
-        ;; HACK disable icons since it makes first buffer load very slow
-        ;doom-modeline-icon nil
+  ;; We display project info in the modeline ourselves
+  (setq projectile-dynamic-mode-line nil
+        ;; set these early so they don't trigger variable watchers
+        doom-modeline-bar-width 3
+        doom-modeline-buffer-file-name-style 'truncate-nil
+
+        ;; I don't like icons
+        doom-modeline-icon nil
 
         ;; Only show file encoding if it's non-UTF-8 and different line endings
         ;; than the current OSes preference
@@ -1023,28 +1007,16 @@
   ;; Don’t compact font caches during GC.
   (setq inhibit-compacting-font-caches t)
 
-  ;; HACK perspective list is shown in global-mode-string, and the misc-info segment only displays this
-  ;; on the active window. This segment is the same as misc-info, without the check for the active window
-  ;; so the persp list always shows
-  ;; https://github.com/seagle0128/doom-modeline/blob/master/doom-modeline-segments.el#L1616-L1621
-  (doom-modeline-def-segment +my/misc-info
-    (when (not doom-modeline--limited-width-p)
-      '("" mode-line-misc-info)))
-
   ;; doom uses the default modeline that is defined here: https://github.com/seagle0128/doom-modeline/blob/master/doom-modeline.el#L90
   ;; as far as I can tell you can't change the ordering of segments without redefining the modeline entirely (segments can be toggled though)
-  ;;
-  ;; this is a bit messy since I already set a bunch of toggles, TODO need to work on this
   (doom-modeline-def-modeline 'my-line
     '(bar modals matches buffer-info buffer-position selection-info)
-    ;'(buffer-encoding lsp major-mode process vcs checker " " +my/misc-info "  ")))
-    '(buffer-encoding lsp major-mode process vcs checker "  "))
+    '(buffer-encoding lsp major-mode process vcs checker))
 
   ;; Add to `doom-modeline-mode-hook` or other hooks
   (defun setup-custom-doom-modeline ()
      (doom-modeline-set-modeline 'my-line 'default))
-  (add-hook 'doom-modeline-mode-hook 'setup-custom-doom-modeline)
-  )
+  (add-hook 'doom-modeline-mode-hook 'setup-custom-doom-modeline))
 
 
 ;; highlight todos
