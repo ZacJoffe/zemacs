@@ -1708,7 +1708,7 @@ _R_   reset frame zoom
     ;; movement
     "C-n" 'evil-next-visual-line ;; TODO should be in motion? doesn't seem to go down to these states? DELETEME
     "C-p" 'evil-previous-visual-line
-    "s" 'avy-goto-char)
+    "s" 'avy-goto-char-timer)
 
   ;; insert mode hotkeys
   (general-define-key
