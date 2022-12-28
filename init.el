@@ -2010,10 +2010,6 @@ _R_   reset frame zoom
     '(("overleaf\\.com" . LaTeX-mode))))
 
 
-;; thrift
-(use-package thrift)
-
-
 ;; hex editing
 ;; TODO
 (use-package nhexl-mode
