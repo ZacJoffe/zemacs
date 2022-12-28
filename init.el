@@ -2200,6 +2200,7 @@ _R_   reset frame zoom
   :after pdf-view)
 ;;----
 
+
 ;; dired
 (use-package dired
   :straight (:type built-in)
@@ -2228,6 +2229,25 @@ _R_   reset frame zoom
         ;; Screens are larger nowadays, we can afford slightly larger thumbnails
         image-dired-thumb-size 150)
   )
+
+;; can also do `& evince' on pdf in dired
+;; https://www.reddit.com/r/emacs/comments/iduu6d/use_pdftools_for_small_pdfs_external_viewer_for/g2bpk73/
+(defun dired-open ()
+  "Open files externally from Dired."
+  (interactive)
+  (setq file (dired-get-file-for-visit))
+  (setq ext (file-name-extension file))
+  (cond ((string= ext "pdf")
+         ;; shell-quote-argument escapes white spaces on the file name
+         (async-shell-command (concat "evince " (shell-quote-argument file))))
+        ((string= ext "epub")
+         (async-shell-command (concat "evince " (shell-quote-argument file))))
+        ((string= ext "rar")
+         (async-shell-command (concat "file-roller " (shell-quote-argument file))))
+        ((string= ext "zip")
+         (async-shell-command (concat "file-roller " (shell-quote-argument file))))
+        (t (dired-find-file))))
+
 
 ;; colorful dired
 (use-package diredfl
