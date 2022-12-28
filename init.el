@@ -192,6 +192,10 @@
 (setq register-preview-delay 0)
 
 
+;; enable narrowing
+(put 'narrow-to-region 'disabled nil)
+
+
 ;;;; DEFUNS
 ;; revert buffer without confirmation
 ;; http://www.emacswiki.org/emacs-en/download/misc-cmds.el
@@ -1648,6 +1652,11 @@ _R_   reset frame zoom
     "nt" '(org-roam-dailies-goto-today :which-key "org-roam-dailies-goto-today")
     "n/" '(+consult/org-roam-ripgrep :which-key "+consult/org-roam-ripgrep")
     "na" '(org-agenda :which-key "org-agenda")
+
+    ;; narrow
+    "N" '(:ignore t :which-key "Narrow")
+    "Nr" '(narrow-to-region :which-key "narrow-to-region")
+    "Nw" '(widen :which-key "widen")
 
     ;; persps
     "TAB" '(:ignore t :which-key "Perspective")
