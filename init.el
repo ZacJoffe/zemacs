@@ -680,6 +680,10 @@
 
 (use-package embark-consult
   :after (embark consult))
+
+
+;; posframe
+(use-package posframe)
 ;;----
 
 
@@ -1662,22 +1666,29 @@ Git gutter:
 ;;; LANGUAGES
 ;; TODO trying out eglot
 (use-package eglot
+  :straight (:type built-in)
   ;; https://github.com/minad/corfu/wiki
-  :init (setq completion-category-overrides '((eglot (styles orderless))))
+  :init
+  (setq completion-category-overrides '((eglot (styles orderless))))
+  ;; enable flymake and disable flycheck
+  :hook (eglot-mode . (lambda ()
+                        (flymake-mode 1)
+                        (flycheck-mode -1)))
   :config
   ;; do not show eldoc in minibuffer
   (add-to-list 'eglot-ignored-server-capabilites :hoverProvider)
-  (setq completion-category-defaults nil))
+  (setq completion-category-defaults nil
+        eldoc-documentation-strategy 'eldoc-documentation-default))
 
 (use-package consult-eglot)
 
 ;; don't show the doc in the minibuffer (I find it distracting)
-(use-package eldoc-box
-  :hook (eglot-mode . eldoc-box-hover-mode)
-  ;; TODO doesn't work, using hover mode for now
-  ;; hide eglot's eldoc in the minibuffer
-  ;:hook (eglot-mode . eldoc-box-quit-frame)
-  )
+;(use-package eldoc-box
+;  :hook (eglot-mode . eldoc-box-hover-mode)
+;  ;; TODO doesn't work, using hover mode for now
+;  ;; hide eglot's eldoc in the minibuffer
+;  ;:hook (eglot-mode . eldoc-box-quit-frame)
+;  )
 
 
 ;; lsp
@@ -1692,10 +1703,11 @@ Git gutter:
 ;         (lsp-mode . lsp-ui-mode)
 ;         (rustic-mode . lsp))
 ;         (lsp-completion-mode . +lsp-mode-setup-completion)
-;  :commands lsp
 ;  :config
 ;  (setq lsp-headerline-breadcrumb-enable nil
-;        lsp-enable-snippet nil)) ;; TODO this is broken
+;        lsp-enable-snippet nil ;; TODO this is broken
+;        lsp-signature-function 'lsp-signature-posframe)
+;  )
 ;
 ;(use-package lsp-ui)
 ;(use-package consult-lsp)
@@ -1731,14 +1743,37 @@ Git gutter:
 ;  :after flycheck
 ;  :hook (flycheck-mode . flycheck-posframe-mode))
 
+;(use-package flycheck-popup-tip
+  ;:after flycheck
+  ;:hook (flycheck-mode . flycheck-popup-tip-mode)
+  ;:hook (evil-insert-state-entry-hook . flycheck-popup-tip-delete-popup)
+  ;:hook (evil-replace-state-entry-hook . flycheck-popup-tip-delete-popup)
+  ;:config
+  ;;(setq flycheck-popup-tip-error-prefix "x ")
+  ;)
 
 
+;; flymake
 (use-package flymake
   :straight nil
   :config
   ;; automatically show linting issues in the minibuffer (`display-local-help' does this manually)
   ;; TODO not working?
+  ;; TODO try the `eldoc' command?
   (setq help-at-pt-display-when-idle t))
+
+(use-package popon
+  :straight (popon :type git :repo "https://codeberg.org/akib/emacs-popon.git"))
+
+(use-package flymake-popon
+ :straight (flymake-popon :type git :repo "https://codeberg.org/akib/emacs-flymake-popon.git"))
+
+;(use-package flymake-popon
+;  :after popon
+;  :straight (emacs-flymake-popon :type git :host codeberg :repo "akib/emacs-flymake-popon"))
+
+
+
 
 (use-package flymake-collection
   :hook (after-init . flymake-collection-hook-setup))
@@ -1755,19 +1790,25 @@ Git gutter:
 
 
 ;; rust
-(use-package rustic)
+(use-package rustic
+  :config
+  (setq rustic-lsp-client 'eglot))
 
 
 ;; go
 (use-package go-mode)
 
 
+;; haskell
+(use-package haskell-mode)
+
+
 ;; python
-;(use-package lsp-pyright
-;  :ensure t
-;  :hook (python-mode . (lambda ()
-;                          (require 'lsp-pyright)
-;                          (lsp))))  ; or lsp-deferred
+; (use-package lsp-pyright
+;   :ensure t
+;   :hook (python-mode . (lambda ()
+;                           (require 'lsp-pyright)
+;                           (lsp))))  ; or lsp-deferred
 
 ;; emacs-ipython-notebook (jupyter)
 (use-package ein)
@@ -1775,6 +1816,10 @@ Git gutter:
 ;; julia
 (use-package julia-mode)
 (use-package julia-repl)
+
+
+;; lua
+(use-package lua-mode)
 
 
 ;; scala
