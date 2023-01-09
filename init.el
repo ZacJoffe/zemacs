@@ -1003,20 +1003,6 @@ kill all magit buffers for this repo."
 (use-package magit-todos)
 
 
-;; WIP hydra for smerge mode
-(defhydra hydra-smerge (:hint nil :foreign-keys run)
-  "
-_j_: smerge-next
-_k_: smerge-prev
-_c_: smerge-keep-current
-"
-  ("j" smerge-next)
-  ("k" smerge-prev)
-  ("c" smerge-keep-current)
-  ("q" nil :exit t)
-  ("?" nil :exit t)
-  ("<escape>" nil :exit t))
-
 (use-package git-gutter
   :init
   (global-git-gutter-mode 1))
@@ -1029,34 +1015,6 @@ _c_: smerge-keep-current
   (define-fringe-bitmap 'git-gutter-fr:added [224] nil nil '(center repeated))
   (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
   (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
-
-(defhydra hydra-git-gutter (:body-pre (git-gutter-mode 1)
-                            :hint nil)
-  "
-Git gutter:
-  _j_: next hunk        _s_tage hunk     _q_uit
-  _k_: previous hunk    _r_evert hunk    _Q_uit and deactivate git-gutter
-  ^ ^                   _p_opup hunk
-  _h_: first hunk
-  _l_: last hunk        set start _R_evision
-"
-  ("j" git-gutter:next-hunk)
-  ("k" git-gutter:previous-hunk)
-  ("h" (progn (goto-char (point-min))
-              (git-gutter:next-hunk 1)))
-  ("l" (progn (goto-char (point-min))
-              (git-gutter:previous-hunk 1)))
-  ("s" git-gutter:stage-hunk)
-  ("r" git-gutter:revert-hunk)
-  ("p" git-gutter:popup-hunk)
-  ("R" git-gutter:set-start-revision)
-  ("q" nil :color blue)
-  ("Q" (progn (git-gutter-mode -1)
-              ;; git-gutter-fringe doesn't seem to
-              ;; clear the markup right away
-              (sit-for 0.1)
-              (git-gutter:clear))
-       :color blue))
 ;;----
 
 
@@ -1340,6 +1298,48 @@ _R_   reset frame zoom
   ("k" zoom-in)
   ("j" zoom-out)
   ("R" (lambda () (interactive) (zoom-in/out 0))))
+
+;; WIP hydra for smerge mode
+(defhydra hydra-smerge (:hint nil :foreign-keys run)
+  "
+_j_: smerge-next
+_k_: smerge-prev
+_c_: smerge-keep-current
+"
+  ("j" smerge-next)
+  ("k" smerge-prev)
+  ("c" smerge-keep-current)
+  ("q" nil :exit t)
+  ("?" nil :exit t)
+  ("<escape>" nil :exit t))
+
+(defhydra hydra-git-gutter (:body-pre (git-gutter-mode 1)
+                            :hint nil)
+  "
+Git gutter:
+  _j_: next hunk        _s_tage hunk     _q_uit
+  _k_: previous hunk    _r_evert hunk    _Q_uit and deactivate git-gutter
+  ^ ^                   _p_opup hunk
+  _h_: first hunk
+  _l_: last hunk        set start _R_evision
+"
+  ("j" git-gutter:next-hunk)
+  ("k" git-gutter:previous-hunk)
+  ("h" (progn (goto-char (point-min))
+              (git-gutter:next-hunk 1)))
+  ("l" (progn (goto-char (point-min))
+              (git-gutter:previous-hunk 1)))
+  ("s" git-gutter:stage-hunk)
+  ("r" git-gutter:revert-hunk)
+  ("p" git-gutter:popup-hunk)
+  ("R" git-gutter:set-start-revision)
+  ("q" nil :color blue)
+  ("Q" (progn (git-gutter-mode -1)
+              ;; git-gutter-fringe doesn't seem to
+              ;; clear the markup right away
+              (sit-for 0.1)
+              (git-gutter:clear))
+       :color blue))
 ;;----
 
 
