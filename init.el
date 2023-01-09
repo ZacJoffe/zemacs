@@ -305,35 +305,11 @@
   (interactive)
   (switch-to-buffer "*scratch*"))
 
-;; TODO FIXME proper indentation in text mode
-;; https://stackoverflow.com/a/22109370
-(defun new-line-dwim ()
-  (interactive)
-  (let ((break-open-pair (or (and (looking-back "{") (looking-at "}"))
-                             (and (looking-back ">") (looking-at "<"))
-                             (and (looking-back "(") (looking-at ")"))
-                             (and (looking-back "\\[") (looking-at "\\]")))))
-    (newline)
-    (when break-open-pair
-      (save-excursion
-        (newline)
-        (indent-for-tab-command)))
-    (indent-for-tab-command)))
-
 ;; useful for emacs daemon
 (defun +reload-config ()
   "Reload `init.el' without closing Emacs."
   (interactive)
   (load-file user-init-file))
-
-(defun +file-to-register (r &optional _)
-  ""
-  (interactive (list (register-read-with-preview
-                      (if current-prefix-arg
-                          "Frame configuration to register: "
-                        "Point to register: "))
-                     current-prefix-arg))
-  (set-register r (cons 'file (buffer-file-name))))
 ;;----
 
 
