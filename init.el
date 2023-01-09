@@ -1401,6 +1401,10 @@ Git gutter:
     "efs" '(hs-show-block :which-key "hs-show-block")
     "efa" '(hs-show-all :which-key "hs-show-all")
 
+    ;; consult
+    "c" '(:ignore t :which-key "consult")
+    "cf" '(consult-flycheck :which-key "consult-flycheck")
+
     ;; buffer
     ;"TAB" '(switch-to-prev-buffer :which-key "Prev buffer")
     "b" '(:ignore t :which-key "Buffer")
