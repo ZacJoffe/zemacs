@@ -1777,19 +1777,49 @@ Git gutter:
 ;  (lsp-metals-server-args '("-J-Dmetals.allow-multiline-string-formatting=off"))
 ;  :hook (scala-mode . lsp))
 
-
 ;; latex
 (use-package auctex
+  :custom-face
+  ;; disable weird verbatim face
+  (font-latex-verbatim-face ((t nil)))
   :hook (LaTeX-mode . visual-line-mode)
   :hook (LaTeX-mode . flyspell-mode)
+  ;; build shell script on save
+;  :hook (LaTeX-mode . (lambda ()
+;                        (add-hook 'after-save-hook (lambda () ;; https://emacs.stackexchange.com/a/14476
+;                                                     (when (memq this-command '(save-buffer save-some-buffers))
+;                                                       (shell-command "./build.sh"))) nil 'local)
+;                        ))
   ;; electric pair mode for `$' https://tex.stackexchange.com/a/75884
   ;; TODO refactor with general
   :hook (LaTeX-mode . (lambda ()
                         (define-key LaTeX-mode-map (kbd "$") 'self-insert-command)))
+  ;; don't auto-indent https://stackoverflow.com/a/21881693/11312409
+  ;; FIXME broken
+  :hook (LaTeX-mode . (lambda () (kill-local-variable 'line-indent-function)))
   :init
   ;; turn off subscripting and superscripting being rendered explicitly
   (setq tex-fontify-script nil
-        font-latex-fontify-script nil))
+        font-latex-fontify-script nil)
+  :config
+  (defun +latex/run-build-script ()
+    (interactive)
+    (when (file-exists-p "build.sh")
+      (shell-command "./build.sh")))
+    ;(when (memq this-command '(save-buffer save-some-buffers))
+    ;  (shell-command "./build.sh")))
+
+  ;(add-hook 'LaTeX-mode-hook #'(lambda ()
+  ;                             (add-hook 'after-save-hook #'+latex/run-build-script nil 'local)))
+  ;; HACK do not indent in align
+  (delete '("align" LaTeX-indent-tabular) LaTeX-indent-environment-list)
+  (delete '("align*" LaTeX-indent-tabular) LaTeX-indent-environment-list)
+  )
+
+(defun +latex/build-current-file ()
+  ""
+  (interactive)
+  (shell-command (concat "pdflatex " buffer-file-name)))
 
 (use-package latex-preview-pane
   :config
