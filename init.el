@@ -50,11 +50,6 @@
 ;; do not display empty cursor in other windows (especially distracting with hydras)
 (setq-default cursor-in-non-selected-windows nil)
 
-;; remember window configuration changes
-;(winner-mode 1)
-(tab-bar-history-mode 1)
-
-
 ;; automatically refresh buffers
 (global-auto-revert-mode 1)
 
@@ -724,7 +719,7 @@
   (tab-bar-history-mode 1)
   :custom
   ;; hide tab back/forward buttons for tab-bar-history-mode
-  (tab-bar-format-history nil)
+  (tab-bar-format '(tab-bar-format-tabs tab-bar-separator tab-bar-format-add-tab))
 
   :config
   (setq tab-bar-show nil
