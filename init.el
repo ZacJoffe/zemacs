@@ -47,7 +47,7 @@
 ;; save buffers on close (sessioning)
 (setq desktop-path '("~/"))
 
-;; do not display empty cursor in other windows (especially discracting with hydras)
+;; do not display empty cursor in other windows (especially distracting with hydras)
 (setq-default cursor-in-non-selected-windows nil)
 
 ;; remember window configuration changes
@@ -83,7 +83,7 @@
 
 
 ;; setup variable to determine computer specific actions
-;; inpsired by https://github.com/jakebox/jake-emacs#custom-variables-registers
+;; inspired by https://github.com/jakebox/jake-emacs#custom-variables-registers
 (defvar computer nil "Which computer I am on.")
 
 (let ((sys (system-name)))
