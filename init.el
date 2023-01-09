@@ -487,16 +487,7 @@
   (evil-goggles-mode))
 
 
-;;; UNDO TREE
-;; undo-tree with evil mode https://www.reddit.com/r/emacs/comments/n1pibp/installed_evil_on_emacs_for_windows_redo_not/gwei7fw/
-;(use-package undo-tree
-;  :after evil
-;  :diminish
-;  :config
-;  (evil-set-undo-system 'undo-tree)
-;  (global-undo-tree-mode 1))
-
-;; TODO try out undo-fu/vundo stack
+;; undo-fu/vundo stack
 (use-package undo-fu
   :after evil
   :config
