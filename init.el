@@ -733,21 +733,6 @@
         projectile-project-search-path '("~/Documents/Code"))
   :config
   (projectile-mode +1))
-
-
-;; treemacs
-(use-package treemacs
-  :config
-  (setq treemacs-follow-after-init t))
-
-(use-package treemacs-evil
-  :after (treemacs evil))
-
-(use-package treemacs-projectile
-  :after (treemacs projectile))
-
-(use-package treemacs-magit
-  :after (treemacs magit))
 ;;----
 
 
@@ -882,11 +867,6 @@
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
   (load-theme 'doom-one t)
 
-  ;; Enable custom treemacs theme (all-the-icons must be installed!)
-  (setq doom-themes-treemacs-theme "doom-atom") ; use "doom-colors" for less minimal icon theme
-  (doom-themes-treemacs-config)
-  ; fix font rendering for treemacs https://github.com/hlissner/doom-emacs/issues/1551#issuecomment-510177597
-  (setq doom-themes-treemacs-enable-variable-pitch nil)
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
 
@@ -1409,7 +1389,7 @@ _R_   reset frame zoom
   (general-override-mode) ;; https://github.com/noctuid/general.el/issues/99#issuecomment-360914335
   ;; doomesque hotkeys using spacebar as prefix
   (my-leader-def
-    :states '(motion normal visual treemacs) ;; NOTE the treemacs state
+    :states '(motion normal visual)
     :keymaps 'override ;; https://github.com/noctuid/general.el/issues/99#issuecomment-360914335
 
     ;; map universal argument to SPC-u
@@ -1460,8 +1440,6 @@ _R_   reset frame zoom
 
     ;; open
     "o" '(:ignore t :which-key "Open")
-    "op" '(treemacs :which-key "Treemacs")
-    "oP" '(treemacs-find-file :which-key "Treemacs find file")
     "oc" '(open-init-file :which-key "Open init.el")
 
     ;; project
@@ -1627,7 +1605,7 @@ _R_   reset frame zoom
     "<tab>" #'company-complete-selection)
 
   ;; unbind C-z from evil
-  (general-unbind '(motion insert treemacs) "C-z")
+  (general-unbind '(motion insert) "C-z")
 
   ;; key bindings for evil search ('/')
   ;; there could be a better way to do this, but this works so whatever
@@ -1746,8 +1724,7 @@ _R_   reset frame zoom
 ;  (setq lsp-headerline-breadcrumb-enable nil
 ;        lsp-enable-snippet nil)) ;; TODO this is broken
 ;
-;(use-package lsp-ui :commands lsp-ui-mode)
-;(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+;(use-package lsp-ui)
 ;(use-package consult-lsp)
 
 
