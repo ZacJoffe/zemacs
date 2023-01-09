@@ -1535,7 +1535,6 @@ Git gutter:
   ;; insert mode hotkeys
   (general-define-key
     :states 'insert
-    ;"C-SPC" 'company-complete
     "C-SPC" 'completion-at-point ;; bring up corfu completion
     "C-v" 'yank ;; C-v should paste clipboard contents
 
@@ -1567,17 +1566,6 @@ Git gutter:
 
     "C-w C-l" 'evil-window-right
     "C-w C-h" 'evil-window-left)
-
-  ;; company
-  ;; DELETEME keeping for now to help configure corfu
-  (general-define-key
-    :keymaps '(company-active-map)
-    "C-w" nil ; allow C-w to act normally during completion
-    "C-h" nil
-    "C-n" #'company-select-next
-    "C-p" #'company-select-previous
-    "TAB" #'company-complete-selection
-    "<tab>" #'company-complete-selection)
 
   ;; unbind C-z from evil
   (general-unbind '(motion insert) "C-z")
@@ -1872,32 +1860,34 @@ Git gutter:
   :mode "\\.m\\'")
 ;;----
 
-;; AUTOCOMPLETE
-;; company TODO remove?
-(use-package company
-  ;; trying out tab and go mode
-  ;:hook (company-mode . company-tng-mode)
+
+;; snippets
+(use-package tempel
   :init
-  ;; https://github.com/company-mode/company-mode/blob/master/company-tng.el#L65
-  (setq company-require-match nil
-        company-minimum-prefix-length 2
-        company-tooltip-limit 14
-        company-tooltip-align-annotations t
-        company-frontends
-        '(company-pseudo-tooltip-frontend  ; always show candidates in overlay tooltip
-          company-echo-metadata-frontend)  ; show selected candidate docs in echo area
+  ;; Setup completion at point
+  (defun tempel-setup-capf ()
+    ;; Add the Tempel Capf to `completion-at-point-functions'.
+    ;; `tempel-expand' only triggers on exact matches. Alternatively use
+    ;; `tempel-complete' if you want to see all matches, but then you
+    ;; should also configure `tempel-trigger-prefix', such that Tempel
+    ;; does not trigger too often when you don't expect it. NOTE: We add
+    ;; `tempel-expand' *before* the main programming mode Capf, such
+    ;; that it will be tried first.
+    (setq-local completion-at-point-functions
+                (cons #'tempel-expand
+                      completion-at-point-functions)))
 
-        company-backends '(company-capf)
+  (add-hook 'prog-mode-hook 'tempel-setup-capf)
+  (add-hook 'text-mode-hook 'tempel-setup-capf)
 
-        ;; Only search the current buffer for `company-dabbrev' (a backend that
-        ;; suggests text your open buffers). This prevents Company from causing
-        ;; lag once you have a lot of buffers open.
-        company-dabbrev-other-buffers nil
-        ;; Make `company-dabbrev' fully case-sensitive, to improve UX with
-        ;; domain-specific words with particular casing.
-        company-dabbrev-ignore-case nil
-        company-dabbrev-downcase nil))
+  ;; Optionally make the Tempel templates available to Abbrev,
+  ;; either locally or globally. `expand-abbrev' is bound to C-x '.
+  ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
+  ;; (global-tempel-abbrev-mode)
+)
 
+
+;; AUTOCOMPLETE
 ;; TODO cleanup comments
 (use-package corfu
   :custom
@@ -1955,7 +1945,6 @@ Git gutter:
 
 ;; icons for corfu
 (use-package kind-icon
-  :ensure t
   :after corfu
   :custom
   (kind-icon-default-face 'corfu-default) ; to compute blended backgrounds correctly
