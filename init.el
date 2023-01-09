@@ -938,6 +938,12 @@
   :hook ((prog-mode . highlight-numbers-mode)))
 
 
+;; code folding
+;(use-package hs-mode
+;  :straight (:type built-in)
+;  :hook (prog-mode . hs-minor-mode))
+
+
 ;; anzu - show number of matches of search in modeline
 (use-package evil-anzu
   ;:after-call evil-ex-start-search evil-ex-start-word-search evil-ex-search-activate-highlight
