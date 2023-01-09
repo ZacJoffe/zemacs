@@ -325,6 +325,15 @@
   "Reload `init.el' without closing Emacs."
   (interactive)
   (load-file user-init-file))
+
+(defun +file-to-register (r &optional _)
+  ""
+  (interactive (list (register-read-with-preview
+                      (if current-prefix-arg
+                          "Frame configuration to register: "
+                        "Point to register: "))
+                     current-prefix-arg))
+  (set-register r (cons 'file (buffer-file-name))))
 ;;----
 
 
