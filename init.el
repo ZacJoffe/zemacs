@@ -516,17 +516,6 @@
   (editorconfig-mode 1))
 
 
-;; hungry delete
-;; TODO broken
-;(use-package hungry-delete
-;  :general
-;  (:keymaps 'hungry-delete-mode-map
-;    "<backspace>" 'backward-delete-char-untabify
-;    "M-<backspace>" 'hungry-delete-backward)
-;  :init
-;  (global-hungry-delete-mode 1))
-
-
 (use-package electric
   :straight (:type built-in)
   :init
