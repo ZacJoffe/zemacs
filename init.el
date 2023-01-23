@@ -1909,11 +1909,6 @@ Git gutter:
 (use-package yaml-mode)
 
 
-;; mermaid graphs
-;(use-package mermaid-mode
-;  :hook (mermaid-mode . (lambda () (electric-indent-local-mode -1))))
-
-
 ;; html/css
 (use-package web-mode
   :mode "\\.html\\'")
