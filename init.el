@@ -1776,6 +1776,10 @@ Git gutter:
   :config
   (setq rustic-lsp-client 'eglot))
 
+;; glsl
+(use-package glsl-mode
+  :mode (("\\.vs\\'" . glsl-mode)
+         ("\\.fs\\'" . glsl-mode)))
 
 ;; go
 (use-package go-mode)
