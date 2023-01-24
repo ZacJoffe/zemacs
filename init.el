@@ -1666,22 +1666,26 @@ Git gutter:
   ;; enable flymake and disable flycheck
   :hook (eglot-mode . (lambda ()
                         (flymake-mode 1)
-                        (flycheck-mode -1)))
+                        ;(flycheck-mode 0)
+                        ))
   :config
-  ;; do not show eldoc in minibuffer
-  (add-to-list 'eglot-ignored-server-capabilites :hoverProvider)
-  (setq completion-category-defaults nil
-        eldoc-documentation-strategy 'eldoc-documentation-default))
+  ;; prevent multi-line prompts in minibuffer
+  ;; https://github.com/joaotavora/eglot/discussions/734#discussioncomment-1286838
+  (setq eldoc-echo-area-use-multiline-p nil)
+;  ;; do not show eldoc in minibuffer
+;  (add-to-list 'eglot-ignored-server-capabilites :hoverProvider)
+;  (setq eldoc-documentation-strategy 'eldoc-documentation-default)
+  )
 
 (use-package consult-eglot)
 
 ;; don't show the doc in the minibuffer (I find it distracting)
-;(use-package eldoc-box
-;  :hook (eglot-mode . eldoc-box-hover-mode)
-;  ;; TODO doesn't work, using hover mode for now
-;  ;; hide eglot's eldoc in the minibuffer
-;  ;:hook (eglot-mode . eldoc-box-quit-frame)
-;  )
+(use-package eldoc-box
+  :hook (eglot-mode . eldoc-box-hover-mode)
+  ;; TODO doesn't work, using hover mode for now
+  ;; hide eglot's eldoc in the minibuffer
+  ;:hook (eglot-mode . eldoc-box-quit-frame)
+  )
 
 
 ;; lsp
