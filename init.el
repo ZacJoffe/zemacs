@@ -613,8 +613,8 @@
 (use-package consult)
 
 ;; integration with flycheck
-(use-package consult-flycheck
-  :after (consult flycheck))
+;(use-package consult-flycheck
+;  :after (consult flycheck))
 
 ;; integration with flyspell
 (use-package consult-flyspell
@@ -1404,7 +1404,8 @@ Git gutter:
 
     ;; consult
     "c" '(:ignore t :which-key "consult")
-    "cf" '(consult-flycheck :which-key "consult-flycheck")
+    ;"cf" '(consult-flycheck :which-key "consult-flycheck")
+    "cf" '(consult-flymake :which-key "consult-flymake")
 
     ;; buffer
     ;"TAB" '(switch-to-prev-buffer :which-key "Prev buffer")
@@ -1459,7 +1460,8 @@ Git gutter:
     "ta" '(corfu-mode :which-key "corfu-mode") ;; 'a' for autocomplete
     "ts" '(flyspell-mode :which-key "flyspell-mode")
     "tf" '(flyspell-mode :which-key "flyspell-mode")
-    "tc" '(flycheck-mode :which-key "flycheck-mode")
+    ;"tc" '(flycheck-mode :which-key "flycheck-mode")
+    "tc" '(flymake-mode :which-key "flymake-mode")
     "tm" '(minimap-mode :which-key "minimap-mode")
     "tg" '(evil-goggles-mode :which-key "evil-goggles")
     "tI" '(toggle-indent-style :which-key "Indent style")
@@ -1718,31 +1720,16 @@ Git gutter:
 
 
 ;; flycheck
-(use-package flycheck
-  :init
-  (global-flycheck-mode)
-  :config
-  (setq flycheck-indication-mode 'right-fringe
-        flycheck-display-errors-delay 0.25)
-  ;; change indicator to a left arrow since the fringe is now on the right
-  ;; https://github.com/hlissner/doom-emacs/blob/master/modules/ui/vc-gutter/config.el#L120
-  (define-fringe-bitmap 'flycheck-fringe-bitmap-double-arrow
-      [16 48 112 240 112 48 16] nil nil 'center))
-
-;; flycheck posframe
-;(use-package flycheck-posframe
-;  :after flycheck
-;  :hook (flycheck-mode . flycheck-posframe-mode))
-
-;(use-package flycheck-popup-tip
-  ;:after flycheck
-  ;:hook (flycheck-mode . flycheck-popup-tip-mode)
-  ;:hook (evil-insert-state-entry-hook . flycheck-popup-tip-delete-popup)
-  ;:hook (evil-replace-state-entry-hook . flycheck-popup-tip-delete-popup)
-  ;:config
-  ;;(setq flycheck-popup-tip-error-prefix "x ")
-  ;)
-
+;(use-package flycheck
+;  :init
+;  (global-flycheck-mode)
+;  :config
+;  (setq flycheck-indication-mode 'right-fringe
+;        flycheck-display-errors-delay 0.25)
+;  ;; change indicator to a left arrow since the fringe is now on the right
+;  ;; https://github.com/hlissner/doom-emacs/blob/master/modules/ui/vc-gutter/config.el#L120
+;  (define-fringe-bitmap 'flycheck-fringe-bitmap-double-arrow
+;      [16 48 112 240 112 48 16] nil nil 'center))
 
 ;; flymake
 (use-package flymake
