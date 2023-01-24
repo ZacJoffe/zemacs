@@ -1748,7 +1748,7 @@ Git gutter:
   :straight (popon :type git :repo "https://codeberg.org/akib/emacs-popon.git"))
 
 (use-package flymake-popon
- :straight (flymake-popon :type git :repo "https://codeberg.org/akib/emacs-flymake-popon.git"))
+  :straight (flymake-popon :type git :repo "https://codeberg.org/akib/emacs-flymake-popon.git"))
 
 ;(use-package flymake-popon
 ;  :after popon
