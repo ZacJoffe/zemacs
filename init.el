@@ -1673,7 +1673,12 @@ Git gutter:
   :config
   ;; prevent multi-line prompts in minibuffer
   ;; https://github.com/joaotavora/eglot/discussions/734#discussioncomment-1286838
-  (setq eldoc-echo-area-use-multiline-p nil)
+  (setq eldoc-echo-area-use-multiline-p nil
+        ;; Show flymake diagnostics first.
+        eldoc-documentation-functions (cons #'flymake-eldoc-function (remove #'flymake-eldoc-function eldoc-documentation-functions))
+        ;; Show all eldoc feedback.
+        eldoc-documentation-strategy #'eldoc-documentation-compose)
+
 ;  ;; do not show eldoc in minibuffer
 ;  (add-to-list 'eglot-ignored-server-capabilites :hoverProvider)
 ;  (setq eldoc-documentation-strategy 'eldoc-documentation-default)
