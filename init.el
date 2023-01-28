@@ -1138,7 +1138,12 @@ Made for `org-tab-first-hook' in evil-mode."
          t)))
 
 ;; org-roam 2
+;; fix for emacs 30
+;; https://github.com/org-roam/org-roam/issues/2308#issuecomment-1405496196
+(use-package emacsql-sqlite-builtin)
 (use-package org-roam
+  :init
+  (setq org-roam-database-connector 'sqlite-builtin)
   :custom
   (org-roam-directory (file-truename (format "%s/roam" +org-google-dir)))
   :config
