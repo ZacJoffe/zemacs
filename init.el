@@ -1803,6 +1803,14 @@ Git gutter:
 (use-package haskell-mode)
 
 
+;; ocaml
+(use-package tuareg)
+
+
+;; smalltalk
+(use-package smalltalk-mode)
+
+
 ;; python
 ; (use-package lsp-pyright
 ;   :ensure t
