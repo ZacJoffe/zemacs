@@ -313,6 +313,13 @@
   "Reload `init.el' without closing Emacs."
   (interactive)
   (load-file user-init-file))
+
+(defun string-equality (s1 s2)
+  "Quickly test equality of two strings s1 s2."
+  (interactive "sEnter first string: \nsEnter second string: ")
+  (if (string= s1 s2)
+      (message "Equal!")
+    (message "Not equal!")))
 ;;----
 
 
