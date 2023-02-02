@@ -1685,6 +1685,15 @@ Git gutter:
                         ;(flycheck-mode 0)
                         ))
   :config
+  ;; https://github.com/joaotavora/eglot/discussions/898#discussioncomment-2609402
+  (add-hook 'eglot-managed-mode-hook
+            (lambda ()
+              ;; Show flymake diagnostics first.
+              (setq eldoc-documentation-functions
+                    (cons #'flymake-eldoc-function
+                          (remove #'flymake-eldoc-function eldoc-documentation-functions)))
+              ;; Show all eldoc feedback.
+              (setq eldoc-documentation-strategy #'eldoc-documentation-compose)))
   ;; prevent multi-line prompts in minibuffer
   ;; https://github.com/joaotavora/eglot/discussions/734#discussioncomment-1286838
   (setq eldoc-echo-area-use-multiline-p nil
