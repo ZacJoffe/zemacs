@@ -320,6 +320,11 @@
   (if (string= s1 s2)
       (message "Equal!")
     (message "Not equal!")))
+
+(defun +which-function ()
+  "Interactive wrapper of `which-function'"
+  (interactive)
+  (message (which-function)))
 ;;----
 
 
