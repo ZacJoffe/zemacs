@@ -13,8 +13,7 @@
 
 
 ;; suppress native comp warnings
-;; https://www.reddit.com/r/emacs/comments/l42oep/suppress_nativecomp_warnings_buffer/gkmnh3y/
-(setq native-comp-async-report-warnings-errors 'silent)
+(setq native-comp-async-report-warnings-errors nil)
 
 ;; disable the "‘buffer-local-value’ is an obsolete generalized variable." warning on init
 (byte-compile-disable-warning 'obsolete)
