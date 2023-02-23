@@ -1673,17 +1673,11 @@ Git gutter:
 
 
 ;;; LANGUAGES
-;; TODO trying out eglot
 (use-package eglot
   :straight (:type built-in)
   ;; https://github.com/minad/corfu/wiki
   :init
   (setq completion-category-overrides '((eglot (styles orderless))))
-  ;; enable flymake and disable flycheck
-  :hook (eglot-mode . (lambda ()
-                        (flymake-mode 1)
-                        ;(flycheck-mode 0)
-                        ))
   :config
   ;; https://github.com/joaotavora/eglot/discussions/898#discussioncomment-2609402
   (add-hook 'eglot-managed-mode-hook
@@ -1696,11 +1690,11 @@ Git gutter:
               (setq eldoc-documentation-strategy #'eldoc-documentation-compose)))
   ;; prevent multi-line prompts in minibuffer
   ;; https://github.com/joaotavora/eglot/discussions/734#discussioncomment-1286838
-  (setq eldoc-echo-area-use-multiline-p nil
-        ;; Show flymake diagnostics first.
-        eldoc-documentation-functions (cons #'flymake-eldoc-function (remove #'flymake-eldoc-function eldoc-documentation-functions))
-        ;; Show all eldoc feedback.
-        eldoc-documentation-strategy #'eldoc-documentation-compose)
+  (setq eldoc-echo-area-use-multiline-p nil)
+        ;;; Show flymake diagnostics first.
+        ;eldoc-documentation-functions (cons #'flymake-eldoc-function (remove #'flymake-eldoc-function eldoc-documentation-functions))
+        ;;; Show all eldoc feedback.
+        ;eldoc-documentation-strategy #'eldoc-documentation-compose)
 
 ;  ;; do not show eldoc in minibuffer
 ;  (add-to-list 'eglot-ignored-server-capabilites :hoverProvider)
@@ -1710,35 +1704,12 @@ Git gutter:
 (use-package consult-eglot)
 
 ;; don't show the doc in the minibuffer (I find it distracting)
-(use-package eldoc-box
-  :hook (eglot-mode . eldoc-box-hover-mode)
-  ;; TODO doesn't work, using hover mode for now
-  ;; hide eglot's eldoc in the minibuffer
-  ;:hook (eglot-mode . eldoc-box-quit-frame)
-  )
-
-
-;; lsp
-;(use-package lsp-mode
-;  :custom
-;  (lsp-completion-provider :none) ;; we use Corfu!
-;  :init
-;  (defun +lsp-mode-setup-completion ()
-;    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-;          '(orderless))) ;; Configure orderless
-;  :hook ((lsp-mode . lsp-enable-which-key-integration)
-;         (lsp-mode . lsp-ui-mode)
-;         (rustic-mode . lsp))
-;         (lsp-completion-mode . +lsp-mode-setup-completion)
-;  :config
-;  (setq lsp-headerline-breadcrumb-enable nil
-;        lsp-enable-snippet nil ;; TODO this is broken
-;        lsp-signature-function 'lsp-signature-posframe)
+;(use-package eldoc-box
+;  :hook (eglot-mode . eldoc-box-hover-mode)
+;  ;; TODO doesn't work, using hover mode for now
+;  ;; hide eglot's eldoc in the minibuffer
+;  ;:hook (eglot-mode . eldoc-box-quit-frame)
 ;  )
-;
-;(use-package lsp-ui)
-;(use-package consult-lsp)
-
 
 ;; dumb jump (indexless code navigation)
 ;; TODO configure with lsp
@@ -1774,21 +1745,15 @@ Git gutter:
   ;; TODO try the `eldoc' command?
   (setq help-at-pt-display-when-idle t))
 
-(use-package popon
-  :straight (popon :type git :repo "https://codeberg.org/akib/emacs-popon.git"))
-
-(use-package flymake-popon
-  :straight (flymake-popon :type git :repo "https://codeberg.org/akib/emacs-flymake-popon.git"))
-
-;(use-package flymake-popon
-;  :after popon
-;  :straight (emacs-flymake-popon :type git :host codeberg :repo "akib/emacs-flymake-popon"))
-
-
-
-
 (use-package flymake-collection
   :hook (after-init . flymake-collection-hook-setup))
+
+
+
+;(use-package popon
+;  :straight (popon :type git :repo "https://codeberg.org/akib/emacs-popon.git"))
+;(use-package flymake-popon
+;  :straight (flymake-popon :type git :repo "https://codeberg.org/akib/emacs-flymake-popon.git"))
 
 
 ;; tree sitter
