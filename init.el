@@ -358,6 +358,9 @@
           (shell-quote-argument source-directory)))))))
 
 (advice-add 'find-function-C-source :before #'+clone-emacs-source)
+
+;; turn off tab indentation in c-mode
+(add-hook 'c-mode-hook (lambda () (setq indent-tabs-mode nil)))
 ;;----
 
 
