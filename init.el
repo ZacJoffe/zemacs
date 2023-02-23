@@ -1768,8 +1768,10 @@ Git gutter:
 
 ;; rust
 (use-package rustic
+  :mode ("\\.rs\\'" . rustic-mode)
   :config
   (setq rustic-lsp-client 'eglot))
+
 
 ;; glsl
 (use-package glsl-mode
