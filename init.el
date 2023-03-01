@@ -40,6 +40,10 @@
 ;(add-to-list 'c-offsets-alist '(arglist-close . c-lineup-close-paren))
 (c-set-offset 'arglist-close 'c-lineup-close-paren)
 
+;; indent cases inside switches
+;; https://www.gnu.org/software/emacs/manual/html_node/efaq/Indenting-switch-statements.html
+(c-set-offset 'case-label '+)
+
 
 ;; set source directory to view source code of functions defined in C
 ;; https://github.com/raxod502/radian/blob/develop/emacs/radian.el#L3951
@@ -358,8 +362,12 @@
 
 (advice-add 'find-function-C-source :before #'+clone-emacs-source)
 
-;; turn off tab indentation in c-mode
-(add-hook 'c-mode-hook (lambda () (setq indent-tabs-mode nil)))
+;; turn off tab indentation in c-mode/c++-mode
+(defun disable-indent-tabs-mode ()
+  (setq indent-tabs-mode nil))
+
+(add-hook 'c-mode-hook #'disable-indent-tabs-mode)
+(add-hook 'c++-mode-hook #'disable-indent-tabs-mode)
 ;;----
 
 
