@@ -2,6 +2,9 @@
 ;;; EDITOR GENERAL
 (setq inhibit-startup-message t)
 
+;; disable blink cursor mode
+(setq blink-cursor-mode nil)
+
 ;; scratch buffer defaults
 (setq initial-major-mode 'text-mode)
 
