@@ -557,10 +557,12 @@
              :post-handlers '(("||\n[i]" "RET") ("| " "SPC"))
              :unless '(sp-point-before-word-p sp-point-before-same-p)))
   ;; remove block comment pairing in c++
-  (sp-local-pair 'c++-mode "/*" nil :actions :rem)
+  ;(sp-local-pair 'c++-mode "/*" nil :actions :rem)
   ;; do not highlight new block when pressing enter after creating set of new parens
   ;; https://stackoverflow.com/a/26708910
-  (setq sp-highlight-pair-overlay nil)
+  (setq sp-highlight-pair-overlay nil
+        sp-highlight-wrap-overlay nil
+        sp-highlight-wrap-tag-overlay nil)
   (smartparens-global-mode))
 
 
