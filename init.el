@@ -39,6 +39,9 @@
               word-wrap t             ;; do not wrap characters in the middle of words
               truncate-lines t)       ;; do not wrap by default
 
+;; don't let anything change the tab width
+(add-to-list 'ignored-local-variables 'tab-width)
+
 ;; properly indent ')' https://stackoverflow.com/q/58844859
 ;(add-to-list 'c-offsets-alist '(arglist-close . c-lineup-close-paren))
 (c-set-offset 'arglist-close 'c-lineup-close-paren)
@@ -365,12 +368,13 @@
 
 (advice-add 'find-function-C-source :before #'+clone-emacs-source)
 
-;; turn off tab indentation in c-mode/c++-mode
-(defun disable-indent-tabs-mode ()
-  (setq indent-tabs-mode nil))
+(defun c-mode-hook ()
+  ;; disable tab indentation
+  (setq indent-tabs-mode nil
+        evil-shift-width 4))
 
-(add-hook 'c-mode-hook #'disable-indent-tabs-mode)
-(add-hook 'c++-mode-hook #'disable-indent-tabs-mode)
+(add-hook 'c-mode-hook #'c-mode-hook)
+(add-hook 'c++-mode-hook #'c-mode-hook)
 ;;----
 
 
@@ -430,7 +434,8 @@
         evil-normal-state-cursor 'box
         evil-search-module 'evil-search
         evil-undo-system 'undo-fu
-        evil-respect-visual-line-mode t)
+        evil-respect-visual-line-mode t
+        evil-shift-width tab-width)
   :general
   ;; j and k should operate line-by-line with text wrapping
   (;[remap evil-next-line] 'evil-next-visual-line
