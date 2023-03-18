@@ -1712,7 +1712,9 @@ Git gutter:
                     (cons #'flymake-eldoc-function
                           (remove #'flymake-eldoc-function eldoc-documentation-functions)))
               ;; Show all eldoc feedback.
-              (setq eldoc-documentation-strategy #'eldoc-documentation-compose)))
+              (setq eldoc-documentation-strategy #'eldoc-documentation-compose)
+              ;; disable inlays
+              (eglot-inlay-hints-mode -1)))
   ;; prevent multi-line prompts in minibuffer
   ;; https://github.com/joaotavora/eglot/discussions/734#discussioncomment-1286838
   (setq eldoc-echo-area-use-multiline-p nil)
