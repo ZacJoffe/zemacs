@@ -1730,7 +1730,7 @@ Git gutter:
 ;; TODO configure with lsp
 (use-package dumb-jump
   :config
-  (add-hook 'xref-backend-functions #'dumb-jump-xref-activate t)
+  (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
   (setq xref-show-definitions-function #'xref-show-definitions-completing-read ;; use vertico to handle ambiguous cases
         dumb-jump-force-searcher 'rg) ;; force dumb jump to use ripgrep (NOTE still defaults to git-grep if file is in git project)
 
