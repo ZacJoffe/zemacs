@@ -1955,6 +1955,8 @@ Git gutter:
 (use-package octave-mode
   :straight (:type built-in)
   :mode "\\.m\\'")
+;; csv
+(use-package csv-mode)
 ;;----
 
 
