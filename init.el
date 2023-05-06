@@ -16,6 +16,7 @@
 
 
 ;; suppress native comp warnings
+;; https://www.reddit.com/r/emacs/comments/l42oep/suppress_nativecomp_warnings_buffer/gkmnh3y/
 (setq native-comp-async-report-warnings-errors nil)
 
 ;; disable the "‘buffer-local-value’ is an obsolete generalized variable." warning on init
@@ -229,7 +230,6 @@
   "Open the init file."
   (interactive)
   (find-file user-init-file))
-
 
 ;; inspired by https://owoga.com/how-to-zap-whitespace-in-emacs/
 (defun delete-whitespace-left-of-cursor ()
@@ -526,9 +526,10 @@
   (setq undo-fu-session-incompatible-files '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'")))
 
 (use-package vundo
-  :straight (vundo :type git :host github :repo "casouri/vundo")
+  ;; :straight (vundo :type git :host github :repo "casouri/vundo")
   :config
   (setq vundo-compact-display t))
+
 
 ;; editor config
 (use-package editorconfig
@@ -1094,7 +1095,7 @@ kill all magit buffers for this repo."
 (use-package org
   ;; HACK (?) prevents needed `org-reload' to fix org agenda (which seems to break org mode)
   ;; https://www.reddit.com/r/emacs/comments/rr203h/using_straightel_and_usepackage_to_configure_org/hqdzpc5/
-  :straight (:type built-in)
+  ;; :straight (:type built-in)
   ;:hook (org-mode . org-indent-mode)  ;; indent org stuff
   :hook (org-mode . visual-line-mode) ;; wrap lines
   :hook (org-mode . flyspell-mode)    ;; spelling
@@ -1253,10 +1254,6 @@ Made for `org-tab-first-hook' in evil-mode."
 
 ;; HYDRA
 (use-package hydra)
-;; TODO hydra posframe glitches when used
-;(use-package hydra-posframe
-;  :straight (hydra-posframe :type git :host github :repo "Ladicle/hydra-posframe")
-;  :hook (after-init . hydra-posframe-enable))
 
 
 ;; simple hydra for resizing windows
@@ -1783,6 +1780,7 @@ Git gutter:
 
 
 ;; tree sitter
+;; TODO port config to use emacs29 native treesit
 (use-package tree-sitter
   :init
   (global-tree-sitter-mode))
@@ -1951,10 +1949,6 @@ Git gutter:
   :mode "\\.ts\\'")
 
 
-;; octave mode for matlab files
-(use-package octave-mode
-  :straight (:type built-in)
-  :mode "\\.m\\'")
 ;; csv
 (use-package csv-mode)
 ;;----
@@ -2005,7 +1999,6 @@ Git gutter:
   (corfu-echo-documentation t)
   ;(lsp-completion-provider :none)
 
-  ;; You may want to enable Corfu only for certain modes.
   :hook (prog-mode . corfu-mode)
   :general
   (:keymaps 'corfu-map
