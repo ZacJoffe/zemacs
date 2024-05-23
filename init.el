@@ -915,7 +915,7 @@
   ;; as far as I can tell you can't change the ordering of segments without redefining the modeline entirely (segments can be toggled though)
   (doom-modeline-def-modeline 'my-line
     '(bar modals matches buffer-info buffer-position selection-info)
-    '(buffer-encoding lsp major-mode process vcs checker))
+    '(buffer-encoding lsp major-mode process vcs check))
 
   ;; Add to `doom-modeline-mode-hook` or other hooks
   (defun setup-custom-doom-modeline ()
