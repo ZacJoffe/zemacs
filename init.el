@@ -159,13 +159,7 @@
 (add-hook 'text-mode-hook 'display-line-numbers-mode)
 (add-hook 'conf-mode-hook 'display-line-numbers-mode)
 
-
-;; I use chemacs2 on my desktop, slightly ugly hack to open the correct file in open-init-file
-(when (eq computer 'linux-desktop)
-  (if (file-exists-p "~/.zemacs/init.el")
-      (setq user-init-file "~/.zemacs/init.el")
-    (setq user-init-file "~/.emacs.d/init.el")))
-
+(setq user-init-file "~/.emacs.d/init.el")
 
 ;; relative line numbers
 (setq display-line-numbers-type 'relative)
