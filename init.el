@@ -407,6 +407,12 @@
 ;; always ensure packages
 (setq use-package-always-ensure t)
 
+
+;; HACK load general first to allow use of :general keyword
+(use-package general)
+
+
+
 ;; put backup files and auto-save files in their own directory
 (use-package no-littering
   ;; :straight (:commit f42f2f2024827035149eeccfb0b315050291c682)
@@ -422,8 +428,6 @@
         `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))
         create-lockfiles nil))
 
-;; HACK load general first to allow use of :general keyword
-(use-package general)
 
 ;;;; EDITOR PACKAGES
 ;;; EVIL
