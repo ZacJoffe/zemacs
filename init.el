@@ -642,7 +642,17 @@
   (marginalia-mode))
 
 ;; consult
-(use-package consult)
+(use-package consult
+  :config
+  ;; Use `consult-completion-in-region' if Vertico is enabled.
+  ;; Otherwise use the default `completion--in-region' function.
+  (setq completion-in-region-function
+        (lambda (&rest args)
+          (apply (if vertico-mode
+                     #'consult-completion-in-region
+                   #'completion--in-region)
+                 args))))
+
 
 ;; integration with flycheck
 ;(use-package consult-flycheck
@@ -1978,70 +1988,7 @@ Git gutter:
 )
 
 
-;; AUTOCOMPLETE
-;; TODO cleanup comments
-(use-package corfu
-  :custom
-  (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
-  (corfu-auto t)                 ;; Enable auto completion
-  ;; (corfu-separator ?\s)          ;; Orderless field separator
-  ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
-  (corfu-preview-current nil)    ;; Disable current candidate preview
-  ;(corfu-preselect-first nil)    ;; Disable candidate preselection
-  ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
-  ;; (corfu-echo-documentation nil) ;; Disable documentation in the echo area
-  ; (corfu-scroll-margin 5)        ;; Use scroll margin
-  ;(corfu-min-width 40)
-  ;(corfu-max-width corfu-min-width)
-  (corfu-count 14)
-  (corfu-echo-documentation t)
-  ;(lsp-completion-provider :none)
-
-  :hook (prog-mode . corfu-mode)
-  :general
-  (:keymaps 'corfu-map
-   "C-n" 'corfu-next
-   "C-j" 'corfu-next
-   "C-p" 'corfu-previous
-   "C-k" 'corfu-previous
-   "C-SPC" 'corfu-insert-separator
-   "<tab>" '+corfu-complete-quit
-   ;"C-f" '+corfu-complete-quit
-   "<escape>" '+corfu-quit) ;; NOTE also sets functionality of "C-["
-  :init
-  (global-corfu-mode)
-  ;(defun +lsp-mode-setup-completion ()
-  ;  (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-  ;        '(orderless))) ;; Configure orderless
-  ;:hook (lsp-completion-mode . +lsp-mode-setup-completion)
-  :config
-  ;; HACK evil keymaps seem to take precedence over corfu's map, use advice to fix
-  ;; https://github.com/minad/corfu/issues/12#issuecomment-881961510
-  (advice-add 'corfu--setup :after 'evil-normalize-keymaps)
-  (advice-add 'corfu--teardown :after 'evil-normalize-keymaps)
-  (evil-make-overriding-map corfu-map))
-
-(defun +corfu-quit ()
-  "Quit corfu completion, go back to normal mode."
-  (interactive)
-  (corfu-quit)
-  (evil-normal-state))
-
-(defun +corfu-complete-quit ()
-  "Corfu complete and quit."
-  (interactive)
-  (corfu-complete)
-  (corfu-quit))
-
-;; icons for corfu
-(use-package kind-icon
-  :after corfu
-  :custom
-  (kind-icon-default-face 'corfu-default) ; to compute blended backgrounds correctly
-  :config
-  (setq kind-icon-use-icons nil) ;; text based icons
-  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
-
+;; CODE AUTOCOMPLETE
 ;; TODO configure
 (use-package cape
   ;; Bind dedicated completion commands
