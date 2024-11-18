@@ -328,6 +328,13 @@
   "Interactive wrapper of `which-function'"
   (interactive)
   (message (which-function)))
+
+(defun +toggle-show-trailing-whitespace ()
+  "Toggle show-trailing-whitespace."
+  (interactive)
+  (if show-trailing-whitespace
+      (setq show-trailing-whitespace nil)
+    (setq show-trailing-whitespace t)))
 ;;----
 
 
