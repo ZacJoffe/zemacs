@@ -413,17 +413,11 @@
 (use-package general)
 
 
-
 ;; put backup files and auto-save files in their own directory
 (use-package no-littering
-  ;; :straight (:commit f42f2f2024827035149eeccfb0b315050291c682)
   :init
-  ;; https://github.com/emacscollective/no-littering#backup-files
-  (setq backup-directory-alist
-      `(("\\`/tmp/" . nil)
-        ("\\`/dev/shm/" . nil)
-        ("." . ,(no-littering-expand-var-file-name "backup/"))))
   ;; auto-saves go in another directory
+  (no-littering-theme-backups)
   ;; https://github.com/emacscollective/no-littering#auto-save-settings
   (setq auto-save-file-name-transforms
         `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))
