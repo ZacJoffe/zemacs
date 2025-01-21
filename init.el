@@ -139,9 +139,7 @@
 (defalias 'yes-or-no-p 'y-or-n-p)
 
 ;; font setup
-(if (eq system-type 'darwin)
-    (set-face-attribute 'default nil :font "Iosevka Fixed" :height 240 :weight 'regular)
-  (set-face-attribute 'default nil :font "Iosevka Fixed" :height 170 :weight 'light))
+(set-face-attribute 'default nil :font "Iosevka Fixed" :height 200 :weight 'light)
 ;; float height value (1.0) makes fixed-pitch take height 1.0 * height of default
 (set-face-attribute 'fixed-pitch nil :font "Iosevka Fixed" :height 1.0 :weight 'regular)
 (set-face-attribute 'variable-pitch nil :font "Iosevka" :height 1.0 :weight 'regular)
@@ -371,13 +369,9 @@
 (advice-add 'find-function-C-source :before #'+clone-emacs-source)
 
 (defun c-mode-hook ()
-  (progn
-    ;; disable tab indentation
-    (setq indent-tabs-mode nil
-          evil-shift-width 4)
-    (+sp-c-setup)
-    )
-  )
+  ;; disable tab indentation
+  (setq indent-tabs-mode nil
+        evil-shift-width 4))
 
 (add-hook 'c-mode-hook #'c-mode-hook)
 (add-hook 'c++-mode-hook #'c-mode-hook)
@@ -526,10 +520,8 @@
   (setq undo-fu-session-incompatible-files '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'")))
 
 (use-package vundo
-  ;; :straight (vundo :type git :host github :repo "casouri/vundo")
   :config
   (setq vundo-compact-display t))
-
 
 ;; editor config
 (use-package editorconfig
@@ -537,10 +529,32 @@
   (editorconfig-mode 1))
 
 
-;; smartparens
+(use-package electric
+  :straight (:type built-in)
+  :init
+  ;; delimeter pairing
+  (setq electric-pair-delete-adjacent-pairs t)
+  ;; TODO
+  (setq electric-pair-pairs '((?\" . ?\")
+                              (?\( . ?\))
+                              (?\[ . ?\])
+                              (?\{ . ?\})))
+  ;(setq-default electric-indent-chars '(?\n ?\^?))
+
+  ;; no delay for showing matching parens
+  (setq show-paren-delay 0)
+
+  ;; prevent electric pair mode from being enabled in the mini buffer (for things like consult)
+  ;; https://emacs.stackexchange.com/a/29342
+  (setq electric-pair-inhibit-predicate (lambda (char) (minibufferp)))
+  ;(electric-pair-mode 1)
+  )
+
+;; TODO trying smartparens
 (use-package smartparens
   :config
   (require 'smartparens-config)
+  (sp-local-pair 'LaTeX-mode "$" "$")
   ;; https://github.com/doomemacs/doomemacs/blob/a570ffe16c24aaaf6b4f8f1761bb037c992de877/modules/config/default/config.el#L108-L120
   ;; Expand {|} => { | }
   ;; Expand {|} => {
@@ -550,28 +564,14 @@
     (sp-pair brace nil
              :post-handlers '(("||\n[i]" "RET") ("| " "SPC"))
              :unless '(sp-point-before-word-p sp-point-before-same-p)))
-  (defun +sp-c-setup ()
-    (sp-with-modes '(c++-mode c-mode)
-      ;; HACK to get around lack of ability to set a negative condition (i.e. all but these commands) for delayed insertion
-      (sp-local-pair "<" ">" :when '(("a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n" "o" "p" "q" "r" "s" "t" "u" "v" "w" "x" "y" "z"
-                                      "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z")))
-      (sp-local-pair "/*" "*/" :actions '(:rem insert))))
-  ;; the block comment pair seems to be overwritten after c++-mode inits, so +sp-c-setup is added as a hook for c++-mode (and c-mode)
-  (+sp-c-setup)
-
-  (sp-with-modes '(LaTeX-mode)
-    (sp-local-pair "$" "$"))
-
-  ;; (sp-local-pair 'tuareg-mode "sig" nil :actions :rem)
+  ;; remove block comment pairing in c++
+  ;(sp-local-pair 'c++-mode "/*" nil :actions :rem)
   ;; do not highlight new block when pressing enter after creating set of new parens
   ;; https://stackoverflow.com/a/26708910
   (setq sp-highlight-pair-overlay nil
         sp-highlight-wrap-overlay nil
-        sp-highlight-wrap-tag-overlay nil
-        show-paren-delay 0) ;; no delay for showing matching parens
-
+        sp-highlight-wrap-tag-overlay nil)
   (smartparens-global-mode))
-
 
 
 ;;; VERTICO
