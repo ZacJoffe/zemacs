@@ -1241,14 +1241,6 @@ Made for `org-tab-first-hook' in evil-mode."
   ("C-h o" 'helpful-symbol)
   ("C-h k" 'helpful-key))
 
-;; HACK for emacs 29
-;; https://github.com/Wilfred/helpful/issues/282#issuecomment-1040416413
-(defun helpful--autoloaded-p (sym buf)
-  "Return non-nil if function SYM is autoloaded."
-  (-when-let (file-name (buffer-file-name buf))
-    (setq file-name (s-chop-suffix ".gz" file-name))
-    (help-fns--autoloaded-p sym)))
-
 (defun helpful--skip-advice (docstring)
   "Remove mentions of advice from DOCSTRING."
   (let* ((lines (s-lines docstring))
