@@ -225,6 +225,7 @@
   (interactive)
   (find-file user-init-file))
 
+
 ;; inspired by https://owoga.com/how-to-zap-whitespace-in-emacs/
 (defun delete-whitespace-left-of-cursor ()
   "Delete all whitespace to the left of cursor's current position."
@@ -654,10 +655,6 @@
                    #'completion--in-region)
                  args))))
 
-
-;; integration with flycheck
-;(use-package consult-flycheck
-;  :after (consult flycheck))
 
 ;; integration with flyspell
 (use-package consult-flyspell
@@ -1742,13 +1739,6 @@ Git gutter:
 
 (use-package consult-eglot)
 
-;; don't show the doc in the minibuffer (I find it distracting)
-;(use-package eldoc-box
-;  :hook (eglot-mode . eldoc-box-hover-mode)
-;  ;; TODO doesn't work, using hover mode for now
-;  ;; hide eglot's eldoc in the minibuffer
-;  ;:hook (eglot-mode . eldoc-box-quit-frame)
-;  )
 
 ;; dumb jump (indexless code navigation)
 ;; TODO configure with lsp
@@ -1763,18 +1753,6 @@ Git gutter:
   (advice-add 'dumb-jump-goto-file-line :before #'evil-set-jump-args))
 
 
-;; flycheck
-;(use-package flycheck
-;  :init
-;  (global-flycheck-mode)
-;  :config
-;  (setq flycheck-indication-mode 'right-fringe
-;        flycheck-display-errors-delay 0.25)
-;  ;; change indicator to a left arrow since the fringe is now on the right
-;  ;; https://github.com/hlissner/doom-emacs/blob/master/modules/ui/vc-gutter/config.el#L120
-;  (define-fringe-bitmap 'flycheck-fringe-bitmap-double-arrow
-;      [16 48 112 240 112 48 16] nil nil 'center))
-
 ;; flymake
 (use-package flymake
   :straight nil
@@ -1786,8 +1764,6 @@ Git gutter:
 
 (use-package flymake-collection
   :hook (after-init . flymake-collection-hook-setup))
-
-
 
 ;(use-package popon
 ;  :straight (popon :type git :repo "https://codeberg.org/akib/emacs-popon.git"))
@@ -1842,12 +1818,7 @@ Git gutter:
 ;                           (lsp))))  ; or lsp-deferred
 
 ;; emacs-ipython-notebook (jupyter)
-(use-package ein)
-
-;; julia
-(use-package julia-mode)
-(use-package julia-repl)
-
+;(use-package ein)
 
 ;; lua
 (use-package lua-mode)
