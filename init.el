@@ -1452,8 +1452,12 @@ Git gutter:
 
     ;; consult
     "c" '(:ignore t :which-key "consult")
-    ;"cf" '(consult-flycheck :which-key "consult-flycheck")
     "cf" '(consult-flymake :which-key "consult-flymake")
+    "ct" '(consult-theme :which-key "consult-theme")
+    ;"cg" '(:ignore t :which-key "Grep")
+    ;"cgr" '(consult-ripgrep :which-key "consult-ripgrep")
+    ;"cgg" '(consult-git-grep :which-key "consult-git-grep")
+    ;"cb" '(consult-buffer :which-key "consult-buffer")
 
     ;; buffer
     ;"TAB" '(switch-to-prev-buffer :which-key "Prev buffer")
@@ -1505,12 +1509,10 @@ Git gutter:
 
     ;; toggles
     "t" '(:ignore t :which-key "Toggles")
-    "ta" '(corfu-mode :which-key "corfu-mode") ;; 'a' for autocomplete
+    ;"ta" '(corfu-mode :which-key "corfu-mode") ;; 'a' for autocomplete
     "ts" '(flyspell-mode :which-key "flyspell-mode")
     "tf" '(flyspell-mode :which-key "flyspell-mode")
-    ;"tc" '(flycheck-mode :which-key "flycheck-mode")
     "tc" '(flymake-mode :which-key "flymake-mode")
-    "tm" '(minimap-mode :which-key "minimap-mode")
     "tg" '(evil-goggles-mode :which-key "evil-goggles")
     "tI" '(toggle-indent-style :which-key "Indent style")
     "tv" '(visual-line-mode :which-key "visual-line-mode")
@@ -1581,18 +1583,21 @@ Git gutter:
     ;; flyspell correct
     "z=" 'flyspell-correct-wrapper
     "C-;" 'flyspell-correct-wrapper
+    ;"z=" 'jinx-correct
+    ;"C-;" 'jinx-correct
 
     ;; movement
     "C-n" 'evil-next-visual-line ;; TODO should be in motion? doesn't seem to go down to these states? DELETEME
     "C-p" 'evil-previous-visual-line
     "M-n" 'flymake-goto-next-error
     "M-p" 'flymake-goto-prev-error
-    "s" 'avy-goto-char-timer)
+    "s" 'avy-goto-char-2
+    "S" 'avy-goto-char-timer)
 
   ;; insert mode hotkeys
   (general-define-key
     :states 'insert
-    "C-SPC" 'completion-at-point ;; bring up corfu completion
+    "C-SPC" 'completion-at-point ;; trigger capf
     "C-v" 'yank ;; C-v should paste clipboard contents
 
     "C-<backspace>" 'my-backward-kill-word
@@ -1642,8 +1647,6 @@ Git gutter:
     "C--" 'text-scale-decrease
     "C-M-=" 'zoom-in
     "C-M--" 'zoom-out
-
-    "C-M-SPC" 'eldoc-box-eglot-help-at-point ;; show documentation for function at point
 
      ;; C-v to paste (or "yank" in emacs jargon) from clipboard, useful for minibuffers (such as query-replace and M-x)
     "C-v" 'yank
