@@ -1228,11 +1228,23 @@ Made for `org-tab-first-hook' in evil-mode."
 
 
 ;; helpful
-;; TODO figure out how to reuse window for recursive helps
 (use-package helpful
   :init
   (defvar read-symbol-positions-list nil)
   :config
+  ;; reuse window for recursive helps
+  ;; https://d12frosted.io/posts/2019-06-26-emacs-helpful.html
+  (defun +helpful-switch-to-buffer (buffer-or-name)
+    "Switch to helpful BUFFER-OR-NAME.
+
+The logic is simple, if we are currently in the helpful buffer,
+reuse it's window, otherwise create new one."
+    (if (eq major-mode 'helpful-mode)
+        (switch-to-buffer buffer-or-name)
+      (pop-to-buffer buffer-or-name)))
+
+  (setq helpful-switch-buffer-function #'+helpful-switch-to-buffer)
+
   ;; redefine help keys to use helpful functions instead of vanilla
   ;; https://github.com/Wilfred/helpful#usage
   :general ;; global
