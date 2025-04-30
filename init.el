@@ -14,9 +14,7 @@
       ;; increase the gc threshold
       gc-cons-threshold 100000000)
 
-
 ;; suppress native comp warnings
-;; https://www.reddit.com/r/emacs/comments/l42oep/suppress_nativecomp_warnings_buffer/gkmnh3y/
 (setq native-comp-async-report-warnings-errors nil)
 
 ;; disable the "‘buffer-local-value’ is an obsolete generalized variable." warning on init
@@ -99,6 +97,8 @@
       (setq computer 'linux-desktop)
     (setq computer 'mac-laptop)))
 
+;; always split vertically on laptop
+;; (setq split-width-threshold 1)
 
 ;; mac specific titlebar stuff
 ;; https://emacs.stackexchange.com/a/40777
@@ -501,6 +501,10 @@
   (evil-goggles-mode))
 
 
+; TODO
+;(use-package better-jumper
+;  )
+
 ;; undo-fu/vundo stack
 (use-package undo-fu
   :after evil
@@ -729,6 +733,13 @@
 ;; spelling correction menu using completing-read (so consult)
 (use-package flyspell-correct
   :after flyspell)
+
+;; TODO trying out jinx again
+;(use-package jinx
+;  :config
+;  (add-to-list 'vertico-multiform-categories
+;             '(jinx grid (vertico-grid-annotate . 20)))
+;  (vertico-multiform-mode 1))
 
 
 ;; PROJECT
@@ -1101,7 +1112,7 @@ kill all magit buffers for this repo."
 (use-package org
   ;; HACK (?) prevents needed `org-reload' to fix org agenda (which seems to break org mode)
   ;; https://www.reddit.com/r/emacs/comments/rr203h/using_straightel_and_usepackage_to_configure_org/hqdzpc5/
-  ;; :straight (:type built-in)
+  :straight (:type built-in)
   ;:hook (org-mode . org-indent-mode)  ;; indent org stuff
   :hook (org-mode . visual-line-mode) ;; wrap lines
   :hook (org-mode . flyspell-mode)    ;; spelling
@@ -1176,12 +1187,7 @@ Made for `org-tab-first-hook' in evil-mode."
          t)))
 
 ;; org-roam 2
-;; fix for emacs 30
-;; https://github.com/org-roam/org-roam/issues/2308#issuecomment-1405496196
-(use-package emacsql-sqlite-builtin)
 (use-package org-roam
-  :init
-  (setq org-roam-database-connector 'sqlite-builtin)
   :custom
   (org-roam-directory (file-truename (format "%s/roam" +org-google-dir)))
   :config
@@ -1198,18 +1204,6 @@ Made for `org-tab-first-hook' in evil-mode."
 ;; prettier headings
 (use-package org-superstar)
 
-
-;; FIXME I am essentially trying to create a consult interface for previewing files in a directory
-;; TODO preview org dailies with consult
-;(defun +org--consult-dailies-sources ()
-;  ""
-;  `(:name "dailies"
-;    :narrow ?f
-;    :category file
-;    :face consult-file
-;    :items
-;          ))
-;;----
 
 
 ;; which-key
@@ -1711,7 +1705,8 @@ Git gutter:
   :straight (:type built-in)
   ;; https://github.com/minad/corfu/wiki
   :init
-  (setq completion-category-overrides '((eglot (styles orderless))))
+  (setq completion-category-overrides '((eglot (styles orderless))
+                                        (eglot-capf (styles orderless))))
   :config
   ;; https://github.com/joaotavora/eglot/discussions/898#discussioncomment-2609402
   (add-hook 'eglot-managed-mode-hook
@@ -1723,7 +1718,9 @@ Git gutter:
               ;; Show all eldoc feedback.
               (setq eldoc-documentation-strategy #'eldoc-documentation-compose)
               ;; disable inlays
-              (eglot-inlay-hints-mode -1)))
+              ;; (eglot-inlay-hints-mode -1)
+              )
+            )
   ;; prevent multi-line prompts in minibuffer
   ;; https://github.com/joaotavora/eglot/discussions/734#discussioncomment-1286838
   (setq eldoc-echo-area-use-multiline-p nil)
@@ -1868,15 +1865,15 @@ Git gutter:
 
   ;(add-hook 'LaTeX-mode-hook #'(lambda ()
   ;                             (add-hook 'after-save-hook #'+latex/run-build-script nil 'local)))
-  ;; HACK do not indent in align
-  (delete '("align" LaTeX-indent-tabular) LaTeX-indent-environment-list)
-  (delete '("align*" LaTeX-indent-tabular) LaTeX-indent-environment-list)
+  ;; HACK do not indent in align (BROKEN FIXME)
+  ;(delete '("align" LaTeX-indent-tabular) LaTeX-indent-environment-list)
+  ;(delete '("align*" LaTeX-indent-tabular) LaTeX-indent-environment-list)
   )
 
 (defun +latex/build-current-file ()
-  ""
+  "Build currently opened file with latexmk."
   (interactive)
-  (shell-command (concat "pdflatex " buffer-file-name)))
+  (shell-command (concat "latexmk -pdf " buffer-file-name)))
 
 (use-package latex-preview-pane
   :config
@@ -1903,13 +1900,8 @@ Git gutter:
   (atomic-chrome-start-server)
   :config
   (setq atomic-chrome-url-major-mode-alist
-    '(("overleaf\\.com" . LaTeX-mode))))
-
-
-;; hex editing
-;; TODO
-(use-package nhexl-mode
-  :hook (nhexl-mode . (lambda () display-line-numbers-mode -1)))
+        '(("overleaf\\.com" . LaTeX-mode)
+          ("leetcode\\.com" . python-ts-mode))))
 
 
 ;; json
@@ -2141,13 +2133,14 @@ _?_: quit
 ;----
 
 
-;; MACOS SPECIFIC CONFIGS
-(setq mac-option-modifier 'super)
-(setq mac-command-modifier 'meta)
-
-;; fix path related issues to allow emacs to easily access tools like rg
-(when (memq window-system '(mac ns x))
-  (use-package exec-path-from-shell
-    :config
-    (exec-path-from-shell-initialize)))
+;;; MACOS SPECIFIC CONFIGS
+;(setq mac-option-modifier 'super)
+;(setq mac-command-modifier 'meta)
+;
+;;; fix path related issues to allow emacs to easily access tools like rg
+;(when (memq window-system '(mac ns x))
+;  (use-package exec-path-from-shell
+;    :config
+;    (exec-path-from-shell-initialize)))
+;
 
