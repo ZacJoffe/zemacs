@@ -1017,7 +1017,8 @@
   ;; refresh status when you save file being tracked in repo
   :hook (after-save . magit-after-save-refresh-status)
   ;; start magit commit in insert mode https://emacs.stackexchange.com/a/20895
-  :hook (git-commit-mode . evil-insert-state)
+  ;; :hook (git-commit-mode . evil-insert-state)
+  :hook (git-commit-setup . evil-insert-state)
   :config
   ;; display magit status in current buffer (no popup) https://stackoverflow.com/a/58554387/11312409
   (setq magit-display-buffer-function 'magit-display-buffer-same-window-except-diff-v1
