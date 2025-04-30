@@ -1830,6 +1830,24 @@ Git gutter:
 
 
 ;; python
+(use-package python-mode
+  :hook (python-mode . (lambda () (setq python-indent-offset 4))))
+
+(defun +python/run-isort ()
+  "Run isort on current buffer."
+  (interactive)
+  (shell-command (concat "isort " buffer-file-name)))
+
+(defun +python/run-black ()
+  "Run black on current buffer."
+  (interactive)
+  (shell-command (concat "black " buffer-file-name)))
+
+(defun +python/run-isort-black ()
+  "Run isort and black on current buffer."
+  (interactive)
+  (shell-command (concat "black " buffer-file-name " && isort " buffer-file-name)))
+
 ; (use-package lsp-pyright
 ;   :ensure t
 ;   :hook (python-mode . (lambda ()
