@@ -139,7 +139,8 @@
 (defalias 'yes-or-no-p 'y-or-n-p)
 
 ;; font setup
-(set-face-attribute 'default nil :font "Iosevka Fixed" :height 200 :weight 'light)
+;(set-face-attribute 'default nil :font "Iosevka Fixed" :height 200 :weight 'light)
+(set-face-attribute 'default nil :font "Iosevka Fixed" :height 100 :weight 'light)
 ;; float height value (1.0) makes fixed-pitch take height 1.0 * height of default
 (set-face-attribute 'fixed-pitch nil :font "Iosevka Fixed" :height 1.0 :weight 'regular)
 (set-face-attribute 'variable-pitch nil :font "Iosevka" :height 1.0 :weight 'regular)
