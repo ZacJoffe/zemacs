@@ -1459,10 +1459,12 @@ Git gutter:
     "c" '(:ignore t :which-key "consult")
     "cf" '(consult-flymake :which-key "consult-flymake")
     "ct" '(consult-theme :which-key "consult-theme")
+    "cm" '(consult-man :which-key "consult-man")
     ;"cg" '(:ignore t :which-key "Grep")
     ;"cgr" '(consult-ripgrep :which-key "consult-ripgrep")
     ;"cgg" '(consult-git-grep :which-key "consult-git-grep")
     ;"cb" '(consult-buffer :which-key "consult-buffer")
+    "ci" '(consult-imenu :which-key "consult-imenu")
 
     ;; buffer
     ;"TAB" '(switch-to-prev-buffer :which-key "Prev buffer")
@@ -1613,7 +1615,8 @@ Git gutter:
     "C-e" 'evil-end-of-visual-line
     "C-n" 'evil-next-visual-line
     "C-p" 'evil-previous-visual-line
-    "C-k" 'kill-whole-line
+    ;"C-k" 'kill-whole-line ; not sure why I wanted this?
+    "C-k" 'eldoc-doc-buffer
     )
 
   ;; motion mode hotkeys, inherited by normal/visual
