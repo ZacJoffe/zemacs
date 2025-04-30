@@ -2033,6 +2033,18 @@ Git gutter:
   ;;(add-to-list 'completion-at-point-functions #'cape-symbol)
   ;;(add-to-list 'completion-at-point-functions #'cape-line)
 )
+
+
+;; ai code gen
+(use-package aider
+  :straight (:host github :repo "tninja/aider.el" :files ("aider.el" "aider-core.el" "aider-file.el" "aider-code-change.el" "aider-discussion.el" "aider-prompt-mode.el"))
+  :config
+  (setq aider-args '("--model" "groq/llama3-70b-8192"))
+
+  ;; TODO pass this through as an env var
+  (setenv "GROQ_API_KEY" "")
+  ;(global-set-key (kbd "C-c a") 'aider-transient-menu)
+  )
 ;;----
 
 
