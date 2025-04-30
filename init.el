@@ -1786,14 +1786,19 @@ Git gutter:
 
 
 ;; tree sitter
-;; TODO port config to use emacs29 native treesit
-(use-package tree-sitter
-  :init
-  (global-tree-sitter-mode))
-
-(use-package tree-sitter-langs
-  ;; enable tree sitter syntax highlighting whenever possible https://emacs-tree-sitter.github.io/syntax-highlighting/
-  :hook (tree-sitter-after-on . tree-sitter-hl-mode))
+;(use-package tree-sitter
+;  :init
+;  (global-tree-sitter-mode))
+;
+;(use-package tree-sitter-langs
+;  ;; enable tree sitter syntax highlighting whenever possible https://emacs-tree-sitter.github.io/syntax-highlighting/
+;  :hook (tree-sitter-after-on . tree-sitter-hl-mode))
+(use-package treesit-auto
+  :custom
+  (treesit-auto-install 'prompt)
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
 
 
 ;; rust
