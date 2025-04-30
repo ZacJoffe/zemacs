@@ -178,7 +178,8 @@
       auto-window-vscroll nil)
 
 ;; smoother scrolling (especially for trackpad) via emacs 29
-(pixel-scroll-precision-mode 1)
+;; TODO trying out ultra-scroll, disabling this for now
+;(pixel-scroll-precision-mode 1)
 
 
 ;; disable bells (distracting)
@@ -577,6 +578,17 @@
         sp-highlight-wrap-overlay nil
         sp-highlight-wrap-tag-overlay nil)
   (smartparens-global-mode))
+
+
+;; smoother scrolling
+(use-package ultra-scroll
+  :straight (ultra-scroll :type git :repo  "https://github.com/jdtsmith/ultra-scroll")
+  :init
+  (setq scroll-conservatively 101
+        scroll-margin 0)
+  :config
+  (ultra-scroll-mode 1))
+
 
 
 ;;; VERTICO
